@@ -1,0 +1,73 @@
+created_at: '2025-07-18T01:57:34.186737'
+description: 基础RAG表结构
+name: basic_rag
+tables:
+  chunks:
+    columns:
+    - auto_increment: true
+      name: id
+      primary_key: true
+      type: BIGINT
+    - name: document_id
+      not_null: true
+      type: BIGINT
+    - name: text
+      not_null: true
+      type: MEDIUMTEXT
+    - default: 0
+      name: sequence
+      type: INT
+    - default: CURRENT_TIMESTAMP
+      name: created_at
+      type: DATETIME
+    created_at: '2025-07-18T01:57:34.186748'
+    foreign_keys:
+    - column: document_id
+      on_delete: CASCADE
+      ref_column: id
+      ref_table: documents
+    indexes: []
+  documents:
+    columns:
+    - auto_increment: true
+      name: id
+      primary_key: true
+      type: BIGINT
+    - name: user_id
+      not_null: true
+      type: BIGINT
+    - name: title
+      not_null: true
+      type: VARCHAR(255)
+    - name: content
+      type: LONGTEXT
+    - default: CURRENT_TIMESTAMP
+      name: created_at
+      type: DATETIME
+    created_at: '2025-07-18T01:57:34.186746'
+    foreign_keys:
+    - column: user_id
+      on_delete: CASCADE
+      ref_column: id
+      ref_table: users
+    indexes: []
+  users:
+    columns:
+    - auto_increment: true
+      name: id
+      primary_key: true
+      type: BIGINT
+    - comment: 用户名
+      name: name
+      not_null: true
+      type: VARCHAR(255)
+    - comment: 邮箱
+      name: email
+      type: VARCHAR(255)
+    - default: CURRENT_TIMESTAMP
+      name: created_at
+      type: DATETIME
+    created_at: '2025-07-18T01:57:34.186743'
+    foreign_keys: []
+    indexes: []
+version: '1.0'

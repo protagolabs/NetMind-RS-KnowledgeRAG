@@ -1,0 +1,55 @@
+created_at: '2025-07-18T01:57:34.188487'
+description: 向量实验表结构
+name: vector_experiment
+tables:
+  retrieval_logs:
+    columns:
+    - auto_increment: true
+      name: id
+      primary_key: true
+      type: BIGINT
+    - name: query_text
+      not_null: true
+      type: TEXT
+    - name: model_name
+      type: VARCHAR(100)
+    - default: 10
+      name: top_k
+      type: INT
+    - comment: 检索结果
+      name: results
+      type: JSON
+    - comment: 耗时（毫秒）
+      name: duration_ms
+      type: FLOAT
+    - default: CURRENT_TIMESTAMP
+      name: created_at
+      type: DATETIME
+    created_at: '2025-07-18T01:57:34.188513'
+    foreign_keys: []
+    indexes: []
+  vectors:
+    columns:
+    - auto_increment: true
+      name: id
+      primary_key: true
+      type: BIGINT
+    - name: chunk_id
+      not_null: true
+      type: BIGINT
+    - name: model_name
+      not_null: true
+      type: VARCHAR(100)
+    - name: vector_dim
+      not_null: true
+      type: INT
+    - comment: Milvus中的ID
+      name: milvus_id
+      type: VARCHAR(50)
+    - default: CURRENT_TIMESTAMP
+      name: created_at
+      type: DATETIME
+    created_at: '2025-07-18T01:57:34.188491'
+    foreign_keys: []
+    indexes: []
+version: '1.0'

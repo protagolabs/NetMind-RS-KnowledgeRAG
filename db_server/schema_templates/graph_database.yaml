@@ -1,0 +1,51 @@
+created_at: '2025-07-18T01:57:34.191142'
+description: 图数据库表结构
+name: graph_database
+tables:
+  edges:
+    columns:
+    - auto_increment: true
+      name: id
+      primary_key: true
+      type: BIGINT
+    - name: from_node
+      not_null: true
+      type: VARCHAR(100)
+    - name: to_node
+      not_null: true
+      type: VARCHAR(100)
+    - name: relation_type
+      not_null: true
+      type: VARCHAR(50)
+    - default: 1.0
+      name: weight
+      type: FLOAT
+    - name: properties
+      type: JSON
+    - default: CURRENT_TIMESTAMP
+      name: created_at
+      type: DATETIME
+    created_at: '2025-07-18T01:57:34.191148'
+    foreign_keys: []
+    indexes: []
+  nodes:
+    columns:
+    - auto_increment: true
+      name: id
+      primary_key: true
+      type: BIGINT
+    - name: node_id
+      not_null: true
+      type: VARCHAR(100)
+    - name: node_type
+      not_null: true
+      type: VARCHAR(50)
+    - name: properties
+      type: JSON
+    - default: CURRENT_TIMESTAMP
+      name: created_at
+      type: DATETIME
+    created_at: '2025-07-18T01:57:34.191146'
+    foreign_keys: []
+    indexes: []
+version: '1.0'

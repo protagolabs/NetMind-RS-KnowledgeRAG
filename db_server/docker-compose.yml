@@ -1,0 +1,95 @@
+services:
+  # MySQL数据库服务
+  mysql:
+    image: mysql:8.0.42
+    container_name: knowledge_rag_mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: devpass
+      MYSQL_DATABASE: knowledge_rag
+      MYSQL_USER: rag_user
+      MYSQL_PASSWORD: rag_password
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./data/mysql:/var/lib/mysql
+      - ./sql:/docker-entrypoint-initdb.d
+    command: 
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+      - --default-authentication-plugin=mysql_native_password
+    networks:
+      - knowledge_rag_network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
+
+  # Milvus向量数据库服务
+  milvus:
+    image: milvusdb/milvus:v2.4.15
+    container_name: knowledge_rag_milvus
+    restart: unless-stopped
+    ports:
+      - "19530:19530"
+      - "9091:9091"
+    volumes:
+      - ./data/milvus:/var/lib/milvus
+    environment:
+      - ETCD_USE_EMBED=true
+      - COMMON_STORAGETYPE=local
+      - MINIO_USE_EMBED=true
+    command: ["milvus", "run", "standalone"]
+    networks:
+      - knowledge_rag_network
+    depends_on:
+      - mysql
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:9091/healthz || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  # Python 3.12 应用服务
+  python-app:
+    image: python:3.12-slim
+    container_name: knowledge_rag_python
+    restart: unless-stopped
+    volumes:
+      - ../src:/app
+      - ../requirements.txt:/app/requirements.txt
+      - ./data/local_object_store:/app/data/object_store  # 本地对象存储卷
+    working_dir: /app
+    command: ["tail", "-f", "/dev/null"]  # 保持容器运行
+    networks:
+      - knowledge_rag_network
+    depends_on:
+      - mysql
+      - milvus
+    environment:
+      - PYTHONPATH=/app
+
+networks:
+  knowledge_rag_network:
+    driver: bridge
+    name: knowledge_rag_network
+
+volumes:
+  mysql_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${PWD}/data/mysql
+  milvus_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${PWD}/data/milvus
+  local_object_store:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${PWD}/data/local_object_store 

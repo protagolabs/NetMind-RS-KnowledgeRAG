@@ -1,0 +1,61 @@
+created_at: '2025-07-18T01:57:34.189768'
+description: 灵活JSON字段表结构
+name: flexible_json
+tables:
+  experiments:
+    columns:
+    - auto_increment: true
+      name: id
+      primary_key: true
+      type: BIGINT
+    - name: name
+      not_null: true
+      type: VARCHAR(100)
+    - comment: 实验配置
+      name: config
+      type: JSON
+    - comment: 实验结果
+      name: results
+      type: JSON
+    - comment: 评估指标
+      name: metrics
+      type: JSON
+    - default: running
+      name: status
+      type: ENUM('running', 'completed', 'failed')
+    - default: CURRENT_TIMESTAMP
+      name: created_at
+      type: DATETIME
+    created_at: '2025-07-18T01:57:34.189775'
+    foreign_keys: []
+    indexes: []
+  flexible_documents:
+    columns:
+    - auto_increment: true
+      name: id
+      primary_key: true
+      type: BIGINT
+    - name: user_id
+      not_null: true
+      type: BIGINT
+    - default: unknown
+      name: doc_type
+      type: VARCHAR(50)
+    - comment: 文档元数据
+      name: metadata
+      type: JSON
+    - name: content
+      type: LONGTEXT
+    - comment: 自定义属性
+      name: properties
+      type: JSON
+    - default: CURRENT_TIMESTAMP
+      name: created_at
+      type: DATETIME
+    - default: CURRENT_TIMESTAMP
+      name: updated_at
+      type: DATETIME
+    created_at: '2025-07-18T01:57:34.189773'
+    foreign_keys: []
+    indexes: []
+version: '1.0'
