@@ -1,0 +1,10 @@
+# KnowledgeRAG 项目依赖包
+# 数据库相关
+mysql-connector-python>=8.0.0
+pymilvus>=2.0.0
+
+# 数据处理
+numpy>=1.21.0
+
+# 配置文件解析
+PyYAML>=6.0 
