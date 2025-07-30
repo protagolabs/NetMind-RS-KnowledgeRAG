@@ -22,6 +22,8 @@ except ImportError:
 
 logger = logging.getLogger(__name__)
 
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+
 @dataclass
 class DatabaseSettings:
     """数据库配置"""

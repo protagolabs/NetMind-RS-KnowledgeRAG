@@ -5,6 +5,10 @@ reference/
 sql/
 **/experiments/
 **/logs/
+**/experiments_docs/
+**/experiments_docs_processed/
+**/.env
+./env
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
