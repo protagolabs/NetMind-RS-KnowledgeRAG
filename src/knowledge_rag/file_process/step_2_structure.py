@@ -194,19 +194,6 @@ Please help me to analyze the chunk.
     )
     return result.final_output
 
-if __name__ == "__main__":
-    
-    import asyncio
-    with open("/home/bin.liang/Documents/02-research/NetMind-RS-KnowledgeRAG/experiments_docs/paper_set_1/Attention Is All You Need.md", "r") as f:
-        markdown_document = f.read()
-    # result = asyncio.run(analysis_doc(markdown_document))
-    # print(result)    
-    from knowledge_rag.file_process.step_1_chunk import chunk_markdown_file
-    
-    chunks = chunk_markdown_file(markdown_document) 
-    
-    the_chunk_we_test = chunks[2]
-    result = asyncio.run(analysis_chunk(the_chunk_we_test, markdown_document))
-    print(result)
+
         
     

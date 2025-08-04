@@ -115,90 +115,12 @@ class EmbeddingSettings:
         )
 
 @dataclass
-class TokenBudgetSettings:
-    """Token预算配置"""
-    max_context_tokens: int = 2048
-    chunk_max_tokens: int = 350
-    top_k_raw: int = 20
-    top_m_rerank: int = 5
-    compression_ratio: float = 0.5
-    
-    @classmethod
-    def from_env(cls) -> 'TokenBudgetSettings':
-        """从环境变量创建Token预算配置"""
-        return cls(
-            max_context_tokens=int(os.getenv('MAX_CONTEXT_TOKENS', '2048')),
-            chunk_max_tokens=int(os.getenv('CHUNK_MAX_TOKENS', '350')),
-            top_k_raw=int(os.getenv('TOP_K_RAW', '20')),
-            top_m_rerank=int(os.getenv('TOP_M_RERANK', '5')),
-            compression_ratio=float(os.getenv('COMPRESSION_RATIO', '0.5'))
-        )
-
-@dataclass
-class LoggingSettings:
-    """日志配置"""
-    level: str = "INFO"
-    dir: str = "./logs"
-    max_file_size: int = 10 * 1024 * 1024  # 10MB
-    backup_count: int = 5
-    
-    @classmethod
-    def from_env(cls) -> 'LoggingSettings':
-        """从环境变量创建日志配置"""
-        return cls(
-            level=os.getenv('LOG_LEVEL', 'INFO'),
-            dir=os.getenv('LOG_DIR', './logs'),
-            max_file_size=int(os.getenv('LOG_MAX_FILE_SIZE', '10485760')),
-            backup_count=int(os.getenv('LOG_BACKUP_COUNT', '5'))
-        )
-
-@dataclass
-class RetrievalSettings:
-    """检索配置"""
-    vector_similarity_threshold: float = 0.7
-    enable_rerank: bool = True
-    rerank_model: str = "bge-reranker-base"
-    enable_compression: bool = True
-    
-    @classmethod
-    def from_env(cls) -> 'RetrievalSettings':
-        """从环境变量创建检索配置"""
-        return cls(
-            vector_similarity_threshold=float(os.getenv('VECTOR_SIMILARITY_THRESHOLD', '0.7')),
-            enable_rerank=os.getenv('ENABLE_RERANK', 'True').lower() == 'true',
-            rerank_model=os.getenv('RERANK_MODEL', 'bge-reranker-base'),
-            enable_compression=os.getenv('ENABLE_COMPRESSION', 'True').lower() == 'true'
-        )
-
-@dataclass
-class SecuritySettings:
-    """安全配置"""
-    enable_user_isolation: bool = True
-    enable_audit_log: bool = True
-    session_timeout: int = 3600  # 1小时
-    max_query_rate: int = 100  # 每分钟最大查询次数
-    
-    @classmethod
-    def from_env(cls) -> 'SecuritySettings':
-        """从环境变量创建安全配置"""
-        return cls(
-            enable_user_isolation=os.getenv('ENABLE_USER_ISOLATION', 'True').lower() == 'true',
-            enable_audit_log=os.getenv('ENABLE_AUDIT_LOG', 'True').lower() == 'true',
-            session_timeout=int(os.getenv('SESSION_TIMEOUT', '3600')),
-            max_query_rate=int(os.getenv('MAX_QUERY_RATE', '100'))
-        )
-
-@dataclass
 class KnowledgeRAGSettings:
     """KnowledgeRAG主配置"""
     database: DatabaseSettings = field(default_factory=DatabaseSettings)
     milvus: MilvusSettings = field(default_factory=MilvusSettings)
     object_store: ObjectStoreSettings = field(default_factory=ObjectStoreSettings)
     embedding: EmbeddingSettings = field(default_factory=EmbeddingSettings)
-    token_budget: TokenBudgetSettings = field(default_factory=TokenBudgetSettings)
-    logging: LoggingSettings = field(default_factory=LoggingSettings)
-    retrieval: RetrievalSettings = field(default_factory=RetrievalSettings)
-    security: SecuritySettings = field(default_factory=SecuritySettings)
     
     # 环境配置
     environment: str = "development"  # development, staging, production
@@ -212,10 +134,6 @@ class KnowledgeRAGSettings:
             milvus=MilvusSettings.from_env(),
             object_store=ObjectStoreSettings.from_env(),
             embedding=EmbeddingSettings.from_env(),
-            token_budget=TokenBudgetSettings.from_env(),
-            logging=LoggingSettings.from_env(),
-            retrieval=RetrievalSettings.from_env(),
-            security=SecuritySettings.from_env(),
             environment=os.getenv('ENVIRONMENT', 'development'),
             debug=os.getenv('DEBUG', 'True').lower() == 'true'
         )
@@ -247,13 +165,6 @@ class KnowledgeRAGSettings:
         if self.embedding.dimension <= 0:
             errors.append("Embedding dimension must be positive")
         
-        # 验证Token预算配置
-        if self.token_budget.max_context_tokens <= 0:
-            errors.append("Max context tokens must be positive")
-        
-        if self.token_budget.top_k_raw <= 0:
-            errors.append("Top K raw must be positive")
-        
         # 验证对象存储配置
         if self.object_store.type != "local":
             errors.append("Only 'local' object store type is supported")
@@ -272,13 +183,6 @@ class KnowledgeRAGSettings:
         # 验证文件大小配置
         if self.object_store.max_file_size <= 0:
             errors.append("Max file size must be positive")
-        
-        # 验证日志配置
-        log_dir = Path(self.logging.dir)
-        try:
-            log_dir.mkdir(parents=True, exist_ok=True)
-        except Exception as e:
-            errors.append(f"Cannot create log directory: {e}")
         
         if errors:
             logger.error(f"Configuration validation failed: {errors}")
@@ -348,22 +252,6 @@ def get_embedding_settings() -> EmbeddingSettings:
     """获取嵌入模型配置"""
     return get_settings().embedding
 
-def get_token_budget_settings() -> TokenBudgetSettings:
-    """获取Token预算配置"""
-    return get_settings().token_budget
-
-def get_logging_settings() -> LoggingSettings:
-    """获取日志配置"""
-    return get_settings().logging
-
-def get_retrieval_settings() -> RetrievalSettings:
-    """获取检索配置"""
-    return get_settings().retrieval
-
-def get_security_settings() -> SecuritySettings:
-    """获取安全配置"""
-    return get_settings().security
-
 def is_debug() -> bool:
     """是否为调试模式"""
     return get_settings().debug
@@ -384,27 +272,4 @@ def print_config():
     import json
     print(json.dumps(config_dict, indent=2, ensure_ascii=False))
 
-if __name__ == "__main__":
-    # 测试配置
-    print("KnowledgeRAG Configuration Test")
-    print("=" * 50)
-    
-    try:
-        settings = get_settings()
-        print(f"✓ Configuration loaded successfully")
-        print(f"  - Environment: {settings.environment}")
-        print(f"  - Debug: {settings.debug}")
-        print(f"  - Database: {settings.database.host}:{settings.database.port}")
-        print(f"  - Milvus: {settings.milvus.host}:{settings.milvus.port}")
-        print(f"  - Object Store: {settings.object_store.type}")
-        print(f"  - Embedding Model: {settings.embedding.model_name}")
-        print(f"  - Log Level: {settings.logging.level}")
-        
-        print("\n" + "=" * 50)
-        print("Full Configuration:")
-        print_config()
-        
-    except Exception as e:
-        print(f"✗ Configuration test failed: {e}")
-        import traceback
-        traceback.print_exc() 
+ 

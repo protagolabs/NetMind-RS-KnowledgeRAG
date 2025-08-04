@@ -71,7 +71,7 @@ cd db_server
 docker-compose up -d
 
 # 创建实验环境
-python experiment_manager.py --create rag_experiment --researcher "你的名字"
+python experiment_manager.py --create rag_experiment --researcher "BinLiang"
 python experiment_manager.py --switch rag_experiment
 ```
 

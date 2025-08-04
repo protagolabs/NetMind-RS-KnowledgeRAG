@@ -288,13 +288,8 @@ class MilvusClient:
         
         self.connection_alias = connection_alias
         
-        # 检查连接是否有效
-        try:
-            connections.get_connection(connection_alias)
-            logger.info("MilvusClient 初始化完成")
-        except Exception as e:
-            logger.error(f"Milvus 连接无效: {e}")
-            raise
+        # 存储连接别名
+        logger.info("MilvusClient 初始化完成")
     
     def create_collection(self, collection_name: str, schema_config: Dict) -> bool:
         """
@@ -335,6 +330,16 @@ class MilvusClient:
                         name=field_name,
                         dtype=field_type,
                         dim=field_config["dim"],
+                        description=field_config.get("comment", "")
+                    )
+                elif field_config["type"] == "VARCHAR":
+                    # 处理VARCHAR字段的max_length
+                    field = FieldSchema(
+                        name=field_name,
+                        dtype=field_type,
+                        max_length=field_config.get("max_length", 65535),
+                        is_primary=field_config.get("is_primary", False),
+                        auto_id=field_config.get("auto_id", False),
                         description=field_config.get("comment", "")
                     )
                 else:

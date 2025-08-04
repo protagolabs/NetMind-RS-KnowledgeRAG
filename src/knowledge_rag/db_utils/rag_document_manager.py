@@ -357,9 +357,10 @@ class RAGDocumentManager:
             fk_sql = self._generate_mysql_foreign_key_sql(fk)
             column_definitions.append(f"    {fk_sql}")
         
+        newline = '\n'
         create_table_sql = f"""
         CREATE TABLE IF NOT EXISTS `{self.db_name}`.`{table_name}` (
-{',\n'.join(column_definitions)}
+{(','+newline).join(column_definitions)}
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci 
         COMMENT='文档chunk级数据表';
         """

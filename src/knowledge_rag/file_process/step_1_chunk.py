@@ -44,14 +44,6 @@ def chunk_by_number(markdown_document: str):
     return texts
 
 
-if __name__ == "__main__":
-    
-    with open("/home/bin.liang/Documents/02-research/NetMind-RS-KnowledgeRAG/experiments_docs/paper_set_1/Attention Is All You Need.md", "r") as f:
-        markdown_document = f.read()
-    md_header_splits = chunk_markdown_file(markdown_document)
-    # md_header_splits = chunk_by_number(markdown_document)
-    for chunk in md_header_splits:
-        print(chunk)
-        print("-"*100)
+
     
     

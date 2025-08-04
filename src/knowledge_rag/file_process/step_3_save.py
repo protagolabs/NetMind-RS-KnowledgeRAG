@@ -175,12 +175,8 @@ async def process_folder(
         }
     }
 
-    # 定义输出路径（修复长行问题）
-    output_path = (
-        "/home/bin.liang/Documents/02-research/"
-        "NetMind-RS-KnowledgeRAG/experiments_docs_processed/"
-        f"paper_set_1/{output_file}"
-    )
+    # 定义输出路径
+    output_path = Path(folder_path).parent / "experiments_docs_processed" / "paper_set_1" / output_file
 
     # 使用 tqdm 进度条
     progress_bar = tqdm(markdown_files, desc="Processing documents")
@@ -225,12 +221,4 @@ def generate_uuid():
     return IDGenerator.generate_simple_uuid()
 
 
-if __name__ == "__main__":
 
-    folder = (
-        "/home/bin.liang/Documents/02-research/"
-        "NetMind-RS-KnowledgeRAG/experiments_docs/paper_set_1"
-    )
-
-    # 运行异步处理
-    asyncio.run(process_folder(folder))

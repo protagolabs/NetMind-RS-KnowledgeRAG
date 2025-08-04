@@ -40,6 +40,50 @@ class RAGSchemaConfig:
         pass
     
     # ======================================
+    # 工具方法
+    # ======================================
+    
+    def get_chunk_table_name(self, source_id: str) -> str:
+        """
+        根据source_id生成chunk表名
+        
+        Args:
+            source_id: 文档的source_id
+            
+        Returns:
+            str: 格式化的表名
+        """
+        # 清理source_id，确保符合MySQL表名规范
+        clean_source_id = source_id.replace('-', '_').replace('.', '_')
+        return f"chunks_{clean_source_id}"
+    
+    def get_chunk_collection_name(self, source_id: str) -> str:
+        """
+        根据source_id生成chunk的Milvus集合名
+        
+        Args:
+            source_id: 文档的source_id
+            
+        Returns:
+            str: 格式化的集合名
+        """
+        clean_source_id = source_id.replace('-', '_').replace('.', '_')
+        return f"chunks_vectors_{clean_source_id}"
+    
+    def get_chunk_insights_collection_name(self, source_id: str) -> str:
+        """
+        根据source_id生成chunk insights的Milvus集合名
+        
+        Args:
+            source_id: 文档的source_id
+            
+        Returns:
+            str: 格式化的集合名
+        """
+        clean_source_id = source_id.replace('-', '_').replace('.', '_')
+        return f"chunks_insights_vectors_{clean_source_id}"
+    
+    # ======================================
     # 文档级数据库Schema配置
     # ======================================
     
@@ -68,36 +112,36 @@ class RAGSchemaConfig:
     def _get_default_document_schema(self) -> Dict:
         """默认的文档级MySQL表结构"""
         return {
-            "table_name": "documents",
+            "table_name": "rag_documents",
             "columns": [
                 # 基本字段
                 {"name": "id", "type": "BIGINT", "auto_increment": True, "primary_key": True, "comment": "文档唯一标识"},
-                {"name": "title", "type": "VARCHAR(1000)", "not_null": True, "comment": "文档标题"},
+                {"name": "file_id", "type": "VARCHAR(255)", "not_null": True, "unique": True, "comment": "原始数据中的file_id"},
+                {"name": "file_name", "type": "VARCHAR(255)", "not_null": True, "comment": "文档文件名"},
                 {"name": "summary", "type": "TEXT", "comment": "文档总结摘要"},
-                {"name": "keywords", "type": "TEXT", "comment": "关键词，用逗号分隔"},
-                {"name": "metadata", "type": "JSON", "comment": "文档元数据信息"},
+                {"name": "insights", "type": "JSON", "comment": "文档洞察列表"},
+                {"name": "key_words", "type": "JSON", "comment": "关键词列表"},
+                {"name": "doc_markdown_content", "type": "LONGTEXT", "comment": "文档markdown内容"},
                 
                 # chunk级数据库信息
                 {"name": "chunk_mysql_table", "type": "VARCHAR(255)", "comment": "chunk级MySQL表名"},
                 {"name": "chunk_milvus_collection", "type": "VARCHAR(255)", "comment": "chunk级Milvus集合名"},
-                {"name": "chunk_schema_config", "type": "JSON", "comment": "chunk级表结构配置"},
                 
                 # 统计和状态信息
                 {"name": "chunk_count", "type": "INT", "default": "0", "comment": "chunk数量"},
                 {"name": "processing_status", "type": "ENUM('pending', 'processing', 'completed', 'failed')", "default": "'pending'", "comment": "处理状态"},
-                {"name": "file_path", "type": "VARCHAR(1000)", "comment": "原始文件路径"},
-                {"name": "file_size", "type": "BIGINT", "comment": "文件大小（字节）"},
                 
                 # 时间戳
                 {"name": "created_at", "type": "DATETIME", "default": "CURRENT_TIMESTAMP", "comment": "创建时间"},
                 {"name": "updated_at", "type": "DATETIME", "default": "CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP", "comment": "更新时间"}
             ],
             "indexes": [
-                {"name": "idx_title", "columns": ["title"], "type": "INDEX"},
+                {"name": "idx_file_id", "columns": ["file_id"], "type": "UNIQUE"},
+                {"name": "idx_file_name", "columns": ["file_name"], "type": "INDEX"},
                 {"name": "idx_status", "columns": ["processing_status"], "type": "INDEX"},
                 {"name": "idx_created_at", "columns": ["created_at"], "type": "INDEX"},
-                {"name": "ft_keywords", "columns": ["keywords"], "type": "FULLTEXT"},
-                {"name": "ft_summary", "columns": ["summary"], "type": "FULLTEXT"}
+                {"name": "ft_summary", "columns": ["summary"], "type": "FULLTEXT"},
+                {"name": "ft_doc_content", "columns": ["doc_markdown_content"], "type": "FULLTEXT"}
             ]
         }
     
@@ -234,20 +278,19 @@ class RAGSchemaConfig:
             return self._get_default_document_milvus_schema(vector_dim)
     
     def _get_default_document_milvus_schema(self, vector_dim: int) -> Dict:
-        """默认的文档级Milvus集合结构"""
+        """默认的文档级Milvus集合结构 - 支持多个向量字段"""
         return {
             "collection_name_suffix": "documents_vectors",
             "fields": [
                 {"name": "id", "type": "INT64", "is_primary": True, "auto_id": False, "comment": "文档ID"},
-                {"name": "document_embedding", "type": "FLOAT_VECTOR", "dim": vector_dim, "comment": "文档级embedding向量"},
+                {"name": "file_id", "type": "VARCHAR", "max_length": 255, "comment": "原始文件ID"},
                 {"name": "summary_embedding", "type": "FLOAT_VECTOR", "dim": vector_dim, "comment": "摘要embedding向量"},
-                {"name": "keywords_embedding", "type": "FLOAT_VECTOR", "dim": vector_dim, "comment": "关键词embedding向量"},
+                {"name": "key_words_embedding", "type": "FLOAT_VECTOR", "dim": vector_dim, "comment": "关键词embedding向量"},
                 {"name": "metadata", "type": "JSON", "comment": "向量元数据"}
             ],
             "indexes": [
-                {"field": "document_embedding", "type": "IVF_FLAT", "metric": "L2", "params": {"nlist": 1024}},
                 {"field": "summary_embedding", "type": "IVF_FLAT", "metric": "L2", "params": {"nlist": 1024}},
-                {"field": "keywords_embedding", "type": "IVF_FLAT", "metric": "COSINE", "params": {"nlist": 512}}
+                {"field": "key_words_embedding", "type": "IVF_FLAT", "metric": "COSINE", "params": {"nlist": 512}}
             ]
         }
     
@@ -276,6 +319,28 @@ class RAGSchemaConfig:
         
         base_schema["indexes"].extend(academic_indexes)
         return base_schema
+    
+    def get_document_insights_milvus_schema(self, vector_dim: int = 1536) -> Dict:
+        """
+        获取文档级insights向量集合结构配置
+        
+        由于每个文档有多个insights向量，需要单独的集合存储
+        """
+        return {
+            "collection_name_suffix": "documents_insights_vectors",
+            "fields": [
+                {"name": "id", "type": "INT64", "is_primary": True, "auto_id": True, "comment": "自增ID"},
+                {"name": "doc_id", "type": "INT64", "comment": "文档ID，关联到documents表"},
+                {"name": "file_id", "type": "VARCHAR", "max_length": 255, "comment": "原始文件ID"},
+                {"name": "insight_index", "type": "INT64", "comment": "insight在列表中的索引"},
+                {"name": "insight_text", "type": "VARCHAR", "max_length": 65535, "comment": "insight原文"},
+                {"name": "insight_embedding", "type": "FLOAT_VECTOR", "dim": vector_dim, "comment": "insight向量"},
+                {"name": "metadata", "type": "JSON", "comment": "额外元数据"}
+            ],
+            "indexes": [
+                {"field": "insight_embedding", "type": "IVF_FLAT", "metric": "L2", "params": {"nlist": 1024}}
+            ]
+        }
     
     def _get_custom_document_milvus_schema(self, vector_dim: int) -> Dict:
         """
@@ -332,37 +397,63 @@ class RAGSchemaConfig:
             return self._get_default_chunk_schema()
     
     def _get_default_chunk_schema(self) -> Dict:
-        """默认的chunk级数据库结构"""
+        """默认的chunk级数据库结构 - 适配新的数据格式"""
         return {
             "mysql": {
                 "columns": [
                     {"name": "id", "type": "BIGINT", "auto_increment": True, "primary_key": True, "comment": "chunk ID"},
-                    {"name": "chunk_index", "type": "INT", "not_null": True, "comment": "chunk在文档中的序号"},
-                    {"name": "chunk_text", "type": "LONGTEXT", "not_null": True, "comment": "chunk文本内容"},
-                    {"name": "chunk_title", "type": "VARCHAR(500)", "comment": "chunk标题"},
-                    {"name": "keywords", "type": "TEXT", "comment": "chunk关键词"},
+                    {"name": "source_id", "type": "VARCHAR(255)", "not_null": True, "comment": "来源文档的source_id"},
+                    {"name": "chunk_id", "type": "VARCHAR(255)", "not_null": True, "unique": True, "comment": "原始数据中的chunk_id"},
+                    {"name": "summary", "type": "TEXT", "comment": "chunk总结"},
+                    {"name": "insights", "type": "JSON", "comment": "chunk洞察列表"},
+                    {"name": "key_words", "type": "JSON", "comment": "关键词列表"},
+                    {"name": "chunk_markdown_content", "type": "LONGTEXT", "not_null": True, "comment": "chunk的markdown内容"},
                     {"name": "metadata", "type": "JSON", "comment": "chunk元数据"},
-                    {"name": "token_count", "type": "INT", "comment": "token数量"},
                     {"name": "created_at", "type": "DATETIME", "default": "CURRENT_TIMESTAMP", "comment": "创建时间"}
                 ],
                 "indexes": [
-                    {"name": "idx_chunk_index", "columns": ["chunk_index"], "type": "INDEX"},
-                    {"name": "fulltext_content", "columns": ["chunk_text"], "type": "FULLTEXT"},
-                    {"name": "fulltext_keywords", "columns": ["keywords"], "type": "FULLTEXT"}
+                    {"name": "idx_source_id", "columns": ["source_id"], "type": "INDEX"},
+                    {"name": "idx_chunk_id", "columns": ["chunk_id"], "type": "UNIQUE"},
+                    {"name": "ft_summary", "columns": ["summary"], "type": "FULLTEXT"},
+                    {"name": "ft_chunk_content", "columns": ["chunk_markdown_content"], "type": "FULLTEXT"}
                 ]
             },
             "milvus": {
                 "fields": [
                     {"name": "id", "type": "INT64", "is_primary": True, "auto_id": False, "comment": "chunk ID"},
-                    {"name": "chunk_embedding", "type": "FLOAT_VECTOR", "dim": 768, "comment": "chunk文本向量"},
-                    {"name": "title_embedding", "type": "FLOAT_VECTOR", "dim": 768, "comment": "chunk标题向量"},
+                    {"name": "source_id", "type": "VARCHAR", "max_length": 255, "comment": "来源文档的source_id"},
+                    {"name": "chunk_id", "type": "VARCHAR", "max_length": 255, "comment": "原始chunk_id"},
+                    {"name": "summary_embedding", "type": "FLOAT_VECTOR", "dim": 1536, "comment": "总结向量"},
+                    {"name": "key_words_embedding", "type": "FLOAT_VECTOR", "dim": 1536, "comment": "关键词向量"},
                     {"name": "metadata", "type": "JSON", "comment": "chunk元数据"}
                 ],
                 "indexes": [
-                    {"field": "chunk_embedding", "type": "IVF_FLAT", "metric": "L2", "params": {"nlist": 1024}},
-                    {"field": "title_embedding", "type": "IVF_FLAT", "metric": "L2", "params": {"nlist": 512}}
+                    {"field": "summary_embedding", "type": "IVF_FLAT", "metric": "L2", "params": {"nlist": 1024}},
+                    {"field": "key_words_embedding", "type": "IVF_FLAT", "metric": "COSINE", "params": {"nlist": 512}}
                 ]
             }
+        }
+    
+    def get_chunk_insights_milvus_schema(self, vector_dim: int = 1536) -> Dict:
+        """
+        获取chunk级insights向量集合结构配置
+        
+        由于每个chunk有多个insights向量，需要单独的集合存储
+        """
+        return {
+            "collection_name_suffix": "chunks_insights_vectors",
+            "fields": [
+                {"name": "id", "type": "INT64", "is_primary": True, "auto_id": True, "comment": "自增ID"},
+                {"name": "chunk_id", "type": "VARCHAR", "max_length": 255, "comment": "原始chunk_id"},
+                {"name": "source_id", "type": "VARCHAR", "max_length": 255, "comment": "来源文档的source_id"},
+                {"name": "insight_index", "type": "INT64", "comment": "insight在列表中的索引"},
+                {"name": "insight_text", "type": "VARCHAR", "max_length": 65535, "comment": "insight原文"},
+                {"name": "insight_embedding", "type": "FLOAT_VECTOR", "dim": vector_dim, "comment": "insight向量"},
+                {"name": "metadata", "type": "JSON", "comment": "额外元数据"}
+            ],
+            "indexes": [
+                {"field": "insight_embedding", "type": "IVF_FLAT", "metric": "L2", "params": {"nlist": 1024}}
+            ]
         }
     
     def _get_academic_chunk_schema(self) -> Dict:

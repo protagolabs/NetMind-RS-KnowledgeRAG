@@ -8,7 +8,8 @@ sql/
 **/experiments_docs/
 **/experiments_docs_processed/
 **/.env
-./env
+.env
+backup/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
