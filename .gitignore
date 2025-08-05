@@ -212,3 +212,25 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+
+# Knowledge RAG specific ignores
+# Environment files
+.env
+.env.*
+
+# Query results and academic processing files
+knowledge_rag/query_results_*.json
+knowledge_rag/query_answers_*.txt
+knowledge_rag/academic_processing_results_*.json
+knowledge_rag/academic_papers_summary_*.txt
+knowledge_rag/academic_commonalities_analysis_*.json
+
+# Cost data
+knowledge_rag/cost_data/
+
+# Debug extraction output
+knowledge_rag/debug_extraction/
+
+# ChromaDB directories
+knowledge_rag/*chroma_db/
+knowledge_rag/test_extraction_output/

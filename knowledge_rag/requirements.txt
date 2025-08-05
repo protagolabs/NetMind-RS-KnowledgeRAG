@@ -1,0 +1,40 @@
+# File Management
+PyMuPDF>=1.23.0  # PDF processing
+python-docx>=0.8.11  # Word documents
+python-pptx>=0.6.21  # PowerPoint
+openpyxl>=3.1.0  # Excel files
+chardet>=5.2.0  # Character encoding detection
+langdetect>=1.0.9  # Language detection
+
+# NLP and AI
+openai>=1.0.0  # For knowledge extraction
+spacy>=3.7.0
+transformers>=4.30.0
+tiktoken>=0.5.1
+
+# Vector/semantic search
+chromadb>=0.4.24  # Vector database for embeddings
+sentence-transformers>=2.2.0
+
+# Graph database
+neo4j>=5.13.0  # Graph database for knowledge storage
+py2neo>=2021.2.3
+
+# Search engine (for future implementation)
+elasticsearch>=8.0.0
+
+# Utilities
+python-dotenv>=1.0.0
+click>=8.1.0  # CLI interface
+rich>=13.0.0  # Pretty printing
+tqdm>=4.65.0  # Progress bars
+
+# Data processing
+pandas>=2.0.0
+numpy>=1.24.0
+
+# Development
+pytest>=7.4.0
+pytest-asyncio>=0.21.0
+black>=23.0.0
+flake8>=6.0.0 

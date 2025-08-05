@@ -1,0 +1,768 @@
+{
+  "entities": [
+    {
+      "uuid": "b4b01ee4-c0d1-49dc-9b52-48df3cdc0a1e",
+      "name": "Elo",
+      "type": "CONCEPT",
+      "summary": "A rating system used to calculate the relative skill levels of players in two-player games such as chess. It involves models like strong student compute and Elo-695 puzzle.",
+      "confidence": 0.95,
+      "mention_count": 23
+    },
+    {
+      "uuid": "3481db30-2a6b-410e-827f-a6b5fae0db46",
+      "name": "AAAI/ACM Conference on AI, Ethics, and Society",
+      "type": "EVENT",
+      "summary": "Conference addressing ethical issues in AI and society.",
+      "confidence": 0.95,
+      "mention_count": 23
+    },
+    {
+      "uuid": "dbbfa79a-de53-463f-932d-4a4547149382",
+      "name": "Ryan Lowe",
+      "type": "PERSON",
+      "summary": "Researchers focusing on mitigating biases, paraphrase adversaries, and training deep neural networks with noisy labels.",
+      "confidence": 0.95,
+      "mention_count": 23
+    },
+    {
+      "uuid": "fb2f3240-4763-4d01-8f36-716d687998a8",
+      "name": "Advances in Neural Information Processing Systems",
+      "type": "DOCUMENT",
+      "summary": "Conference proceedings in the field of neural information processing, data preprocessing technique used for generating difficulty labels and Elo...",
+      "confidence": 0.95,
+      "mention_count": 23
+    },
+    {
+      "uuid": "77647e28-5223-4a2b-8b6f-0f29682c53c3",
+      "name": "Jong Wook Kim",
+      "type": "PERSON",
+      "summary": "Researchers involved in robust fine-tuning of zero-shot models, model soups, and contributor to robust fine-tuning research.",
+      "confidence": 0.95,
+      "mention_count": 23
+    },
+    {
+      "uuid": "f7cac4c7-8a88-4fcb-9dd0-17292f01368e",
+      "name": "Margaret Mitchell",
+      "type": "PERSON",
+      "summary": "Researcher known for work on mitigating biases and imagenet classification.",
+      "confidence": 0.95,
+      "mention_count": 23
+    },
+    {
+      "uuid": "3687e8e1-663d-46cd-bc29-d468699390fd",
+      "name": "Dan Roth",
+      "type": "PERSON",
+      "summary": "Researchers known for work in machine learning, temporal commonsense understanding, and imagenet classification.",
+      "confidence": 0.95,
+      "mention_count": 23
+    },
+    {
+      "uuid": "a5d4994f-8139-4949-a93b-c2c5e3337118",
+      "name": "PMLR",
+      "type": "ORGANIZATION",
+      "summary": "Publisher of machine learning conference proceedings, focusing on natural language processing and computational linguistics.",
+      "confidence": 0.95,
+      "mention_count": 23
+    },
+    {
+      "uuid": "8844945a-b924-4b7d-bea4-e5c2d3f00e11",
+      "name": "Rebecca Roelofs",
+      "type": "PERSON",
+      "summary": "Researchers specializing in machine learning, computer vision, and pattern recognition.",
+      "confidence": 0.95,
+      "mention_count": 23
+    },
+    {
+      "uuid": "f5dbea15-e307-4395-b485-b5c3eb3d0bb9",
+      "name": "Hongseok Namkoong",
+      "type": "PERSON",
+      "summary": "Contributors to fine-tuning models research.",
+      "confidence": 0.95,
+      "mention_count": 23
+    },
+    {
+      "uuid": "a36dfd5b-7716-48bb-87ee-8153c94e8d04",
+      "name": "arXiv preprint",
+      "type": "DOCUMENT",
+      "summary": "Pre-publication research paper hosted on arXiv.",
+      "confidence": 0.95,
+      "mention_count": 23
+    },
+    {
+      "uuid": "27d0d31f-3974-434c-914c-6312af43bc40",
+      "name": "Zhilu Zhang",
+      "type": "PERSON",
+      "summary": "Researcher known for work on training deep neural networks with noisy labels and noise correction for learning with noisy labels.",
+      "confidence": 0.95,
+      "mention_count": 23
+    },
+    {
+      "uuid": "dd38a1f6-613a-4c42-acca-9d91be58f83a",
+      "name": "Jianxin Wu",
+      "type": "PERSON",
+      "summary": "Contributor to research on noise correction",
+      "confidence": 0.95,
+      "mention_count": 23
+    },
+    {
+      "uuid": "9fbf1f9c-212d-43fa-83f4-4a353809840c",
+      "name": "Chess puzzles",
+      "type": "CONCEPT",
+      "summary": "Puzzles related to the game of chess.",
+      "confidence": 0.95,
+      "mention_count": 19
+    },
+    {
+      "uuid": "1ce1141c-60d7-4514-b1a7-417a72ce734d",
+      "name": "Ground truth test accuracy",
+      "type": "CONCEPT",
+      "summary": "The actual accuracy of a model in testing.",
+      "confidence": 0.95,
+      "mention_count": 19
+    },
+    {
+      "uuid": "cfb09a58-669c-4f5c-8bfc-bd0159805965",
+      "name": "NLP task",
+      "type": "CONCEPT",
+      "summary": "A task related to Natural Language Processing.",
+      "confidence": 0.95,
+      "mention_count": 19
+    },
+    {
+      "uuid": "407284c9-eaf0-46b1-be50-099255b0aed3",
+      "name": "Deontology",
+      "type": "CONCEPT",
+      "summary": "A moral philosophy concept related to duty, ethics, and moral excellence or goodness, also associated with the game of chess.",
+      "confidence": 0.95,
+      "mention_count": 19
+    },
+    {
+      "uuid": "d0ef33dc-012e-46c5-b7fd-705b21998953",
+      "name": "Reward Modeling",
+      "type": "CONCEPT",
+      "summary": "Concept related to reward modeling in machine learning, used for generating difficulty labels and Elo ratings.",
+      "confidence": 0.95,
+      "mention_count": 18
+    },
+    {
+      "uuid": "845ee920-38a3-4dcf-b559-42efa7d66af7",
+      "name": "ChatGPT",
+      "type": "TECHNOLOGY",
+      "summary": "A language model used for reward modeling in dialog systems",
+      "confidence": 0.95,
+      "mention_count": 18
+    },
+    {
+      "uuid": "4823b5e8-2625-4e75-ad27-83e3110cd079",
+      "name": "Ouyang",
+      "type": "PERSON",
+      "summary": "A person referenced in the text",
+      "confidence": 0.8,
+      "mention_count": 18
+    },
+    {
+      "uuid": "4fa54679-85a5-430d-ab46-1b928b71ae67",
+      "name": "Im0",
+      "type": "UNKNOWN",
+      "summary": "Image identifier",
+      "confidence": 0.7,
+      "mention_count": 18
+    },
+    {
+      "uuid": "40b3312b-0d77-422b-bf3c-2c73b038fe84",
+      "name": "Im0",
+      "type": "UNKNOWN",
+      "summary": "Image 0, with dimensions 6x93 pixels.",
+      "confidence": 0.8,
+      "mention_count": 17
+    },
+    {
+      "uuid": "4214e71d-0637-4ca3-a8b9-144669cc1d88",
+      "name": "Chess",
+      "type": "CONCEPT",
+      "summary": "Chess, a strategic board game.",
+      "confidence": 0.75,
+      "mention_count": 17
+    },
+    {
+      "uuid": "83fcb47f-ce29-40f6-beeb-81d61f5273ed",
+      "name": "Grandvalet & Bengio",
+      "type": "PERSON",
+      "summary": "Refers to researchers or authors mentioned in the text.",
+      "confidence": 0.85,
+      "mention_count": 16
+    },
+    {
+      "uuid": "07b30ef3-fd7a-4c12-805c-a2cf31ae94df",
+      "name": "Appendix C",
+      "type": "DOCUMENT",
+      "summary": "An appendix section in a document containing related experiments.",
+      "confidence": 0.8,
+      "mention_count": 16
+    },
+    {
+      "uuid": "4d0d6de0-75da-4220-94e4-6f5524df2f17",
+      "name": "QuAIL",
+      "type": "PRODUCT",
+      "summary": "A dataset related to question answering in a news context",
+      "confidence": 0.95,
+      "mention_count": 15
+    },
+    {
+      "uuid": "bf6aa80b-4a66-4c87-95bd-3204c4a65938",
+      "name": "Justice",
+      "type": "CONCEPT",
+      "summary": "The quality of being fair and reasonable",
+      "confidence": 0.95,
+      "mention_count": 15
+    },
+    {
+      "uuid": "6d4f081f-a7ee-47e4-aa3f-8ce33e50d733",
+      "name": "CosmosQA",
+      "type": "PRODUCT",
+      "summary": "A dataset used for question answering tasks",
+      "confidence": 0.95,
+      "mention_count": 15
+    },
+    {
+      "uuid": "1c816216-6f86-4c1f-894e-cc2651548f1b",
+      "name": "Data augmentation",
+      "type": "TECHNOLOGY",
+      "summary": "A technique involving rephrasing inputs and enforcing model predictions consistency",
+      "confidence": 0.85,
+      "mention_count": 15
+    },
+    {
+      "uuid": "201a2199-3322-4fd3-8362-fff5946d7693",
+      "name": "Weight Averaging",
+      "type": "TECHNOLOGY",
+      "summary": "A technique where the parameters of a model are averaged during training to improve performance, especially in distribution shift settings",
+      "confidence": 0.85,
+      "mention_count": 14
+    },
+    {
+      "uuid": "a2550edc-2c2c-4016-afc6-3a617cb821f5",
+      "name": "In-Context Learning",
+      "type": "TECHNOLOGY",
+      "summary": "A learning approach where models are trained to understand and generate text based on the context provided",
+      "confidence": 0.75,
+      "mention_count": 14
+    },
+    {
+      "uuid": "81154034-2225-45a6-aba9-d7f86577c43d",
+      "name": "Im0",
+      "type": "DOCUMENT",
+      "summary": "Document image with dimensions 6x93 pixels",
+      "confidence": 0.9,
+      "mention_count": 12
+    },
+    {
+      "uuid": "6aac586b-cd1d-4dba-96c5-dbdee7376ed0",
+      "name": "GPT-4",
+      "type": "TECHNOLOGY",
+      "summary": "Generative Pre-trained Transformer 4, a language model used in various natural language processing tasks.",
+      "confidence": 0.95,
+      "mention_count": 10
+    },
+    {
+      "uuid": "aaf587b1-63a8-4e2e-821d-7e43fd48ad5e",
+      "name": "ViT-B/8",
+      "type": "TECHNOLOGY",
+      "summary": "Vision Transformer model with 8x8 patch size",
+      "confidence": 0.95,
+      "mention_count": 10
+    },
+    {
+      "uuid": "bf9b114e-0dd9-45c9-a218-984524567dab",
+      "name": "ResNet-50",
+      "type": "TECHNOLOGY",
+      "summary": "A deep residual neural network architecture",
+      "confidence": 0.95,
+      "mention_count": 10
+    },
+    {
+      "uuid": "73603395-7069-4800-8d8d-323bf999e521",
+      "name": "AlexNet",
+      "type": "TECHNOLOGY",
+      "summary": "A deep neural network architecture",
+      "confidence": 0.95,
+      "mention_count": 10
+    },
+    {
+      "uuid": "294f3a93-1a56-4f2d-ac34-cc78f963d482",
+      "name": "DINO models",
+      "type": "TECHNOLOGY",
+      "summary": "Models used for unsupervised pretraining",
+      "confidence": 0.95,
+      "mention_count": 10
+    },
+    {
+      "uuid": "c5cc4475-5151-4ea4-9d73-c54c4ebcd2d5",
+      "name": "ImageNet",
+      "type": "TECHNOLOGY",
+      "summary": "A large-scale dataset for visual recognition tasks",
+      "confidence": 0.95,
+      "mention_count": 10
+    },
+    {
+      "uuid": "f61c8cec-a1f7-48e3-a62d-5917f84bac23",
+      "name": "weak supervision",
+      "type": "CONCEPT",
+      "summary": "Weak supervision, a method where training data is labeled with less precise annotations",
+      "confidence": 0.85,
+      "mention_count": 9
+    },
+    {
+      "uuid": "eac507d8-dda8-442e-b7db-e974f0aa4e55",
+      "name": "Adam optimizer",
+      "type": "TECHNOLOGY",
+      "summary": "Adam optimizer, an optimization algorithm used for training neural networks",
+      "confidence": 0.85,
+      "mention_count": 9
+    },
+    {
+      "uuid": "3114aa13-3bf6-4a1b-ac2e-d165bf6a1e07",
+      "name": "linear classification heads",
+      "type": "TECHNOLOGY",
+      "summary": "Linear classification heads, components used in linear probing for classification tasks",
+      "confidence": 0.8,
+      "mention_count": 9
+    },
+    {
+      "uuid": "d0faa72c-ab4e-43f3-b512-001d62023887",
+      "name": "NLP tasks",
+      "type": "CONCEPT",
+      "summary": "Natural Language Processing tasks, specific tasks related to processing and understanding human language",
+      "confidence": 0.75,
+      "mention_count": 9
+    },
+    {
+      "uuid": "8678e772-256f-4b29-938e-a7dbcae0be73",
+      "name": "linear probing",
+      "type": "TECHNOLOGY",
+      "summary": "Linear probing, a method for analyzing the generalization capabilities of machine learning models",
+      "confidence": 0.75,
+      "mention_count": 9
+    },
+    {
+      "uuid": "f0584ce9-fedf-448b-91a0-2e16b70e03f9",
+      "name": "confidence loss",
+      "type": "CONCEPT",
+      "summary": "Confidence loss, a concept related to the reduction in certainty of predictions made by models",
+      "confidence": 0.7,
+      "mention_count": 9
+    },
+    {
+      "uuid": "a49c5be8-bce6-402f-9555-4b4b12ef4db5",
+      "name": "bootstrapping",
+      "type": "TECHNOLOGY",
+      "summary": "Bootstrapping, a method for improving model performance by iteratively refining predictions",
+      "confidence": 0.65,
+      "mention_count": 9
+    },
+    {
+      "uuid": "2db41670-384f-4042-b019-c5ec6ae66cc9",
+      "name": "SciQ dataset",
+      "type": "CONCEPT",
+      "summary": "A dataset used in the synthetic experiments on simulation difficulty",
+      "confidence": 0.95,
+      "mention_count": 8
+    },
+    {
+      "uuid": "b9092f6b-2da2-4c02-9ba2-fe50def54b1c",
+      "name": "LogisticRegression class",
+      "type": "TECHNOLOGY",
+      "summary": "A class used for training logistic regression in the experiment",
+      "confidence": 0.85,
+      "mention_count": 8
+    },
+    {
+      "uuid": "848d3925-990a-4ad6-b81c-c372d5375e3b",
+      "name": "GPT-4 family",
+      "type": "TECHNOLOGY",
+      "summary": "A model of an intermediate size used in extracting a representation for the SciQ dataset",
+      "confidence": 0.85,
+      "mention_count": 8
+    },
+    {
+      "uuid": "d6d11ec8-7fda-4b4a-a876-4aaf173fa462",
+      "name": "linear models",
+      "type": "TECHNOLOGY",
+      "summary": "Models used in the linear probing setting for weak-to-strong generalization experiments",
+      "confidence": 0.75,
+      "mention_count": 8
+    },
+    {
+      "uuid": "31c78f10-a2b0-4481-9718-2bf2a51764c8",
+      "name": "weak supervisor",
+      "type": "CONCEPT",
+      "summary": "A weak supervisor refers to a model or system that provides labels with certain error structures.",
+      "confidence": 0.9,
+      "mention_count": 7
+    }
+  ],
+  "entity_mentions": [
+    {
+      "entity_name": "Jianxin Wu",
+      "entity_type": "PERSON",
+      "episode_number": 27,
+      "document_title": "Weak-to-Strong Generalization Eliciting Strong Capabilities with Weak Supervision",
+      "episode_content": "Page 27\n\nMitchell Wortsman, Gabriel Ilharco, Samir Ya Gadre, Rebecca Roelofs, Raphael Gontijo-Lopes, Ari S Morcos, Hongseok Namkoong, Ali Farhadi, Yai"
+    },
+    {
+      "entity_name": "Elo",
+      "entity_type": "CONCEPT",
+      "episode_number": 27,
+      "document_title": "Weak-to-Strong Generalization Eliciting Strong Capabilities with Weak Supervision",
+      "episode_content": "Page 27\n\nMitchell Wortsman, Gabriel Ilharco, Samir Ya Gadre, Rebecca Roelofs, Raphael Gontijo-Lopes, Ari S Morcos, Hongseok Namkoong, Ali Farhadi, Yai"
+    },
+    {
+      "entity_name": "Dan Roth",
+      "entity_type": "PERSON",
+      "episode_number": 27,
+      "document_title": "Weak-to-Strong Generalization Eliciting Strong Capabilities with Weak Supervision",
+      "episode_content": "Page 27\n\nMitchell Wortsman, Gabriel Ilharco, Samir Ya Gadre, Rebecca Roelofs, Raphael Gontijo-Lopes, Ari S Morcos, Hongseok Namkoong, Ali Farhadi, Yai"
+    },
+    {
+      "entity_name": "Jong Wook Kim",
+      "entity_type": "PERSON",
+      "episode_number": 27,
+      "document_title": "Weak-to-Strong Generalization Eliciting Strong Capabilities with Weak Supervision",
+      "episode_content": "Page 27\n\nMitchell Wortsman, Gabriel Ilharco, Samir Ya Gadre, Rebecca Roelofs, Raphael Gontijo-Lopes, Ari S Morcos, Hongseok Namkoong, Ali Farhadi, Yai"
+    },
+    {
+      "entity_name": "PMLR",
+      "entity_type": "ORGANIZATION",
+      "episode_number": 27,
+      "document_title": "Weak-to-Strong Generalization Eliciting Strong Capabilities with Weak Supervision",
+      "episode_content": "Page 27\n\nMitchell Wortsman, Gabriel Ilharco, Samir Ya Gadre, Rebecca Roelofs, Raphael Gontijo-Lopes, Ari S Morcos, Hongseok Namkoong, Ali Farhadi, Yai"
+    },
+    {
+      "entity_name": "Zhilu Zhang",
+      "entity_type": "PERSON",
+      "episode_number": 27,
+      "document_title": "Weak-to-Strong Generalization Eliciting Strong Capabilities with Weak Supervision",
+      "episode_content": "Page 27\n\nMitchell Wortsman, Gabriel Ilharco, Samir Ya Gadre, Rebecca Roelofs, Raphael Gontijo-Lopes, Ari S Morcos, Hongseok Namkoong, Ali Farhadi, Yai"
+    },
+    {
+      "entity_name": "AAAI/ACM Conference on AI, Ethics, and Society",
+      "entity_type": "EVENT",
+      "episode_number": 27,
+      "document_title": "Weak-to-Strong Generalization Eliciting Strong Capabilities with Weak Supervision",
+      "episode_content": "Page 27\n\nMitchell Wortsman, Gabriel Ilharco, Samir Ya Gadre, Rebecca Roelofs, Raphael Gontijo-Lopes, Ari S Morcos, Hongseok Namkoong, Ali Farhadi, Yai"
+    },
+    {
+      "entity_name": "Hongseok Namkoong",
+      "entity_type": "PERSON",
+      "episode_number": 27,
+      "document_title": "Weak-to-Strong Generalization Eliciting Strong Capabilities with Weak Supervision",
+      "episode_content": "Page 27\n\nMitchell Wortsman, Gabriel Ilharco, Samir Ya Gadre, Rebecca Roelofs, Raphael Gontijo-Lopes, Ari S Morcos, Hongseok Namkoong, Ali Farhadi, Yai"
+    },
+    {
+      "entity_name": "arXiv preprint",
+      "entity_type": "DOCUMENT",
+      "episode_number": 27,
+      "document_title": "Weak-to-Strong Generalization Eliciting Strong Capabilities with Weak Supervision",
+      "episode_content": "Page 27\n\nMitchell Wortsman, Gabriel Ilharco, Samir Ya Gadre, Rebecca Roelofs, Raphael Gontijo-Lopes, Ari S Morcos, Hongseok Namkoong, Ali Farhadi, Yai"
+    },
+    {
+      "entity_name": "Advances in Neural Information Processing Systems",
+      "entity_type": "DOCUMENT",
+      "episode_number": 27,
+      "document_title": "Weak-to-Strong Generalization Eliciting Strong Capabilities with Weak Supervision",
+      "episode_content": "Page 27\n\nMitchell Wortsman, Gabriel Ilharco, Samir Ya Gadre, Rebecca Roelofs, Raphael Gontijo-Lopes, Ari S Morcos, Hongseok Namkoong, Ali Farhadi, Yai"
+    },
+    {
+      "entity_name": "Margaret Mitchell",
+      "entity_type": "PERSON",
+      "episode_number": 27,
+      "document_title": "Weak-to-Strong Generalization Eliciting Strong Capabilities with Weak Supervision",
+      "episode_content": "Page 27\n\nMitchell Wortsman, Gabriel Ilharco, Samir Ya Gadre, Rebecca Roelofs, Raphael Gontijo-Lopes, Ari S Morcos, Hongseok Namkoong, Ali Farhadi, Yai"
+    },
+    {
+      "entity_name": "Ryan Lowe",
+      "entity_type": "PERSON",
+      "episode_number": 27,
+      "document_title": "Weak-to-Strong Generalization Eliciting Strong Capabilities with Weak Supervision",
+      "episode_content": "Page 27\n\nMitchell Wortsman, Gabriel Ilharco, Samir Ya Gadre, Rebecca Roelofs, Raphael Gontijo-Lopes, Ari S Morcos, Hongseok Namkoong, Ali Farhadi, Yai"
+    },
+    {
+      "entity_name": "Rebecca Roelofs",
+      "entity_type": "PERSON",
+      "episode_number": 27,
+      "document_title": "Weak-to-Strong Generalization Eliciting Strong Capabilities with Weak Supervision",
+      "episode_content": "Page 27\n\nMitchell Wortsman, Gabriel Ilharco, Samir Ya Gadre, Rebecca Roelofs, Raphael Gontijo-Lopes, Ari S Morcos, Hongseok Namkoong, Ali Farhadi, Yai"
+    },
+    {
+      "entity_name": "Hongseok Namkoong",
+      "entity_type": "PERSON",
+      "episode_number": 28,
+      "document_title": "Weak-to-Strong Generalization Eliciting Strong Capabilities with Weak Supervision",
+      "episode_content": "Page 28\n\nAPPENDIX OUTLINE • In Appendix A, we provide additional details on our setup and experiments. • In Appendix B, we describe additional results"
+    },
+    {
+      "entity_name": "Margaret Mitchell",
+      "entity_type": "PERSON",
+      "episode_number": 28,
+      "document_title": "Weak-to-Strong Generalization Eliciting Strong Capabilities with Weak Supervision",
+      "episode_content": "Page 28\n\nAPPENDIX OUTLINE • In Appendix A, we provide additional details on our setup and experiments. • In Appendix B, we describe additional results"
+    },
+    {
+      "entity_name": "Elo",
+      "entity_type": "CONCEPT",
+      "episode_number": 28,
+      "document_title": "Weak-to-Strong Generalization Eliciting Strong Capabilities with Weak Supervision",
+      "episode_content": "Page 28\n\nAPPENDIX OUTLINE • In Appendix A, we provide additional details on our setup and experiments. • In Appendix B, we describe additional results"
+    },
+    {
+      "entity_name": "arXiv preprint",
+      "entity_type": "DOCUMENT",
+      "episode_number": 28,
+      "document_title": "Weak-to-Strong Generalization Eliciting Strong Capabilities with Weak Supervision",
+      "episode_content": "Page 28\n\nAPPENDIX OUTLINE • In Appendix A, we provide additional details on our setup and experiments. • In Appendix B, we describe additional results"
+    },
+    {
+      "entity_name": "Zhilu Zhang",
+      "entity_type": "PERSON",
+      "episode_number": 28,
+      "document_title": "Weak-to-Strong Generalization Eliciting Strong Capabilities with Weak Supervision",
+      "episode_content": "Page 28\n\nAPPENDIX OUTLINE • In Appendix A, we provide additional details on our setup and experiments. • In Appendix B, we describe additional results"
+    },
+    {
+      "entity_name": "Jong Wook Kim",
+      "entity_type": "PERSON",
+      "episode_number": 28,
+      "document_title": "Weak-to-Strong Generalization Eliciting Strong Capabilities with Weak Supervision",
+      "episode_content": "Page 28\n\nAPPENDIX OUTLINE • In Appendix A, we provide additional details on our setup and experiments. • In Appendix B, we describe additional results"
+    },
+    {
+      "entity_name": "PMLR",
+      "entity_type": "ORGANIZATION",
+      "episode_number": 28,
+      "document_title": "Weak-to-Strong Generalization Eliciting Strong Capabilities with Weak Supervision",
+      "episode_content": "Page 28\n\nAPPENDIX OUTLINE • In Appendix A, we provide additional details on our setup and experiments. • In Appendix B, we describe additional results"
+    },
+    {
+      "entity_name": "Ryan Lowe",
+      "entity_type": "PERSON",
+      "episode_number": 28,
+      "document_title": "Weak-to-Strong Generalization Eliciting Strong Capabilities with Weak Supervision",
+      "episode_content": "Page 28\n\nAPPENDIX OUTLINE • In Appendix A, we provide additional details on our setup and experiments. • In Appendix B, we describe additional results"
+    },
+    {
+      "entity_name": "Dan Roth",
+      "entity_type": "PERSON",
+      "episode_number": 28,
+      "document_title": "Weak-to-Strong Generalization Eliciting Strong Capabilities with Weak Supervision",
+      "episode_content": "Page 28\n\nAPPENDIX OUTLINE • In Appendix A, we provide additional details on our setup and experiments. • In Appendix B, we describe additional results"
+    },
+    {
+      "entity_name": "AAAI/ACM Conference on AI, Ethics, and Society",
+      "entity_type": "EVENT",
+      "episode_number": 28,
+      "document_title": "Weak-to-Strong Generalization Eliciting Strong Capabilities with Weak Supervision",
+      "episode_content": "Page 28\n\nAPPENDIX OUTLINE • In Appendix A, we provide additional details on our setup and experiments. • In Appendix B, we describe additional results"
+    },
+    {
+      "entity_name": "Advances in Neural Information Processing Systems",
+      "entity_type": "DOCUMENT",
+      "episode_number": 28,
+      "document_title": "Weak-to-Strong Generalization Eliciting Strong Capabilities with Weak Supervision",
+      "episode_content": "Page 28\n\nAPPENDIX OUTLINE • In Appendix A, we provide additional details on our setup and experiments. • In Appendix B, we describe additional results"
+    },
+    {
+      "entity_name": "Rebecca Roelofs",
+      "entity_type": "PERSON",
+      "episode_number": 28,
+      "document_title": "Weak-to-Strong Generalization Eliciting Strong Capabilities with Weak Supervision",
+      "episode_content": "Page 28\n\nAPPENDIX OUTLINE • In Appendix A, we provide additional details on our setup and experiments. • In Appendix B, we describe additional results"
+    },
+    {
+      "entity_name": "Jianxin Wu",
+      "entity_type": "PERSON",
+      "episode_number": 28,
+      "document_title": "Weak-to-Strong Generalization Eliciting Strong Capabilities with Weak Supervision",
+      "episode_content": "Page 28\n\nAPPENDIX OUTLINE • In Appendix A, we provide additional details on our setup and experiments. • In Appendix B, we describe additional results"
+    },
+    {
+      "entity_name": "Advances in Neural Information Processing Systems",
+      "entity_type": "DOCUMENT",
+      "episode_number": 29,
+      "document_title": "Weak-to-Strong Generalization Eliciting Strong Capabilities with Weak Supervision",
+      "episode_content": "Page 29\n\nTable 1: Datasets and their sources. We summarize the NLP datasets we use and their original sources. Dataset Original Source BoolQ Clark et "
+    },
+    {
+      "entity_name": "Hongseok Namkoong",
+      "entity_type": "PERSON",
+      "episode_number": 29,
+      "document_title": "Weak-to-Strong Generalization Eliciting Strong Capabilities with Weak Supervision",
+      "episode_content": "Page 29\n\nTable 1: Datasets and their sources. We summarize the NLP datasets we use and their original sources. Dataset Original Source BoolQ Clark et "
+    },
+    {
+      "entity_name": "Zhilu Zhang",
+      "entity_type": "PERSON",
+      "episode_number": 29,
+      "document_title": "Weak-to-Strong Generalization Eliciting Strong Capabilities with Weak Supervision",
+      "episode_content": "Page 29\n\nTable 1: Datasets and their sources. We summarize the NLP datasets we use and their original sources. Dataset Original Source BoolQ Clark et "
+    },
+    {
+      "entity_name": "Margaret Mitchell",
+      "entity_type": "PERSON",
+      "episode_number": 29,
+      "document_title": "Weak-to-Strong Generalization Eliciting Strong Capabilities with Weak Supervision",
+      "episode_content": "Page 29\n\nTable 1: Datasets and their sources. We summarize the NLP datasets we use and their original sources. Dataset Original Source BoolQ Clark et "
+    }
+  ],
+  "episodes": [
+    {
+      "document": "Weak-to-Strong Generalization Eliciting Strong Capabilities with Weak Supervision",
+      "sequence": 1,
+      "type": "page",
+      "content_sample": "Page 1\n\nWEAK-TO-STRONG GENERALIZATION: ELICITING STRONG CAPABILITIES WITH WEAK SUPERVISION Collin Burns∗ Pavel Izmailov∗ Jan Hendrik Kirchner∗ Bowen Baker∗ Leo Gao∗ Leopold Aschenbrenner∗ Yining Chen∗",
+      "entity_count": 0
+    },
+    {
+      "document": "Weak-to-Strong Generalization Eliciting Strong Capabilities with Weak Supervision",
+      "sequence": 2,
+      "type": "page",
+      "content_sample": "Page 2\n\nFigure 1: An illustration of our methodology. Traditional ML focuses on the setting where humans supervise models that are weaker than humans. For the ultimate superalignment problem, humans w",
+      "entity_count": 0
+    },
+    {
+      "document": "Weak-to-Strong Generalization Eliciting Strong Capabilities with Weak Supervision",
+      "sequence": 3,
+      "type": "page",
+      "content_sample": "Page 3\n\naccuracy (%) Representative NLP Task 50 60 70 80 90 100 Chess Puzzles 0 20 40 60 80 100 ChatGPT Reward Modeling 50 55 60 65 70 75 weak performance weak-to-strong performance (naive) weak-to-st",
+      "entity_count": 0
+    },
+    {
+      "document": "Weak-to-Strong Generalization Eliciting Strong Capabilities with Weak Supervision",
+      "sequence": 4,
+      "type": "page",
+      "content_sample": "Page 4\n\nmodels, at least for some key tasks that we care about. This may allow us to develop superhuman reward models or safety classifiers, which we could in turn use to align superhuman models. Alig",
+      "entity_count": 0
+    },
+    {
+      "document": "Weak-to-Strong Generalization Eliciting Strong Capabilities with Weak Supervision",
+      "sequence": 5,
+      "type": "page",
+      "content_sample": "Page 5\n\nsarial training (Zhang et al., 2018), and model editing (Santurkar et al., 2021; Meng et al., 2022). In contrast, our setting can be viewed as a particularly difficult debiasing problem where ",
+      "entity_count": 0
+    },
+    {
+      "document": "Weak-to-Strong Generalization Eliciting Strong Capabilities with Weak Supervision",
+      "sequence": 6,
+      "type": "page",
+      "content_sample": "Page 6\n\n3. Train a strong model with ground truth labels as a ceiling. Finally, for comparison, we finetune a strong model with ground truth labels.4 We call this model’s resulting perfor- mance the s",
+      "entity_count": 0
+    },
+    {
+      "document": "Weak-to-Strong Generalization Eliciting Strong Capabilities with Weak Supervision",
+      "sequence": 7,
+      "type": "page",
+      "content_sample": "Page 7\n\nMore generally, we do not yet know how superhuman models will be built, but they could develop new inductive biases that are qualitatively different from today’s models. We view iterating on o",
+      "entity_count": 0
+    },
+    {
+      "document": "Weak-to-Strong Generalization Eliciting Strong Capabilities with Weak Supervision",
+      "sequence": 8,
+      "type": "page",
+      "content_sample": "Page 8\n\nweak supervisor compute (fraction of GPT4) 10-7 0.1 strong ceiling performance (g.t. supervision) weak-to-strong performance (weak supervision) (c) test accuracy (%) ChatGPT Reward Modeling te",
+      "entity_count": 0
+    },
+    {
+      "document": "Weak-to-Strong Generalization Eliciting Strong Capabilities with Weak Supervision",
+      "sequence": 9,
+      "type": "page",
+      "content_sample": "Page 9\n\ntest accuracy (%) 0 20 40 60 80 100 10-8 10-6 10-4 10-2 1 strong student compute (fraction of GPT4) chess bootstrapping weak-to-strong performance with bootstrapping (b) performance gap recove",
+      "entity_count": 0
+    },
+    {
+      "document": "Weak-to-Strong Generalization Eliciting Strong Capabilities with Weak Supervision",
+      "sequence": 10,
+      "type": "page",
+      "content_sample": "Page 10\n\ntest accuracy (%) 100 50 60 70 80 90 NLP with auxiliary loss strong student compute (fraction of GPT4) 10-8 10-6 10-4 10-2 1 weak-to-strong performance with aux. loss (a) weak supervisor comp",
+      "entity_count": 0
+    },
+    {
+      "document": "Weak-to-Strong Generalization Eliciting Strong Capabilities with Weak Supervision",
+      "sequence": 11,
+      "type": "page",
+      "content_sample": "Page 11\n\n10-8 10-6 10-4 10-2 1 strong student compute (fraction of GPT4) 10-8 10-6 10-4 10-2 1 10-8 10-6 10-4 10-2 1 10-8 10-6 10-4 10-2 1 test accuracy (%) strong performance (g.t. supervision) weak-",
+      "entity_count": 0
+    },
+    {
+      "document": "Weak-to-Strong Generalization Eliciting Strong Capabilities with Weak Supervision",
+      "sequence": 12,
+      "type": "page",
+      "content_sample": "Page 12\n\n(a) 0 30 performance gap recovered (%) early stop (ground truth) last (c) 0.2 0.8 progress (fraction of epoch) test accuracy (%) 0.4 61 strong student compute / weak supervisor compute 1 107 ",
+      "entity_count": 0
+    },
+    {
+      "document": "Weak-to-Strong Generalization Eliciting Strong Capabilities with Weak Supervision",
+      "sequence": 13,
+      "type": "page",
+      "content_sample": "Page 13\n\nweak-to-strong performance (aux. loss) weak-to-strong performance student-supervisor agreement (%) 100 60 70 80 90 strong student compute (fraction of GPT4) 10-8 10-6 10-4 10-2 1 (a) all samp",
+      "entity_count": 0
+    },
+    {
+      "document": "Weak-to-Strong Generalization Eliciting Strong Capabilities with Weak Supervision",
+      "sequence": 14,
+      "type": "page",
+      "content_sample": "Page 14\n\nzeroshot finetune g.t. weak supervisor compute (fraction of GPT4) 10-7 0.1 (a) fewshot weak labels (n=5) (c) aux. loss finetune test accuracy (%) strong student compute (fraction of GPT4) 10-",
+      "entity_count": 0
+    },
+    {
+      "document": "Weak-to-Strong Generalization Eliciting Strong Capabilities with Weak Supervision",
+      "sequence": 15,
+      "type": "page",
+      "content_sample": "Page 15\n\nno generative finetuning (b) 10-4 10-3 10-2 10-5 strong student compute (fraction of GPT4) 10-6 weak model compute (fraction of GPT4) 10-7 0.1 (a) 60 62 64 66 68 70 10-7 10-6 10-5 10-4 strong",
+      "entity_count": 0
+    },
+    {
+      "document": "Weak-to-Strong Generalization Eliciting Strong Capabilities with Weak Supervision",
+      "sequence": 16,
+      "type": "page",
+      "content_sample": "Page 16\n\nlp(gt) ft(weak) ft(weak)+lp(gt) ft(gt) 60 90 test accuracy (%) 70 80 lp(weak) Figure 11: Finetuning on weak supervisor labels makes the desired generalization more lin- early represented. We ",
+      "entity_count": 0
+    },
+    {
+      "document": "Weak-to-Strong Generalization Eliciting Strong Capabilities with Weak Supervision",
+      "sequence": 17,
+      "type": "page",
+      "content_sample": "Page 17\n\nsuperhuman model with human supervision, it might simply imitate the weak supervisor, outputting human-level capabilities rather than its latent superhuman capabilities (Christiano et al., 20",
+      "entity_count": 0
+    },
+    {
+      "document": "Weak-to-Strong Generalization Eliciting Strong Capabilities with Weak Supervision",
+      "sequence": 18,
+      "type": "page",
+      "content_sample": "Page 18\n\n• Testing our conjecture that prompting-based methods in our current setup will not be as indicative of future results relative to finetuning-based methods (Section 5.2.1), and im- proving ou",
+      "entity_count": 0
+    },
+    {
+      "document": "Weak-to-Strong Generalization Eliciting Strong Capabilities with Weak Supervision",
+      "sequence": 19,
+      "type": "page",
+      "content_sample": "Page 19\n\nextraordinarily powerful and, if misused or misaligned with humans values, could potentially cause catastrophic harm (CAIS). Given the stakes, we need to establish extremely high reliability ",
+      "entity_count": 0
+    },
+    {
+      "document": "Weak-to-Strong Generalization Eliciting Strong Capabilities with Weak Supervision",
+      "sequence": 20,
+      "type": "page",
+      "content_sample": "Page 20\n\nLucas Beyer, Xiaohua Zhai, Am´elie Royer, Larisa Markeeva, Rohan Anil, and Alexander Kolesnikov. Knowledge distillation: A good teacher is patient and consistent. In Proceedings of the IEEE/C",
+      "entity_count": 0
+    }
+  ],
+  "documents": [
+    {
+      "uuid": "acb10657-20ea-4840-8500-0e73b92f913e",
+      "title": "Weak-to-Strong Generalization Eliciting Strong Capabilities with Weak Supervision",
+      "file_name": "Weak-to-Strong Generalization Eliciting Strong Capabilities with Weak Supervision.pdf",
+      "document_type": "pdf",
+      "episode_count": 49,
+      "entity_count": 77
+    }
+  ]
+}
