@@ -7,6 +7,8 @@
 """
 
 
+import json
+import logging
 from copy import deepcopy
 from typing import List
 from pydantic import BaseModel
@@ -15,6 +17,8 @@ from openai import AsyncOpenAI
 from agents import Agent, Runner, OpenAIChatCompletionsModel, ModelSettings
 
 from knowledge_rag.config import OPENAI_API_KEY
+
+logger = logging.getLogger(__name__)
 
 
 class ChunkMatchingResult(BaseModel):
@@ -114,7 +118,42 @@ async def make_decision_of_chunk_matching(
     chunk: dict
 ) -> dict:
     
-    result = await chunk_matching(query_text, chunk["summary"], chunk["insights"])
+    # 记录chunk的所有字段，用于调试
+    logger.info(f"Chunk字段: {list(chunk.keys())}")
+    
+    # 安全获取 summary 和 insights 字段，提供默认值
+    summary = chunk.get("summary", "")
+    insights = chunk.get("insights", "")
+    
+    # 检查字段是否缺失并记录警告
+    if "summary" not in chunk:
+        logger.warning(f"Chunk缺失'summary'字段，chunk_id: {chunk.get('chunk_id', 'unknown')}")
+    if "insights" not in chunk:
+        logger.warning(f"Chunk缺失'insights'字段，chunk_id: {chunk.get('chunk_id', 'unknown')}")
+    
+    # 记录字段内容类型和长度
+    logger.info(f"Summary类型: {type(summary)}, 长度: {len(str(summary)) if summary else 0}")
+    logger.info(f"Insights类型: {type(insights)}, 长度: {len(str(insights)) if insights else 0}")
+    
+    # 如果 summary 是字符串格式的 JSON，尝试解析
+    if isinstance(summary, str) and summary.strip().startswith('{'):
+        try:
+            summary = json.loads(summary)
+            logger.info("Summary成功解析为JSON")
+        except json.JSONDecodeError:
+            logger.warning("Summary JSON解析失败，保持原字符串")
+    
+    # 如果 insights 是字符串格式的 JSON，尝试解析
+    if isinstance(insights, str) and insights.strip().startswith('{'):
+        try:
+            insights = json.loads(insights)
+            logger.info("Insights成功解析为JSON")
+        except json.JSONDecodeError:
+            logger.warning("Insights JSON解析失败，保持原字符串")
+    
+    result = await chunk_matching(query_text, summary, insights)
+    logger.info(f"Chunk匹配结果: 分数={result.score}, 是否相关={result.is_related}")
+    
     if result.is_related:
         return chunk
     else:

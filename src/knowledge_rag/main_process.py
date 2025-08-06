@@ -243,8 +243,9 @@ async def chunk_retrieval(
         query_text = query,
         chunk_top_k = each_doc_chunk_number,
     )
-        
-    return results
+    
+    # 提取 relevant_chunks 列表作为返回结果
+    return results.get('relevant_chunks', [])
 
 async def make_decision_of_chunk_retrieval(
     query_text: str,

@@ -1,5 +1,7 @@
 
 # Custom
+Dockerfile 
+docker-*
 data/
 reference/
 sql/

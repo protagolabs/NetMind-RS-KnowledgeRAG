@@ -431,13 +431,15 @@ python start_server.py --host 0.0.0.0
   "chunks": [
     {
       "chunk_id": "chunk_001",
-      "chunk_content": "交叉验证是评估模型性能的重要方法...",
-      "chunk_summary": "模型评估方法介绍"
+      "summary": "",
+      "insights": "",
+      "key_words": [],
     },
     {
       "chunk_id": "chunk_002", 
-      "chunk_content": "准确率、召回率和 F1 分数是常用指标...",
-      "chunk_summary": "评估指标说明"
+      "summary": "",
+      "insights": "",
+      "key_words": []
     }
   ]
 }
