@@ -263,16 +263,43 @@ python start_server.py --host 0.0.0.0
   "message": "文档检索成功",
   "results": [
     {
+      "id": 1,
       "file_id": "doc_001",
       "file_name": "ml_algorithms.md",
       "summary": "机器学习算法综述...",
+      "insights": ["关键洞察1", "关键洞察2"],
+      "key_words": ["机器学习", "算法", "分类"],
+      "doc_markdown_content": "# 机器学习算法\n\n完整文档内容...",
+      "chunk_mysql_table": "chunks_doc_001",
+      "chunk_milvus_collection": "chunks_vectors_doc_001",
+      "chunk_count": 15,
+      "processing_status": "completed",
+      "created_at": "2025-08-01T10:00:00Z",
+      "updated_at": "2025-08-01T10:30:00Z",
       "relevance_score": 0.95,
-      "match_reason": "查询与文档摘要高度相关"
+      "search_field": "fulltext"
     }
   ],
   "total_results": 5
 }
 ```
+
+**字段说明**:
+- `id`: 文档在数据库中的主键ID
+- `file_id`: 文档的唯一标识符
+- `file_name`: 文档文件名
+- `summary`: 文档摘要
+- `insights`: 文档关键洞察列表
+- `key_words`: 文档关键词列表
+- `doc_markdown_content`: 完整的Markdown文档内容
+- `chunk_mysql_table`: 对应的chunk MySQL表名
+- `chunk_milvus_collection`: 对应的chunk Milvus集合名
+- `chunk_count`: 文档包含的chunk数量
+- `processing_status`: 处理状态（如"completed"）
+- `created_at`: 创建时间
+- `updated_at`: 更新时间
+- `relevance_score`: 相关度分数（0-1）
+- `search_field`: 搜索字段标识（如"fulltext"、"summary_embedding"等）
 
 #### 7. 按数据集类型检索文档
 
@@ -295,16 +322,39 @@ python start_server.py --host 0.0.0.0
   "message": "数据集文档检索成功",
   "results": [
     {
+      "id": 2,
       "file_id": "doc_002",
       "file_name": "cv_deep_learning.md",
       "summary": "计算机视觉中的深度学习方法...",
-      "relevance_score": 0.92,
-      "dataset_type": "paper_set_1"
+      "insights": ["深度学习在CV中的应用", "卷积神经网络优势"],
+      "key_words": ["计算机视觉", "深度学习", "CNN"],
+      "doc_markdown_content": "# 计算机视觉中的深度学习\n\n完整文档内容...",
+      "chunk_mysql_table": "chunks_doc_002",
+      "chunk_milvus_collection": "chunks_vectors_doc_002",
+      "chunk_count": 22,
+      "processing_status": "completed",
+      "created_at": "2025-08-01T11:00:00Z",
+      "updated_at": "2025-08-01T11:15:00Z"
     }
   ],
   "total_results": 3
 }
 ```
+
+**字段说明**:
+- `id`: 文档在数据库中的主键ID
+- `file_id`: 文档的唯一标识符
+- `file_name`: 文档文件名
+- `summary`: 文档摘要
+- `insights`: 文档关键洞察列表
+- `key_words`: 文档关键词列表
+- `doc_markdown_content`: 完整的Markdown文档内容
+- `chunk_mysql_table`: 对应的chunk MySQL表名
+- `chunk_milvus_collection`: 对应的chunk Milvus集合名
+- `chunk_count`: 文档包含的chunk数量
+- `processing_status`: 处理状态（如"completed"）
+- `created_at`: 创建时间
+- `updated_at`: 更新时间
 
 #### 8. Chunk 检索
 
@@ -332,13 +382,36 @@ python start_server.py --host 0.0.0.0
       "file_id": "doc_001",
       "chunk_content": "梯度下降是最常用的优化算法...",
       "chunk_summary": "介绍梯度下降优化方法",
+      "chunk_insights": ["梯度下降原理", "优化算法比较"],
       "similarity_score": 0.89,
-      "source_document": "neural_networks.md"
+      "relevance_score": 0.92,
+      "search_field": "summary_embedding",
+      "metadata": {
+        "chunk_index": 5,
+        "token_count": 256,
+        "section": "优化算法"
+      },
+      "created_at": "2025-08-01T10:15:00Z"
     }
   ],
   "total_results": 20
 }
 ```
+
+**字段说明**:
+- `chunk_id`: chunk的唯一标识符
+- `file_id`: 所属文档的ID
+- `chunk_content`: chunk的文本内容
+- `chunk_summary`: chunk的摘要
+- `chunk_insights`: chunk的关键洞察列表
+- `similarity_score`: 向量相似度分数（0-1）
+- `relevance_score`: 文本相关度分数（0-1）
+- `search_field`: 搜索字段标识（如"summary_embedding"、"fulltext"等）
+- `metadata`: 包含chunk的元数据信息
+  - `chunk_index`: chunk在文档中的索引位置
+  - `token_count`: chunk的token数量
+  - `section`: chunk所属的章节
+- `created_at`: chunk创建时间
 
 **参数说明**:
 - `query`: 查询文本
