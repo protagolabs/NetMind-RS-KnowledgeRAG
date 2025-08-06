@@ -24,7 +24,11 @@
 2. 文档级insights向量搜索 - 在文档的insights向量中搜索  
 3. 文档级全文搜索 - 在文档的文本内容中搜索
 4. Chunk级向量搜索 - 在特定文档的chunks中搜索
-5. Chunk级全文搜索 - 在chunks的文本内容中搜索
+5. Chunk级insights向量搜索 - 在chunk的insights向量中进行精细搜索
+6. Chunk级全文搜索 - 在chunks的文本内容中搜索
+7. Chunk级insights文本搜索 - 在chunk的insights文本中进行关键词搜索
+8. 综合搜索 - 两阶段搜索策略，先文档级再chunk级
+9. 无文档级综合搜索 - 直接在指定文档中进行chunk级搜索
 
 【智能检索流程】
 1. 先在文档级别搜索相关文档（粗筛选）
@@ -43,10 +47,11 @@
 
 import json
 import logging
+import asyncio
 from typing import Dict, List, Any, Optional, Tuple, Union
 from pathlib import Path
-import mysql.connector
-from pymilvus import connections, Collection
+import mysql.connector  # type: ignore
+from pymilvus import connections, Collection  # type: ignore
 import numpy as np
 
 logger = logging.getLogger(__name__)
@@ -111,6 +116,33 @@ class DBRetriever:
         # 立即建立数据库连接（失败会抛出异常）
         self._connect_databases()
     
+    def _normalize_vector(self, query_vector):
+        """
+        规范化查询向量格式
+        
+        Args:
+            query_vector: 输入向量，可能是list、tuple、numpy array等格式
+            
+        Returns:
+            List[float]: 标准化的float列表
+        """
+        if isinstance(query_vector, (list, tuple)):
+            return [float(x) for x in query_vector]
+        else:
+            return query_vector.tolist() if hasattr(query_vector, 'tolist') else list(query_vector)
+    
+    def _normalize_text(self, query_text):
+        """
+        规范化查询文本格式
+        
+        Args:
+            query_text: 输入文本，可能是string、list等格式
+            
+        Returns:
+            str: 标准化的字符串
+        """
+        return str(query_text) if not isinstance(query_text, str) else query_text
+    
     def _connect_databases(self):
         """
         连接到MySQL和Milvus数据库
@@ -151,7 +183,7 @@ class DBRetriever:
             # 连接失败立即抛出异常，避免系统在不完整状态下运行
             raise
     
-    def search_documents_by_vector(
+    async def search_documents_by_vector(
         self, 
         query_vector: List[float],
         vector_field: str = "summary_embedding",
@@ -216,9 +248,12 @@ class DBRetriever:
                 "params": {"nprobe": 10} # 搜索聚类数量，影响精度vs速度平衡
             }
             
+            # 规范化查询向量格式
+            search_vector = self._normalize_vector(query_vector)
+            
             # 执行向量搜索
             results = collection.search(
-                data=[query_vector],        # 查询向量（列表格式，支持批量查询）
+                data=[search_vector],       # 查询向量（列表格式，支持批量查询）
                 anns_field=vector_field,    # 要搜索的向量字段
                 param=search_params,        # 搜索参数
                 limit=top_k,               # 返回最相似的top_k个结果
@@ -280,7 +315,7 @@ class DBRetriever:
             logger.error(f"文档向量搜索失败: {e}")
             return []
     
-    def search_documents_by_insights(self, 
+    async def search_documents_by_insights(self, 
                                    query_vector: List[float],
                                    top_k: int = 10,
                                    threshold: float = 0.8) -> List[Dict[str, Any]]:
@@ -304,8 +339,11 @@ class DBRetriever:
                 "params": {"nprobe": 10}
             }
             
+            # 规范化查询向量格式
+            search_vector = self._normalize_vector(query_vector)
+            
             results = collection.search(
-                data=[query_vector],
+                data=[search_vector],
                 anns_field="insight_embedding",
                 param=search_params,
                 limit=top_k,
@@ -359,7 +397,7 @@ class DBRetriever:
             logger.error(f"文档insights搜索失败: {e}")
             return []
     
-    def search_documents_by_text(self, 
+    async def search_documents_by_text(self, 
                                query_text: str,
                                search_fields: List[str] = ["summary", "doc_markdown_content"],
                                top_k: int = 10) -> List[Dict[str, Any]]:
@@ -438,9 +476,12 @@ class DBRetriever:
             # - ORDER BY：按相关度降序排列，最相关的在前
             
             # 第三步：准备查询参数
+            # 规范化查询文本格式
+            search_text = self._normalize_text(query_text)
+            
             # 需要为每个MATCH条件提供查询文本，所以要重复query_text
             cursor = self.mysql_conn.cursor(dictionary=True)
-            params = [query_text] * (len(search_fields) * 2) + [top_k]
+            params = [search_text] * (len(search_fields) * 2) + [top_k]
             # 参数解释：
             # - query_text重复2倍字段数：SELECT和WHERE中各用一次
             # - 最后加上LIMIT的top_k值
@@ -468,7 +509,7 @@ class DBRetriever:
             logger.error(f"文档全文搜索失败: {e}")
             return []
     
-    def get_document_by_file_id(self, file_id: str) -> Optional[Dict[str, Any]]:
+    async def get_document_by_file_id(self, file_id: str) -> Optional[Dict[str, Any]]:
         """
         根据file_id获取文档详细信息
         
@@ -504,7 +545,7 @@ class DBRetriever:
             logger.error(f"获取文档失败: {e}")
             return None
     
-    def search_chunks_by_vector(self,
+    async def search_chunks_by_vector(self,
                                source_ids: List[str],
                                query_vector: List[float],
                                vector_field: str = "summary_embedding",
@@ -524,19 +565,19 @@ class DBRetriever:
             List[Dict]: 搜索结果列表
         """
         try:
-            all_results = []
-            
-            for source_id in source_ids:
+            # 创建每个source_id的并行搜索任务
+            async def search_single_source_vector(source_id: str):
+                """搜索单个source_id的chunk向量"""
                 try:
                     # 生成集合名
                     clean_source_id = source_id.replace('-', '_').replace('.', '_')
                     collection_name = f"chunks_vectors_{clean_source_id}"
                     
                     # 检查集合是否存在
-                    from pymilvus import utility
+                    from pymilvus import utility  # type: ignore
                     if not utility.has_collection(collection_name):
                         logger.warning(f"集合 {collection_name} 不存在，跳过")
-                        continue
+                        return []
                     
                     collection = Collection(collection_name)
                     
@@ -545,14 +586,21 @@ class DBRetriever:
                         "params": {"nprobe": 10}
                     }
                     
+                    # 确保query_vector是正确的float列表格式
+                    if isinstance(query_vector, (list, tuple)):
+                        search_vector = [float(x) for x in query_vector]
+                    else:
+                        search_vector = query_vector.tolist() if hasattr(query_vector, 'tolist') else list(query_vector)
+                    
                     results = collection.search(
-                        data=[query_vector],
+                        data=[search_vector],
                         anns_field=vector_field,
                         param=search_params,
                         limit=top_k,
                         output_fields=["chunk_id", "source_id"]
                     )
                     
+                    source_results = []
                     if results and len(results[0]) > 0:
                         # 获取chunk详细信息
                         chunk_ids = [hit.entity.get("chunk_id") for hit in results[0]]
@@ -588,11 +636,24 @@ class DBRetriever:
                                     chunk_info['key_words'] = json.loads(chunk_info['key_words'])
                                 
                                 if chunk_info['similarity_score'] >= threshold:
-                                    all_results.append(chunk_info)
-                
+                                    source_results.append(chunk_info)
+                    
+                    return source_results
+                    
                 except Exception as e:
                     logger.error(f"搜索source_id {source_id}的chunks失败: {e}")
-                    continue
+                    return []
+            
+            # 并行搜索所有source_id
+            logger.info(f"并行搜索{len(source_ids)}个source_id的chunk向量...")
+            search_tasks = [search_single_source_vector(source_id) for source_id in source_ids]
+            search_results = await asyncio.gather(*search_tasks, return_exceptions=True)
+            
+            # 合并所有结果
+            all_results = []
+            for result in search_results:
+                if not isinstance(result, Exception) and result:
+                    all_results.extend(result)
             
             # 按相似度排序
             all_results.sort(key=lambda x: x['similarity_score'], reverse=True)
@@ -604,7 +665,272 @@ class DBRetriever:
             logger.error(f"chunk向量搜索失败: {e}")
             return []
     
-    def search_chunks_by_text(self,
+    async def search_chunks_by_insight_vector(self,
+                                      source_ids: List[str],
+                                      query_vector: List[float],
+                                      top_k: int = 20,
+                                      threshold: float = 0.8) -> List[Dict[str, Any]]:
+        """
+        在指定文档的chunks中进行insights向量搜索
+        
+        【工作原理】
+        1. 遍历每个source_id对应的chunks_insights_vectors集合
+        2. 在insights向量中进行语义相似度搜索
+        3. 获取匹配的chunk详细信息
+        4. 合并所有结果并按相似度排序
+        
+        【与常规chunk搜索的区别】
+        - 搜索粒度更细：每个insight独立匹配，而不是整个chunk
+        - 语义精度更高：insights通常包含更精炼的核心观点
+        - 结果更丰富：返回匹配的具体insight文本和索引
+        
+        Args:
+            source_ids: 要搜索的文档source_id列表
+            query_vector: 查询向量
+            top_k: 每个集合返回的结果数
+            threshold: 相似度阈值
+            
+        Returns:
+            List[Dict]: 搜索结果列表，每个元素包含：
+                - chunk的完整信息
+                - matched_insight: 匹配的insight文本
+                - insight_index: insight在chunk中的索引
+                - similarity_score: 相似度分数
+        """
+        try:
+            # 创建每个source_id的并行搜索任务
+            async def search_single_source_insight_vector(source_id: str):
+                """搜索单个source_id的chunk insights向量"""
+                try:
+                    # 生成insights集合名
+                    clean_source_id = source_id.replace('-', '_').replace('.', '_')
+                    collection_name = f"chunks_insights_vectors_{clean_source_id}"
+                    
+                    # 检查集合是否存在
+                    from pymilvus import utility  # type: ignore
+                    if not utility.has_collection(collection_name):
+                        logger.warning(f"集合 {collection_name} 不存在，跳过")
+                        return []
+                    
+                    collection = Collection(collection_name)
+                    
+                    search_params = {
+                        "metric_type": "L2",
+                        "params": {"nprobe": 10}
+                    }
+                    
+                    # 确保query_vector是正确的float列表格式
+                    if isinstance(query_vector, (list, tuple)):
+                        search_vector = [float(x) for x in query_vector]
+                    else:
+                        search_vector = query_vector.tolist() if hasattr(query_vector, 'tolist') else list(query_vector)
+                    
+                    results = collection.search(
+                        data=[search_vector],
+                        anns_field="insight_embedding",
+                        param=search_params,
+                        limit=top_k,
+                        output_fields=["chunk_id", "source_id", "insight_text", "insight_index"]
+                    )
+                    
+                    source_results = []
+                    if results and len(results[0]) > 0:
+                        # 获取chunk详细信息
+                        chunk_ids = list(set([hit.entity.get("chunk_id") for hit in results[0]]))
+                        table_name = f"chunks_{clean_source_id}"
+                        
+                        placeholders = ', '.join(['%s'] * len(chunk_ids))
+                        query_sql = f"""
+                        SELECT id, source_id, chunk_id, summary, insights, key_words, 
+                               chunk_markdown_content, created_at
+                        FROM {table_name}
+                        WHERE chunk_id IN ({placeholders})
+                        """
+                        
+                        cursor = self.mysql_conn.cursor(dictionary=True)
+                        cursor.execute(query_sql, chunk_ids)
+                        chunks = cursor.fetchall()
+                        cursor.close()
+                        
+                        # 合并结果
+                        chunks_dict = {chunk['chunk_id']: chunk for chunk in chunks}
+                        
+                        for hit in results[0]:
+                            chunk_id = hit.entity.get("chunk_id")
+                            if chunk_id in chunks_dict:
+                                chunk_info = chunks_dict[chunk_id].copy()
+                                chunk_info['similarity_score'] = float(1.0 / (1.0 + hit.distance))
+                                chunk_info['matched_insight'] = hit.entity.get("insight_text")
+                                chunk_info['insight_index'] = hit.entity.get("insight_index")
+                                chunk_info['search_field'] = "insights_vector"
+                                
+                                # 解析JSON字段
+                                if chunk_info.get('insights') and isinstance(chunk_info['insights'], str):
+                                    chunk_info['insights'] = json.loads(chunk_info['insights'])
+                                if chunk_info.get('key_words') and isinstance(chunk_info['key_words'], str):
+                                    chunk_info['key_words'] = json.loads(chunk_info['key_words'])
+                                
+                                if chunk_info['similarity_score'] >= threshold:
+                                    source_results.append(chunk_info)
+                    
+                    return source_results
+                    
+                except Exception as e:
+                    logger.error(f"搜索source_id {source_id}的chunk insights失败: {e}")
+                    return []
+            
+            # 并行搜索所有source_id
+            logger.info(f"并行搜索{len(source_ids)}个source_id的chunk insights向量...")
+            search_tasks = [search_single_source_insight_vector(source_id) for source_id in source_ids]
+            search_results = await asyncio.gather(*search_tasks, return_exceptions=True)
+            
+            # 合并所有结果
+            all_results = []
+            for result in search_results:
+                if not isinstance(result, Exception) and result:
+                    all_results.extend(result)
+            
+            # 按相似度排序
+            all_results.sort(key=lambda x: x['similarity_score'], reverse=True)
+            
+            logger.info(f"chunk insights向量搜索完成，返回{len(all_results)}个结果")
+            return all_results
+            
+        except Exception as e:
+            logger.error(f"chunk insights向量搜索失败: {e}")
+            return []
+    
+    async def search_chunks_by_insight_text(self,
+                                    source_ids: List[str],
+                                    query_text: str,
+                                    top_k: int = 20) -> List[Dict[str, Any]]:
+        """
+        在指定文档的chunks中进行insights文本搜索
+        
+        【工作原理】
+        1. 在每个chunk的insights字段中进行文本匹配
+        2. 使用JSON_SEARCH函数在insights JSON数组中查找匹配文本
+        3. 计算文本相关度分数
+        4. 返回包含匹配insights的chunk信息
+        
+        【搜索策略】
+        - 使用MySQL的JSON_SEARCH函数在insights数组中搜索
+        - 支持模糊匹配（LIKE操作）
+        - 按匹配度和相关性排序
+        
+        Args:
+            source_ids: 要搜索的文档source_id列表
+            query_text: 查询文本
+            top_k: 每个表返回的结果数
+            
+        Returns:
+            List[Dict]: 搜索结果列表，每个元素包含：
+                - chunk的完整信息
+                - matched_insights: 匹配的insights列表
+                - relevance_score: 文本相关度分数
+        """
+        try:
+            # 创建每个source_id的并行搜索任务
+            async def search_single_source_insight_text(source_id: str):
+                """搜索单个source_id的chunk insights文本"""
+                try:
+                    # 生成表名
+                    clean_source_id = source_id.replace('-', '_').replace('.', '_')
+                    table_name = f"chunks_{clean_source_id}"
+                    
+                    # 检查表是否存在
+                    cursor = self.mysql_conn.cursor(dictionary=True)
+                    cursor.execute("""
+                        SELECT COUNT(*) as count FROM information_schema.tables 
+                        WHERE table_schema = %s AND table_name = %s
+                    """, (self.mysql_config['database'], table_name))
+                    
+                    if cursor.fetchone()['count'] == 0:
+                        logger.warning(f"表 {table_name} 不存在，跳过")
+                        cursor.close()
+                        return []
+                    
+                    # 构建insights文本搜索SQL
+                    # 使用JSON_SEARCH在insights数组中查找包含查询文本的项
+                    search_sql = f"""
+                    SELECT id, source_id, chunk_id, summary, insights, key_words, 
+                           chunk_markdown_content, created_at,
+                           (CASE 
+                            WHEN JSON_SEARCH(insights, 'one', %s) IS NOT NULL THEN 2.0
+                            WHEN JSON_SEARCH(insights, 'one', CONCAT('%%', %s, '%%')) IS NOT NULL THEN 1.5
+                            WHEN JSON_EXTRACT(insights, '$[*]') LIKE %s THEN 1.0
+                            ELSE 0.5
+                           END) as relevance_score
+                    FROM {table_name}
+                    WHERE JSON_SEARCH(insights, 'all', CONCAT('%%', %s, '%%')) IS NOT NULL
+                       OR JSON_EXTRACT(insights, '$[*]') LIKE %s
+                    ORDER BY relevance_score DESC
+                    LIMIT %s
+                    """
+                    
+                    # 确保query_text是字符串格式
+                    search_text = str(query_text) if not isinstance(query_text, str) else query_text
+                    
+                    # 执行搜索
+                    like_pattern = f"%{search_text}%"
+                    params = [search_text, search_text, like_pattern, search_text, like_pattern, top_k]
+                    cursor.execute(search_sql, params)
+                    results = cursor.fetchall()
+                    cursor.close()
+                    
+                    # 处理结果
+                    source_results = []
+                    for result in results:
+                        # 解析JSON字段
+                        if result.get('insights') and isinstance(result['insights'], str):
+                            result['insights'] = json.loads(result['insights'])
+                        if result.get('key_words') and isinstance(result['key_words'], str):
+                            result['key_words'] = json.loads(result['key_words'])
+                        
+                        # 找出匹配的insights
+                        matched_insights = []
+                        if result.get('insights'):
+                            for idx, insight in enumerate(result['insights']):
+                                if search_text.lower() in insight.lower():
+                                    matched_insights.append({
+                                        'index': idx,
+                                        'text': insight,
+                                        'match_score': insight.lower().count(search_text.lower())
+                                    })
+                        
+                        result['matched_insights'] = matched_insights
+                        result['search_field'] = "insights_text"
+                        result['search_table'] = table_name
+                        source_results.append(result)
+                    
+                    return source_results
+                    
+                except Exception as e:
+                    logger.error(f"搜索表 {table_name} 的insights文本失败: {e}")
+                    return []
+            
+            # 并行搜索所有source_id
+            logger.info(f"并行搜索{len(source_ids)}个source_id的chunk insights文本...")
+            search_tasks = [search_single_source_insight_text(source_id) for source_id in source_ids]
+            search_results = await asyncio.gather(*search_tasks, return_exceptions=True)
+            
+            # 合并所有结果
+            all_results = []
+            for result in search_results:
+                if not isinstance(result, Exception) and result:
+                    all_results.extend(result)
+            
+            # 按相关度排序
+            all_results.sort(key=lambda x: x.get('relevance_score', 0), reverse=True)
+            
+            logger.info(f"chunk insights文本搜索完成，返回{len(all_results)}个结果")
+            return all_results
+            
+        except Exception as e:
+            logger.error(f"chunk insights文本搜索失败: {e}")
+            return []
+
+    async def search_chunks_by_text(self,
                              source_ids: List[str],
                              query_text: str,
                              search_fields: List[str] = ["summary", "chunk_markdown_content"],
@@ -622,9 +948,9 @@ class DBRetriever:
             List[Dict]: 搜索结果列表
         """
         try:
-            all_results = []
-            
-            for source_id in source_ids:
+            # 创建每个source_id的并行搜索任务
+            async def search_single_source_text(source_id: str):
+                """搜索单个source_id的chunk文本"""
                 try:
                     # 生成表名
                     clean_source_id = source_id.replace('-', '_').replace('.', '_')
@@ -640,7 +966,7 @@ class DBRetriever:
                     if cursor.fetchone()['count'] == 0:
                         logger.warning(f"表 {table_name} 不存在，跳过")
                         cursor.close()
-                        continue
+                        return []
                     
                     # 构建全文搜索SQL
                     search_conditions = []
@@ -657,13 +983,17 @@ class DBRetriever:
                     LIMIT %s
                     """
                     
+                    # 确保query_text是字符串格式
+                    search_text = str(query_text) if not isinstance(query_text, str) else query_text
+                    
                     # 执行搜索
-                    params = [query_text] * (len(search_fields) * 2) + [top_k]
+                    params = [search_text] * (len(search_fields) * 2) + [top_k]
                     cursor.execute(search_sql, params)
                     results = cursor.fetchall()
                     cursor.close()
                     
                     # 处理结果
+                    source_results = []
                     for result in results:
                         # 解析JSON字段
                         if result.get('insights') and isinstance(result['insights'], str):
@@ -673,11 +1003,24 @@ class DBRetriever:
                         
                         result['search_field'] = "fulltext"
                         result['search_table'] = table_name
-                        all_results.append(result)
-                
+                        source_results.append(result)
+                    
+                    return source_results
+                    
                 except Exception as e:
                     logger.error(f"搜索表 {table_name} 失败: {e}")
-                    continue
+                    return []
+            
+            # 并行搜索所有source_id
+            logger.info(f"并行搜索{len(source_ids)}个source_id的chunk文本...")
+            search_tasks = [search_single_source_text(source_id) for source_id in source_ids]
+            search_results = await asyncio.gather(*search_tasks, return_exceptions=True)
+            
+            # 合并所有结果
+            all_results = []
+            for result in search_results:
+                if not isinstance(result, Exception) and result:
+                    all_results.extend(result)
             
             # 按相关度排序
             all_results.sort(key=lambda x: x.get('relevance_score', 0), reverse=True)
@@ -689,10 +1032,10 @@ class DBRetriever:
             logger.error(f"chunk全文搜索失败: {e}")
             return []
     
-    def comprehensive_search(self,
+    async def comprehensive_search(self,
                            query_vector: List[float],
                            query_text: str = None,
-                           doc_top_k: int = 5,
+                           doc_top_k: int = 50,
                            chunk_top_k: int = 10,
                            final_top_k: int = 20) -> Dict[str, Any]:
         """
@@ -764,28 +1107,32 @@ class DBRetriever:
         }
         
         try:
-            # ============ 第一阶段：文档级多策略搜索 ============
-            logger.info("开始文档级搜索...")
+            # ============ 第一阶段：文档级多策略并行搜索 ============
+            logger.info("开始文档级并行搜索...")
             
-            # 策略1：向量搜索文档摘要
-            # 基于文档摘要向量进行语义相似度搜索
-            doc_vector_results = self.search_documents_by_vector(
-                query_vector, "summary_embedding", doc_top_k
-            )
-            
-            # 策略2：insights向量搜索
-            # 在文档的核心观点/洞察中搜索相关内容
-            doc_insights_results = self.search_documents_by_insights(
-                query_vector, doc_top_k
-            )
+            # 创建文档级搜索任务列表
+            doc_search_tasks = [
+                # 策略1：向量搜索文档摘要
+                self.search_documents_by_vector(query_vector, "summary_embedding", doc_top_k),
+                # 策略2：insights向量搜索
+                self.search_documents_by_insights(query_vector, doc_top_k)
+            ]
             
             # 策略3：全文搜索（条件性启用）
-            # 如果提供了查询文本，启用关键词精确匹配
-            doc_text_results = []
             if query_text:
-                doc_text_results = self.search_documents_by_text(
-                    query_text, top_k=doc_top_k
+                doc_search_tasks.append(
+                    self.search_documents_by_text(query_text, top_k=doc_top_k)
                 )
+            
+            # 并行执行所有文档级搜索
+            doc_search_results = await asyncio.gather(*doc_search_tasks, return_exceptions=True)
+            
+            # 处理搜索结果，过滤异常
+            doc_vector_results = doc_search_results[0] if not isinstance(doc_search_results[0], Exception) else []
+            doc_insights_results = doc_search_results[1] if not isinstance(doc_search_results[1], Exception) else []
+            doc_text_results = []
+            if query_text and len(doc_search_results) > 2:
+                doc_text_results = doc_search_results[2] if not isinstance(doc_search_results[2], Exception) else []
             
             # ============ 文档结果合并与去重 ============
             # 使用字典结构按file_id去重，保留最高分的版本
@@ -807,35 +1154,51 @@ class DBRetriever:
             ), reverse=True)
             result['relevant_documents'] = relevant_docs[:doc_top_k]
             
-            # ============ 第二阶段：chunk级精确搜索 ============
+            # ============ 第二阶段：chunk级并行精确搜索 ============
             if relevant_docs:
-                logger.info(f"在{len(relevant_docs)}个相关文档中搜索chunks...")
+                logger.info(f"在{len(relevant_docs)}个相关文档中并行搜索chunks...")
                 
                 # 提取文档ID，准备chunk搜索
                 # 注意：file_id即为source_id，用于定位对应的chunk表和集合
-                source_ids = []
-                for doc in relevant_docs:
-                    file_id = doc['file_id']
-                    source_ids.append(file_id)
+                source_ids = [doc['file_id'] for doc in relevant_docs]
                 
-                # 策略1：chunk向量搜索
-                # 在已筛选的文档内部，进行更精细的语义搜索
-                chunk_vector_results = self.search_chunks_by_vector(
-                    source_ids, query_vector, "summary_embedding", chunk_top_k
-                )
+                # 创建chunk级搜索任务列表
+                chunk_search_tasks = [
+                    # 策略1：chunk向量搜索
+                    self.search_chunks_by_vector(source_ids, query_vector, "summary_embedding", chunk_top_k),
+                    # 策略2：chunk insights向量搜索
+                    self.search_chunks_by_insight_vector(source_ids, query_vector, chunk_top_k)
+                ]
                 
-                # 策略2：chunk全文搜索（条件性启用）
-                # 如果有查询文本，在chunk内容中进行关键词搜索
-                chunk_text_results = []
+                # 策略3和4：文本搜索（条件性启用）
                 if query_text:
-                    chunk_text_results = self.search_chunks_by_text(
-                        source_ids, query_text, top_k=chunk_top_k
-                    )
+                    chunk_search_tasks.extend([
+                        # 策略3：chunk全文搜索
+                        self.search_chunks_by_text(source_ids, query_text, top_k=chunk_top_k),
+                        # 策略4：chunk insights文本搜索
+                        self.search_chunks_by_insight_text(source_ids, query_text, chunk_top_k)
+                    ])
+                
+                # 并行执行所有chunk级搜索
+                logger.info(f"启动{len(chunk_search_tasks)}个并行chunk搜索任务...")
+                chunk_search_results = await asyncio.gather(*chunk_search_tasks, return_exceptions=True)
+                
+                # 处理搜索结果，过滤异常
+                chunk_vector_results = chunk_search_results[0] if not isinstance(chunk_search_results[0], Exception) else []
+                chunk_insights_vector_results = chunk_search_results[1] if not isinstance(chunk_search_results[1], Exception) else []
+                
+                chunk_text_results = []
+                chunk_insights_text_results = []
+                if query_text and len(chunk_search_results) > 2:
+                    chunk_text_results = chunk_search_results[2] if not isinstance(chunk_search_results[2], Exception) else []
+                    if len(chunk_search_results) > 3:
+                        chunk_insights_text_results = chunk_search_results[3] if not isinstance(chunk_search_results[3], Exception) else []
                 
                 # ============ chunk结果合并与去重 ============
                 # 同样使用字典去重，保留最高分的chunk版本
                 all_chunk_results = {}
-                for chunk in chunk_vector_results + chunk_text_results:
+                for chunk in (chunk_vector_results + chunk_insights_vector_results + 
+                             chunk_text_results + chunk_insights_text_results):
                     chunk_id = chunk['chunk_id']
                     
                     # 智能评分：优先考虑similarity_score，其次relevance_score
@@ -865,7 +1228,7 @@ class DBRetriever:
             result['search_summary'] = {
                 'total_documents_found': len(result['relevant_documents']),    # 第一阶段发现的文档数
                 'total_chunks_found': len(result['relevant_chunks']),         # 第二阶段发现的chunk数
-                'search_methods_used': ['vector_search'],                     # 使用的搜索方法列表
+                'search_methods_used': ['vector_search', 'insights_vector_search'],  # 使用的搜索方法列表
                 'query_vector_dim': len(query_vector),                       # 查询向量维度
                 'two_stage_search': True,                                     # 标识使用了两阶段搜索
                 'document_sources': [doc['file_id'] for doc in result['relevant_documents']]  # 相关文档ID列表
@@ -873,7 +1236,7 @@ class DBRetriever:
             
             # 如果使用了全文搜索，添加相关信息
             if query_text:
-                result['search_summary']['search_methods_used'].append('fulltext_search')
+                result['search_summary']['search_methods_used'].extend(['fulltext_search', 'insights_text_search'])
                 result['search_summary']['query_text'] = query_text
                 result['search_summary']['hybrid_search'] = True  # 标识为混合搜索
             
@@ -882,6 +1245,221 @@ class DBRetriever:
             
         except Exception as e:
             logger.error(f"综合搜索失败: {e}")
+            # 即使出错也返回已有结果，提高系统容错性
+            return result
+    
+    async def comprehensive_search_without_docs(
+        self,
+        doc_ids: List[str],
+        query_vector: List[float],
+        query_text: str = None,
+        chunk_top_k: int = 10,
+    ) -> Dict[str, Any]:
+        """
+        无文档级搜索的综合检索 - 直接在指定文档中搜索chunks
+        =====================================================
+        
+        【核心思想】
+        跳过文档级搜索阶段，直接在指定的文档ID列表中进行chunk级搜索：
+        1. 接受预先确定的文档ID列表（可能来自其他搜索或推荐系统）
+        2. 直接在这些文档的chunks中进行多策略并行搜索
+        3. 返回最相关的chunk结果
+        
+        【适用场景】
+        - 已知相关文档范围，需要精确定位具体内容
+        - 二次搜索：在初次搜索结果的基础上进一步细化
+        - 推荐系统：基于用户历史或协同过滤确定的文档集合
+        - 分类搜索：在特定类别或标签的文档中搜索
+        - 性能优化：当文档范围已确定时，避免不必要的文档级搜索
+        
+        【搜索策略】
+        使用与comprehensive_search相同的chunk级搜索策略：
+        1. chunk向量搜索（summary_embedding）
+        2. chunk insights向量搜索（更精细的语义匹配）
+        3. chunk全文搜索（条件性启用）
+        4. chunk insights文本搜索（条件性启用）
+        
+        【性能优势】
+        - 跳过文档级搜索：节省200-600ms
+        - 直接chunk搜索：减少不必要的计算
+        - 并行处理：多个文档的chunks同时搜索
+        - 精确范围：只在相关文档中搜索，提高准确性
+        
+        Args:
+            doc_ids: 指定要搜索的文档ID列表
+                - 这些ID对应数据库中的file_id字段
+                - 也是source_id，用于定位对应的chunk表和集合
+                - 建议数量：5-50个，过多可能影响性能
+                
+            query_vector: 查询向量（必需）
+                - 用于语义相似度计算
+                - 维度必须与存储的向量一致（通常1536维）
+                
+            query_text: 查询文本（可选）
+                - 如果提供，会启用全文搜索和insights文本搜索
+                - 建议提供，能显著提高搜索覆盖度
+                
+            chunk_top_k: 每个文档的chunk搜索数量
+                - 在每个指定文档中搜索的chunk数量
+                - 建议5-20，根据文档大小和需求调整
+                
+            final_top_k: 最终返回的chunk数量
+                - 合并所有结果后的最终返回数量
+                - 建议10-50，根据应用需求调整
+                
+        Returns:
+            Dict: 搜索结果包含：
+                - relevant_documents: 指定的文档信息列表
+                - relevant_chunks: 相关chunk列表（最终答案候选）
+                - search_summary: 搜索过程统计信息
+        
+        【使用示例】
+        # 场景1：基于推荐系统的文档ID
+        recommended_docs = ["doc_001", "doc_015", "doc_032"]
+        results = await retriever.comprehensive_search_without_docs(
+            doc_ids=recommended_docs,
+            query_vector=embedding_vector,
+            query_text="机器学习算法",
+            chunk_top_k=15,
+            final_top_k=30
+        )
+        
+        # 场景2：基于分类的文档搜索
+        ai_paper_docs = get_ai_papers_doc_ids()  # 从分类系统获取
+        results = await retriever.comprehensive_search_without_docs(
+            doc_ids=ai_paper_docs,
+            query_vector=query_embedding
+        )
+        """
+        # 初始化搜索结果结构
+        result = {
+            'relevant_documents': [],    # 指定的文档列表
+            'relevant_chunks': [],       # 搜索到的相关chunk列表
+            'search_summary': {}         # 搜索过程统计信息
+        }
+        
+        try:
+            # ============ 第一阶段：获取指定文档的基本信息 ============
+            logger.info(f"获取{len(doc_ids)}个指定文档的基本信息...")
+            
+            if doc_ids:
+                # 从MySQL获取指定文档的详细信息
+                placeholders = ', '.join(['%s'] * len(doc_ids))
+                query_sql = f"""
+                SELECT id, file_id, file_name, summary, insights, key_words, 
+                       processing_status, created_at
+                FROM rag_documents 
+                WHERE file_id IN ({placeholders})
+                """
+                
+                cursor = self.mysql_conn.cursor(dictionary=True)
+                cursor.execute(query_sql, doc_ids)
+                docs = cursor.fetchall()
+                cursor.close()
+                
+                # 解析JSON字段
+                for doc in docs:
+                    if doc.get('insights') and isinstance(doc['insights'], str):
+                        doc['insights'] = json.loads(doc['insights'])
+                    if doc.get('key_words') and isinstance(doc['key_words'], str):
+                        doc['key_words'] = json.loads(doc['key_words'])
+                    doc['search_field'] = "specified_docs"  # 标记为指定文档
+                
+                result['relevant_documents'] = docs
+                
+                # 使用实际存在的文档ID作为source_ids
+                existing_doc_ids = [doc['file_id'] for doc in docs]
+                missing_doc_ids = set(doc_ids) - set(existing_doc_ids)
+                if missing_doc_ids:
+                    logger.warning(f"以下文档ID不存在: {missing_doc_ids}")
+                
+                # ============ 第二阶段：chunk级并行精确搜索 ============
+                if existing_doc_ids:
+                    logger.info(f"在{len(existing_doc_ids)}个文档中并行搜索chunks...")
+                    
+                    # 创建chunk级搜索任务列表
+                    chunk_search_tasks = [
+                        # 策略1：chunk向量搜索
+                        self.search_chunks_by_vector(existing_doc_ids, query_vector, "summary_embedding", chunk_top_k),
+                        # 策略2：chunk insights向量搜索
+                        self.search_chunks_by_insight_vector(existing_doc_ids, query_vector, chunk_top_k)
+                    ]
+                    
+                    # 策略3和4：文本搜索（条件性启用）
+                    if query_text:
+                        chunk_search_tasks.extend([
+                            # 策略3：chunk全文搜索
+                            self.search_chunks_by_text(existing_doc_ids, query_text, top_k=chunk_top_k),
+                            # 策略4：chunk insights文本搜索
+                            self.search_chunks_by_insight_text(existing_doc_ids, query_text, chunk_top_k)
+                        ])
+                    
+                    # 并行执行所有chunk级搜索
+                    logger.info(f"启动{len(chunk_search_tasks)}个并行chunk搜索任务...")
+                    chunk_search_results = await asyncio.gather(*chunk_search_tasks, return_exceptions=True)
+                    
+                    # 处理搜索结果，过滤异常
+                    chunk_vector_results = chunk_search_results[0] if not isinstance(chunk_search_results[0], Exception) else []
+                    chunk_insights_vector_results = chunk_search_results[1] if not isinstance(chunk_search_results[1], Exception) else []
+                    
+                    chunk_text_results = []
+                    chunk_insights_text_results = []
+                    if query_text and len(chunk_search_results) > 2:
+                        chunk_text_results = chunk_search_results[2] if not isinstance(chunk_search_results[2], Exception) else []
+                        if len(chunk_search_results) > 3:
+                            chunk_insights_text_results = chunk_search_results[3] if not isinstance(chunk_search_results[3], Exception) else []
+                    
+                    # ============ chunk结果合并与去重 ============
+                    # 使用字典去重，保留最高分的chunk版本
+                    all_chunk_results = {}
+                    for chunk in (chunk_vector_results + chunk_insights_vector_results + 
+                                 chunk_text_results + chunk_insights_text_results):
+                        chunk_id = chunk['chunk_id']
+                        
+                        # 智能评分：优先考虑similarity_score，其次relevance_score
+                        existing_score = max(
+                            all_chunk_results.get(chunk_id, {}).get('similarity_score', 0),
+                            all_chunk_results.get(chunk_id, {}).get('relevance_score', 0)
+                        )
+                        current_score = max(
+                            chunk.get('similarity_score', 0),
+                            chunk.get('relevance_score', 0)
+                        )
+                        
+                        if chunk_id not in all_chunk_results or current_score > existing_score:
+                            all_chunk_results[chunk_id] = chunk
+                    
+                    # 最终排序和截取
+                    final_chunks = list(all_chunk_results.values())
+                    final_chunks.sort(key=lambda x: max(
+                        x.get('similarity_score', 0), 
+                        x.get('relevance_score', 0)
+                    ), reverse=True)
+                    result['relevant_chunks'] = final_chunks
+            
+            # ============ 生成搜索报告 ============
+            result['search_summary'] = {
+                'total_documents_specified': len(doc_ids),                    # 指定的文档数
+                'total_documents_found': len(result['relevant_documents']),   # 实际找到的文档数
+                'total_chunks_found': len(result['relevant_chunks']),         # 找到的chunk数
+                'search_methods_used': ['vector_search', 'insights_vector_search'],  # 使用的搜索方法
+                'query_vector_dim': len(query_vector),                       # 查询向量维度
+                'direct_chunk_search': True,                                  # 标识为直接chunk搜索
+                'skipped_document_search': True,                             # 标识跳过了文档级搜索
+                'specified_doc_ids': doc_ids                                  # 指定的文档ID列表
+            }
+            
+            # 如果使用了全文搜索，添加相关信息
+            if query_text:
+                result['search_summary']['search_methods_used'].extend(['fulltext_search', 'insights_text_search'])
+                result['search_summary']['query_text'] = query_text
+                result['search_summary']['hybrid_search'] = True
+            
+            logger.info(f"无文档级搜索的综合检索完成: {result['search_summary']}")
+            return result
+            
+        except Exception as e:
+            logger.error(f"无文档级搜索的综合检索失败: {e}")
             # 即使出错也返回已有结果，提高系统容错性
             return result
     
@@ -921,7 +1499,7 @@ class DBRetriever:
             logger.error(f"关闭数据库连接失败: {e}")
 
 
-def create_retriever(mysql_config: Dict = None, milvus_config: Dict = None) -> DBRetriever:
+async def create_retriever(mysql_config: Dict = None, milvus_config: Dict = None) -> DBRetriever:
     """
     创建检索器实例的便捷函数
     ========================

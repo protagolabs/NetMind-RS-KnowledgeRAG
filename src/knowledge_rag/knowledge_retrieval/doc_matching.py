@@ -109,6 +109,16 @@ async def doc_matching(user_question: str, doc_summary: str, doc_insights: str) 
     
     return result
 
-
+async def make_decision_of_doc_matching(
+    user_question: str,
+    doc_dic: dict
+) -> DocMatchingResultWithIsRelated:
+    
+    result = await doc_matching(user_question, doc_dic["summary"], doc_dic["insights"])
+    
+    if result.is_related:
+        return doc_dic
+    else:
+        return None
     
     

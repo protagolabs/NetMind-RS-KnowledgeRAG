@@ -12,7 +12,7 @@ from openai import AsyncOpenAI
 from agents import Agent, Runner, OpenAIChatCompletionsModel
 from pydantic import BaseModel
 
-from src.knowledge_rag.config import OPENAI_API_KEY
+from knowledge_rag.config import OPENAI_API_KEY
 
 
 class Plan(BaseModel):

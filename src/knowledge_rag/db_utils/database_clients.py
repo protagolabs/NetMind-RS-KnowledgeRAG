@@ -22,7 +22,7 @@ from mysql.connector import Error
 
 # Milvus 客户端
 try:
-    from pymilvus import connections, Collection, utility, FieldSchema, CollectionSchema, DataType
+    from pymilvus import connections, Collection, utility, FieldSchema, CollectionSchema, DataType # type: ignore
     MILVUS_AVAILABLE = True
 except ImportError:
     MILVUS_AVAILABLE = False

@@ -48,19 +48,19 @@ import logging
 from typing import Dict, List, Any, Optional
 from pathlib import Path
 import mysql.connector
-from tqdm import tqdm
+from tqdm.auto import tqdm # type: ignore
 
 # 添加项目根目录到Python路径
 project_root = Path(__file__).parent.parent.parent.parent
 sys.path.append(str(project_root))
 
-from src.knowledge_rag.config import KnowledgeRAGSettings
-from src.knowledge_rag.db_utils.rag_schema_config import RAGSchemaConfig
-from src.knowledge_rag.db_utils.database_clients import MySQLClient, MilvusClient
+from knowledge_rag.config import KnowledgeRAGSettings
+from knowledge_rag.db_utils.rag_schema_config import RAGSchemaConfig
+from knowledge_rag.db_utils.database_clients import MySQLClient, MilvusClient
 
 # Milvus连接
 try:
-    from pymilvus import connections
+    from pymilvus import connections # type: ignore
     MILVUS_AVAILABLE = True
 except ImportError:
     MILVUS_AVAILABLE = False

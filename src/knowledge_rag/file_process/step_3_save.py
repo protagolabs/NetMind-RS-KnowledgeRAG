@@ -92,13 +92,16 @@ class IDGenerator:
 
 
 async def process_document(
-    file_path: str, file_name: str
+    file_path: str=None, file_name: str=None, markdown_document: str = None, num_workers: int=5
 ) -> Tuple[DocAnalysis, List[ChunkAnalysis]]:
     """处理单个文档，返回文档分析和所有块分析结果"""
 
-    # 读取文档内容
-    with open(file_path, "r", encoding='utf-8') as f:
-        markdown_document = f.read()
+    if not markdown_document:
+        # 读取文档内容
+        with open(file_path, "r", encoding='utf-8') as f:
+            markdown_document = f.read()
+    else:
+        markdown_document = markdown_document
 
     # 生成文档ID
     doc_id = IDGenerator.generate_doc_id(file_name, markdown_document)
@@ -118,7 +121,7 @@ async def process_document(
     chunks = chunk_markdown_file(markdown_document)
 
     # 并行分析所有块，使用5个worker
-    semaphore = asyncio.Semaphore(5)  # 限制并发数为5
+    semaphore = asyncio.Semaphore(num_workers)  # 限制并发数为5
 
     async def process_single_chunk(i: int, chunk: str) -> ChunkAnalysis:
         async with semaphore:

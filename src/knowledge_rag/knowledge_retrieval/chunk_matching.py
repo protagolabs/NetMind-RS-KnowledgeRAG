@@ -8,6 +8,7 @@
 
 
 from copy import deepcopy
+from typing import List
 from pydantic import BaseModel
 
 from openai import AsyncOpenAI
@@ -108,6 +109,15 @@ async def chunk_matching(user_question: str, chunk_summary: str, chunk_insights:
     
     return result
 
-
+async def make_decision_of_chunk_matching(
+    query_text: str,
+    chunk: dict
+) -> dict:
+    
+    result = await chunk_matching(query_text, chunk["summary"], chunk["insights"])
+    if result.is_related:
+        return chunk
+    else:
+        return None
 
 
