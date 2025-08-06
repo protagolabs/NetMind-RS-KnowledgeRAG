@@ -135,7 +135,7 @@ python start_server.py --host 0.0.0.0
       "key_words": ["关键词1", "关键词2"],
       "insights": ["洞察1", "洞察2"],
       "doc_markdown_content": "# 文档标题\n\n...",
-      "source_id": "paper_set_1"
+      "source_id": "llm_papers"
     }
   ],
   "chunk_analysis_list": [
@@ -145,7 +145,7 @@ python start_server.py --host 0.0.0.0
       "chunk_content": "chunk 内容...",
       "chunk_summary": "chunk 摘要...",
       "chunk_insights": ["chunk 洞察"],
-      "source_id": "paper_set_1"
+      "source_id": "llm_papers"
     }
   ],
   "total_docs": 2,
@@ -310,8 +310,8 @@ python start_server.py --host 0.0.0.0
 **请求体**:
 ```json
 {
-  "data_set_type": "paper_set_1",
-  "query": "深度学习在计算机视觉中的应用"
+  "data_set_type": "llm_papers",
+  "query": "What is LLM?"
 }
 ```
 
