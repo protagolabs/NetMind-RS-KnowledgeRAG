@@ -433,12 +433,14 @@ python start_server.py --host 0.0.0.0
       "chunk_id": "chunk_001",
       "summary": "",
       "insights": "",
+      "chunk_markdown_content": "",
       "key_words": [],
     },
     {
       "chunk_id": "chunk_002", 
       "summary": "",
       "insights": "",
+      "chunk_markdown_content": "",
       "key_words": []
     }
   ]
