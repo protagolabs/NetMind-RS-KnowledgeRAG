@@ -3,7 +3,36 @@
 @author: Bin Liang
 @date: 2025-07-31
 @description: 
-
+    文档片段匹配模块 - 细粒度内容相关性判断
+    
+    本模块负责在文档级筛选之后，对文档片段（chunks）进行更精细的
+    相关性判断，确保检索到的内容片段与用户查询高度相关。
+    
+    核心功能：
+    1. 片段相关性分析：基于chunk摘要和洞察判断相关性
+    2. 细粒度匹配：比文档级匹配更精确的内容判断
+    3. 独立判断：每个片段独立分析，不依赖其他片段
+    4. 结构化输出：标准化的匹配结果格式
+    
+    技术特点：
+    - 专注单个片段的内容分析
+    - 避免跨片段的信息聚合假设
+    - 基于包含性原则的精确判断
+    - 支持细粒度的相关性评分
+    
+    应用场景：
+    - 二阶段检索的第二阶段
+    - 精确内容匹配
+    - 答案生成的上下文筛选
+    - 内容质量评估
+    
+    与文档匹配的区别：
+    - 文档匹配：粗粒度，基于整体文档信息
+    - 片段匹配：细粒度，基于具体片段内容
+    - 片段匹配更精确，但计算成本更高
+    
+    工作流程：
+    用户查询 + 片段信息 → LLM分析 → 相关性判断 → 结构化结果
 """
 
 
@@ -16,21 +45,69 @@ from pydantic import BaseModel
 from openai import AsyncOpenAI
 from agents import Agent, Runner, OpenAIChatCompletionsModel, ModelSettings
 
-from knowledge_rag.config import OPENAI_API_KEY
+from knowledge_rag.config import OPENAI_API_KEY, MATCHING_MODEL
 
 logger = logging.getLogger(__name__)
 
 
 class ChunkMatchingResult(BaseModel):
-    """ 
-    文档片段匹配结果
+    """文档片段匹配结果基础模型。
+    
+    用于存储文档片段与用户查询的匹配分析结果，提供详细的
+    分析过程和量化评分。
+    
+    Attributes:
+        analysis_detail: 详细的分析过程和判断依据
+            - 描述为什么片段与查询相关或不相关
+            - 基于片段摘要和洞察的具体证据
+            - 专注于单个片段的内容分析
+            - 不依赖其他片段或完整文档的信息
+            
+        score: 相关性评分（0-100）
+            - 0-30：不相关或弱相关
+            - 31-70：中等相关性
+            - 71-100：高度相关
+            - 基于片段内容的包含性和语义匹配度
+    
+    特点：
+        - 独立性：每个片段独立分析
+        - 精确性：比文档级匹配更精确
+        - 专注性：只关注单个片段的内容
+    
+    用途：
+        - 精确内容筛选的基础数据
+        - 片段级排序的依据
+        - 答案生成的上下文质量评估
     """
     analysis_detail: str
     score: int
     
 class ChunkMatchingResultWithIsRelated(ChunkMatchingResult):
-    """ 
-    文档片段匹配结果，包含是否相关
+    """包含二元判断的文档片段匹配结果模型。
+    
+    继承自ChunkMatchingResult，添加了明确的二元相关性判断，
+    便于快速筛选高质量的文档片段。
+    
+    新增字段：
+        is_related: 二元相关性判断
+            - True: 片段包含与查询直接相关的信息
+            - False: 片段不包含相关信息
+            - 基于片段内容的严格包含性判断
+    
+    继承字段：
+        analysis_detail: 详细分析过程
+        score: 相关性评分
+    
+    判断标准：
+        - 比文档级判断更严格
+        - 要求片段内容直接回答或涉及查询
+        - 避免间接或模糊的相关性
+    
+    用途：
+        - 高质量片段筛选
+        - 答案生成的直接输入
+        - 精确匹配的决策依据
+        - 检索质量的最终保证
     """
     is_related: bool
 
@@ -93,7 +170,7 @@ async def chunk_matching(user_question: str, chunk_summary: str, chunk_insights:
         name="chunk_matching",
         instructions=prompt,
         model=OpenAIChatCompletionsModel(
-            model="gpt-4o-mini",
+            model=MATCHING_MODEL,
             openai_client=client,
         ),
         model_settings=ModelSettings(temperature=0.0),

@@ -1581,7 +1581,7 @@ async def main():
         knowledge_rag_api_url="http://71.178.110.3:8955",
         model_name="gpt-4.1",  # 使用更便宜的模型进行测试
         temperature=0.1,
-        max_tokens=4000,
+        max_tokens=100000,
         max_queries=3  # 减少查询数量进行测试
     )
     

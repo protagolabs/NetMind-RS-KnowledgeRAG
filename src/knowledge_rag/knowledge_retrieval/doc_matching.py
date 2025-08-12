@@ -3,7 +3,31 @@
 @author: bin.liang
 @date: 2025-07-31
 @description: 
-    我们使用 LLM 来判断用户的问题是否与文档相关，返回结构化信息来判断是否相关。
+    文档匹配模块 - 智能文档相关性判断
+    
+    本模块使用大语言模型（LLM）进行智能的文档-查询相关性判断，
+    是RAG系统中的关键组件，负责过滤和筛选与用户查询相关的文档。
+    
+    核心功能：
+    1. 文档相关性分析：基于文档摘要和洞察判断与查询的相关性
+    2. 结构化输出：返回标准化的相关性判断结果
+    3. 证据驱动：基于文档内容提供判断依据
+    4. 二元决策：明确的相关/不相关判断
+    
+    技术特点：
+    - 使用OpenAI GPT模型进行语义理解
+    - Pydantic模型确保输出结构一致性
+    - 基于包含性原则的判断逻辑
+    - 支持细粒度的相关性评分
+    
+    应用场景：
+    - 文档预筛选：在大量文档中快速找到相关文档
+    - 检索优化：提高检索精确度和召回率
+    - 内容过滤：避免无关文档干扰答案生成
+    - 智能推荐：基于相关性推荐相关文档
+    
+    工作流程：
+    用户查询 + 文档信息 → LLM分析 → 相关性判断 → 结构化结果
 """
 
 
@@ -13,19 +37,60 @@ from pydantic import BaseModel
 from openai import AsyncOpenAI
 from agents import Agent, Runner, OpenAIChatCompletionsModel, ModelSettings
 
-from knowledge_rag.config import OPENAI_API_KEY
+from knowledge_rag.config import OPENAI_API_KEY, MATCHING_MODEL
 
 
 class DocMatchingResult(BaseModel):
-    """ 
-    文档匹配结果
+    """文档匹配结果基础模型。
+    
+    用于存储文档与用户查询的匹配分析结果，提供详细的
+    分析过程和量化评分。
+    
+    Attributes:
+        analysis_detail: 详细的分析过程和判断依据
+            - 描述为什么文档与查询相关或不相关
+            - 基于文档摘要和洞察的具体证据
+            - 帮助理解匹配决策的逻辑
+            
+        score: 相关性评分（0-100）
+            - 0-30：不相关或弱相关
+            - 31-70：中等相关性
+            - 71-100：高度相关
+            - 基于内容包含性和语义相似度
+    
+    用途：
+        - 文档筛选决策的基础数据
+        - 相关性排序的依据
+        - 匹配质量的评估指标
     """
     analysis_detail: str
     score: int
     
 class DocMatchingResultWithIsRelated(DocMatchingResult):
-    """ 
-    文档匹配结果，包含是否相关
+    """包含二元判断的文档匹配结果模型。
+    
+    继承自DocMatchingResult，添加了明确的二元相关性判断，
+    便于快速筛选和过滤文档。
+    
+    新增字段：
+        is_related: 二元相关性判断
+            - True: 文档包含与查询相关的信息
+            - False: 文档不包含相关信息
+            - 基于包含性原则的明确判断
+    
+    继承字段：
+        analysis_detail: 详细分析过程
+        score: 相关性评分
+    
+    决策逻辑：
+        - 通常score >= 31时，is_related = True
+        - score < 31时，is_related = False
+        - 具体阈值可根据应用场景调整
+    
+    用途：
+        - 文档预筛选的直接依据
+        - 布尔逻辑判断的基础
+        - 二阶段检索的第一阶段结果
     """
     is_related: bool
 
@@ -90,7 +155,7 @@ async def doc_matching(user_question: str, doc_summary: str, doc_insights: str) 
         name="doc_matching",
         instructions=prompt,
         model=OpenAIChatCompletionsModel(
-            model="gpt-4o-mini",
+            model=MATCHING_MODEL,
             openai_client=client,
         ),
         model_settings=ModelSettings(temperature=0.0),

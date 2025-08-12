@@ -3,35 +3,53 @@ name = "netmind-rs-knowledgerag"
 version = "0.1.0"
 description = "NetMind Research KnowledgeRAG API Server"
 readme = "README.md"
-requires-python = ">=3.8.1"
+requires-python = ">=3.12.1"
 dependencies = [
     # Web Framework
-    "fastapi>=0.104.0",
-    "uvicorn[standard]>=0.24.0",
+    "fastapi>=0.116.1",
+    "uvicorn[standard]>=0.35.0",
     
     # Data Validation and Serialization
-    "pydantic>=2.5.0",
+    "pydantic>=2.11.7",
+    "pydantic-settings>=2.10.1",
     
     # Logging
-    "loguru>=0.7.2",
+    "loguru>=0.7.3",
     
     # Configuration Management
-    "python-dotenv>=1.0.0",
+    "python-dotenv>=1.1.1",
     
     # Database Connectors
-    "mysql-connector-python>=8.2.0",
-    "pymilvus>=2.3.0",
+    "mysql-connector-python>=9.3.0",
+    "pymilvus>=2.5.12",
+    "sqlalchemy>=2.0.42",
     
     # Scientific Computing
-    "numpy>=1.24.0",
+    "numpy>=2.3.1",
+    "pandas>=2.3.1",
     
     # HTTP Client
-    "httpx>=0.25.0",
+    "httpx>=0.28.1",
     
-    # Additional dependencies
+    # AI and ML Libraries
+    "openai>=1.97.1",
+    "openai-agents>=0.2.5",
     "sentence-transformers>=2.2.0",
-    "openai>=1.3.0",
+    
+    # Text Processing
+    "langchain>=0.3.27",
+    "langchain-core>=0.3.72",
+    "langchain-community>=0.3.27",
+    "langchain-text-splitters>=0.3.9",
+    
+    # File and Data Processing
     "aiofiles>=23.2.0",
+    "python-multipart>=0.0.20",
+    "tqdm>=4.67.1",
+
+
+    "traceloop-sdk>=0.44.1",
+
 ]
 
 [project.optional-dependencies]

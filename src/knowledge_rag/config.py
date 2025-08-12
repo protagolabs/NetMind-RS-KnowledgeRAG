@@ -1,7 +1,46 @@
 """
 KnowledgeRAG 配置管理模块
-作者: XYZ-Algorithm-Team
-用途: 集中管理配置参数，读取环境变量，提供配置单例
+========================
+
+本模块提供了KnowledgeRAG系统的统一配置管理功能，支持多种配置来源
+和环境适配，确保系统在不同环境下的灵活部署和运行。
+
+核心功能：
+1. 环境变量管理：自动加载.env文件和系统环境变量
+2. 配置分类：按功能模块组织配置（数据库、向量库、存储等）
+3. 配置验证：确保配置参数的有效性和完整性
+4. 单例模式：提供全局统一的配置访问接口
+5. 环境适配：支持开发、测试、生产等多种环境
+
+配置分类：
+- DatabaseSettings: MySQL数据库连接和配置
+- MilvusSettings: Milvus向量数据库配置
+- ObjectStoreSettings: 对象存储（本地文件系统）配置
+- EmbeddingSettings: 向量嵌入模型配置
+- KnowledgeRAGSettings: 系统主配置，整合所有子配置
+
+技术特点：
+- 基于dataclass的类型安全配置
+- 支持环境变量覆盖默认值
+- 自动配置验证和错误提示
+- 敏感信息保护（密码隐藏）
+- 灵活的配置重载机制
+
+使用场景：
+- 系统初始化和配置加载
+- 多环境部署配置管理
+- 数据库连接池配置
+- 向量模型参数调优
+- 存储路径和权限管理
+
+环境变量支持：
+- OPENAI_API_KEY: OpenAI API密钥
+- MYSQL_*: MySQL数据库配置
+- MILVUS_*: Milvus向量库配置
+- EMBEDDING_*: 嵌入模型配置
+- 其他系统级配置
+
+作者: NetMind-RS-KnowledgeRAG Team
 """
 
 import os
@@ -23,10 +62,44 @@ except ImportError:
 logger = logging.getLogger(__name__)
 
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+MATCHING_MODEL = os.getenv("MATCHING_MODEL", "gpt-4.1")
+INTENT_RECOGNITION_MODEL_NAME = os.getenv("INTENT_RECOGNITION_MODEL_NAME", "gpt-4.1")
+QUERY_REWRITE_MODEL_NAME = os.getenv("QUERY_REWRITE_MODEL_NAME", "gpt-4.1")
+GENERATION_MODEL_NAME = os.getenv("GENERATION_MODEL_NAME", "gpt-4.1")
 
 @dataclass
 class DatabaseSettings:
-    """数据库配置"""
+    """MySQL数据库配置管理类。
+    
+    管理MySQL数据库的连接参数和性能配置，支持从环境变量
+    自动加载配置，确保不同环境下的灵活部署。
+    
+    Attributes:
+        host: 数据库服务器地址，默认本地
+        port: 数据库端口，MySQL默认3306
+        user: 数据库用户名
+        password: 数据库密码（生产环境建议使用环境变量）
+        database: 目标数据库名称
+        charset: 字符集，推荐utf8mb4支持emoji
+        collation: 排序规则，影响文本比较和排序
+        pool_size: 连接池大小，影响并发性能
+        
+    环境变量映射：
+        MYSQL_HOST -> host
+        MYSQL_PORT -> port
+        MYSQL_USER -> user
+        MYSQL_PASSWORD -> password
+        MYSQL_DB -> database
+        MYSQL_CHARSET -> charset
+        MYSQL_COLLATION -> collation
+        MYSQL_POOL_SIZE -> pool_size
+        
+    用途：
+        - RAG文档和chunk的结构化数据存储
+        - 全文搜索索引支持
+        - 元数据和状态信息管理
+        - 系统配置和日志存储
+    """
     host: str = "127.0.0.1"
     port: int = 3306
     user: str = "root"
@@ -38,7 +111,25 @@ class DatabaseSettings:
     
     @classmethod
     def from_env(cls) -> 'DatabaseSettings':
-        """从环境变量创建数据库配置"""
+        """从环境变量创建数据库配置。
+        
+        优先使用环境变量，如果环境变量不存在则使用默认值。
+        这种设计支持容器化部署和多环境配置。
+        
+        Returns:
+            DatabaseSettings: 配置好的数据库设置实例
+            
+        环境变量优先级：
+            环境变量 > 默认值
+            
+        示例：
+            # 通过环境变量配置
+            export MYSQL_HOST=db.example.com
+            export MYSQL_PASSWORD=secure_password
+            
+            # 代码中使用
+            db_config = DatabaseSettings.from_env()
+        """
         return cls(
             host=os.getenv('MYSQL_HOST', '127.0.0.1'),
             port=int(os.getenv('MYSQL_PORT', '3306')),
@@ -52,7 +143,35 @@ class DatabaseSettings:
 
 @dataclass
 class MilvusSettings:
-    """Milvus配置"""
+    """Milvus向量数据库配置管理类。
+    
+    管理Milvus向量数据库的连接参数和集合配置，专门用于
+    存储和检索文档的向量表示。
+    
+    Attributes:
+        host: Milvus服务器地址
+        port: Milvus端口，默认19530
+        collection_name: 默认集合名称（实际会创建多个集合）
+        alias: 连接别名，用于管理多个连接
+        
+    环境变量映射：
+        MILVUS_HOST -> host
+        MILVUS_PORT -> port
+        MILVUS_COLLECTION -> collection_name
+        MILVUS_ALIAS -> alias
+        
+    用途：
+        - 存储文档和chunk的向量表示
+        - 支持高效的语义相似度搜索
+        - 向量索引管理和优化
+        - 大规模向量数据的持久化存储
+        
+    集合设计：
+        - documents_vectors: 文档级向量
+        - documents_insights_vectors: 文档洞察向量
+        - chunks_vectors_{source_id}: chunk级向量
+        - chunks_insights_vectors_{source_id}: chunk洞察向量
+    """
     host: str = "127.0.0.1"
     port: int = 19530
     collection_name: str = "rag_embeddings_v1"
@@ -60,7 +179,27 @@ class MilvusSettings:
     
     @classmethod
     def from_env(cls) -> 'MilvusSettings':
-        """从环境变量创建Milvus配置"""
+        """从环境变量创建Milvus配置。
+        
+        支持从环境变量加载Milvus连接参数，便于容器化部署
+        和云环境配置。
+        
+        Returns:
+            MilvusSettings: 配置好的Milvus设置实例
+            
+        部署建议：
+            - 开发环境：使用本地Milvus实例
+            - 生产环境：使用集群模式或云服务
+            - 测试环境：可以使用内存模式
+            
+        示例：
+            # 环境变量配置
+            export MILVUS_HOST=milvus.example.com
+            export MILVUS_PORT=19530
+            
+            # 代码使用
+            milvus_config = MilvusSettings.from_env()
+        """
         return cls(
             host=os.getenv('MILVUS_HOST', '127.0.0.1'),
             port=int(os.getenv('MILVUS_PORT', '19530')),
@@ -70,7 +209,42 @@ class MilvusSettings:
 
 @dataclass
 class ObjectStoreSettings:
-    """对象存储配置"""
+    """对象存储配置管理类。
+    
+    管理文档、处理结果和实验数据的存储配置。当前版本支持
+    本地文件系统存储，未来可扩展支持云存储服务。
+    
+    Attributes:
+        type: 存储类型，当前只支持"local"
+        base_path: 存储根目录路径
+        experiments_dir: 实验数据子目录名称
+        auto_create_dirs: 是否自动创建目录
+        max_file_size: 最大文件大小限制（字节）
+        
+    目录结构：
+        base_path/
+        ├── experiments/          # 实验数据
+        │   ├── paper_set_1/     # 数据集1
+        │   └── paper_set_2/     # 数据集2
+        ├── processed/           # 处理结果
+        └── temp/               # 临时文件
+        
+    环境变量映射：
+        OBJECT_STORE_TYPE -> type
+        LOCAL_OBJECT_STORE_PATH -> base_path
+        LOCAL_OBJECT_STORE_EXPERIMENTS_DIR -> experiments_dir
+        LOCAL_OBJECT_STORE_AUTO_CREATE_DIRS -> auto_create_dirs
+        LOCAL_OBJECT_STORE_MAX_FILE_SIZE -> max_file_size
+        
+    用途：
+        - 原始文档存储
+        - 处理结果缓存
+        - 实验数据管理
+        - 临时文件处理
+        
+    扩展性：
+        未来可支持AWS S3、阿里云OSS等云存储服务
+    """
     type: str = "local"  # 目前只支持local
     base_path: str = "./data/local_object_store"
     experiments_dir: str = "experiments"
@@ -81,7 +255,27 @@ class ObjectStoreSettings:
     
     @classmethod
     def from_env(cls) -> 'ObjectStoreSettings':
-        """从环境变量创建对象存储配置"""
+        """从环境变量创建对象存储配置。
+        
+        支持通过环境变量灵活配置存储路径和参数，适应不同
+        的部署环境和存储需求。
+        
+        Returns:
+            ObjectStoreSettings: 配置好的对象存储设置实例
+            
+        配置建议：
+            - 开发环境：使用项目内相对路径
+            - 生产环境：使用绝对路径，确保权限正确
+            - 容器环境：挂载外部存储卷
+            
+        示例：
+            # 环境变量配置
+            export LOCAL_OBJECT_STORE_PATH=/data/knowledge_rag
+            export LOCAL_OBJECT_STORE_MAX_FILE_SIZE=209715200  # 200MB
+            
+            # 代码使用
+            store_config = ObjectStoreSettings.from_env()
+        """
         return cls(
             type=os.getenv('OBJECT_STORE_TYPE', 'local'),
             base_path=os.getenv('LOCAL_OBJECT_STORE_PATH', './data/local_object_store'),
