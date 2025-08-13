@@ -3,8 +3,8 @@
 from typing import List, Dict, Any, Tuple, Optional
 from datetime import datetime
 
-from data_models import Entity, Relationship, EntityType, RelationshipType
-from prompts import (
+from core.data_models import Entity, Relationship, EntityType, RelationshipType
+from extraction.prompts import (
     ENTITY_EXTRACTION_PROMPT,
     RELATIONSHIP_EXTRACTION_PROMPT,
     ENTITY_DEDUPLICATION_PROMPT,

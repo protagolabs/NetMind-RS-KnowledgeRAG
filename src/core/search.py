@@ -4,9 +4,9 @@ from typing import List, Dict, Any, Optional, Tuple
 from datetime import datetime
 from abc import ABC, abstractmethod
 
-from data_models import SearchQuery, SearchResult, Entity, Relationship, Community, Chunk
-from storage import GraphStorage, VectorStorage, DocumentStorage
-from prompts import COMMUNITY_SUMMARY_PROMPT
+from core.data_models import SearchQuery, SearchResult, Entity, Relationship, Community, Chunk
+from core.storage import GraphStorage, VectorStorage, DocumentStorage
+from extraction.prompts import COMMUNITY_SUMMARY_PROMPT
 
 
 class BaseSearchStrategy(ABC):

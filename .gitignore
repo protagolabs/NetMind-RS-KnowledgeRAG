@@ -234,6 +234,9 @@ knowledge_rag/debug_extraction/
 # ChromaDB directories
 knowledge_rag/*chroma_db/
 knowledge_rag/test_extraction_output/
+src/chroma_db_papers/
+src/**/chroma_db*/
+paper_sets/**/chroma_db*/
 
 # unrelated files
 Initial_design.md
@@ -241,3 +244,6 @@ CLAUDE.md
 
 # first version repo as reference
 knowledge_rag
+
+# paper sets
+paper_sets/

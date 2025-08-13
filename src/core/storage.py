@@ -3,7 +3,7 @@
 from typing import List, Dict, Any, Optional, Tuple
 from abc import ABC, abstractmethod
 
-from data_models import Entity, Relationship, Chunk, Document, Community
+from core.data_models import Entity, Relationship, Chunk, Document, Community
 
 
 class BaseStorage(ABC):
