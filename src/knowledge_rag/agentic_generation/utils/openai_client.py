@@ -79,7 +79,6 @@ class OpenAIClient:
         if not self.api_key:
             raise ValueError("需要设置 OPENAI_API_KEY 环境变量")
 
-        self.client = AsyncOpenAI(api_key=self.api_key)
         self.cost_calculator = OpenAICostCalculator()
     
     async def close(self):
@@ -148,7 +147,8 @@ class OpenAIClient:
             解析后的模型对象和费用信息的元组，如果失败则返回None
         """
         try:
-            completion = await self.client.chat.completions.parse(
+            client = AsyncOpenAI(api_key=self.api_key)
+            completion = await client.chat.completions.parse(
                 model=model,
                 messages=messages,
                 temperature=temperature,
@@ -186,7 +186,8 @@ class OpenAIClient:
             生成的文本和费用信息的元组，如果失败则返回None
         """
         try:
-            completion = await self.client.chat.completions.create(
+            client = AsyncOpenAI(api_key=self.api_key)
+            completion = await client.chat.completions.create(
                 model=model,
                 messages=messages, # type: ignore
                 temperature=temperature,
