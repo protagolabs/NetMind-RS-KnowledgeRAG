@@ -11,6 +11,7 @@ from openai import AsyncOpenAI
 import os
 import traceback
 
+from knowledge_rag.config import OPENAI_API_KEY
 
 
 class OpenAICostCalculator:
@@ -74,12 +75,39 @@ class OpenAIClient:
         Args:
             api_key: OpenAI API密钥，如果为None则从环境变量获取
         """
-        self.api_key = api_key or os.getenv("OPENAI_API_KEY")
+        self.api_key = OPENAI_API_KEY
         if not self.api_key:
             raise ValueError("需要设置 OPENAI_API_KEY 环境变量")
 
         self.client = AsyncOpenAI(api_key=self.api_key)
         self.cost_calculator = OpenAICostCalculator()
+    
+    async def close(self):
+        """关闭客户端连接"""
+        if hasattr(self, 'client') and self.client:
+            await self.client.close()
+    
+    async def __aenter__(self):
+        """异步上下文管理器入口"""
+        return self
+    
+    async def __aexit__(self, exc_type, exc_val, exc_tb):
+        """异步上下文管理器出口"""
+        await self.close()
+    
+    def __del__(self):
+        """析构函数，确保资源清理"""
+        try:
+            if hasattr(self, 'client') and self.client:
+                # 不能在__del__中调用异步方法，只能尝试同步关闭
+                try:
+                    # 尝试访问底层的httpx客户端并关闭
+                    if hasattr(self.client, '_client') and hasattr(self.client._client, 'close'):
+                        self.client._client.close()
+                except:
+                    pass
+        except:
+            pass
     
     def _handle_openai_error(self, error: Exception, operation: str) -> str:
         """处理OpenAI API错误。
@@ -141,7 +169,7 @@ class OpenAIClient:
     async def generate_text(
         self,
         model: str,
-        messages: List[Dict[str, str]],
+        messages: List,
         temperature: float = 0.1,
         max_tokens: Optional[int] = None,
         **kwargs
@@ -160,7 +188,7 @@ class OpenAIClient:
         try:
             completion = await self.client.chat.completions.create(
                 model=model,
-                messages=messages,
+                messages=messages, # type: ignore
                 temperature=temperature,
                 **kwargs
             )

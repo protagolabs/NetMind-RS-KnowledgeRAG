@@ -25,9 +25,14 @@ from typing import List
 from knowledge_rag.agentic_generation.rag_agent import RAGAgent
 
 
+async def main():
+    """主函数，使用异步上下文管理器确保资源正确释放"""
+    async with RAGAgent() as rag_agent:
+        query = "How many methods are there in LLM training?"
+        result = await rag_agent.rag_agent(query)
+        print(result)
+
 if __name__ == "__main__":
     import asyncio
-    rag_agent = RAGAgent()
-    query = "Please sort out all the professional terms in these papers for me"
-    result = asyncio.run(rag_agent.rag_agent(query))
-    print(result)
+    asyncio.run(main())
+    

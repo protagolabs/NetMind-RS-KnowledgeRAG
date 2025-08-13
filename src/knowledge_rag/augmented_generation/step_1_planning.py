@@ -151,28 +151,28 @@ async def make_rag_plan(information: str, user_question: str) -> Plan:
         >>> print(plan.reasoning)  # 推理过程
         >>> print(plan.plan)       # 具体计划
     """
-    client = AsyncOpenAI(api_key=OPENAI_API_KEY)
-    local_plan_prompt = deepcopy(PLAN_PROMPT)
-    plan_prompt = local_plan_prompt.format(
-        information=information, user_question=user_question
-    )
+    async with AsyncOpenAI(api_key=OPENAI_API_KEY) as client:
+        local_plan_prompt = deepcopy(PLAN_PROMPT)
+        plan_prompt = local_plan_prompt.format(
+            information=information, user_question=user_question
+        )
 
-    plan_agent = Agent(
-        name="plan_agent",
-        instructions=plan_prompt,
-        model=OpenAIChatCompletionsModel(
-            model="gpt-4.1",
-            openai_client=client,
-        ),
-        output_type=Plan,
-    )
+        plan_agent = Agent(
+            name="plan_agent",
+            instructions=plan_prompt,
+            model=OpenAIChatCompletionsModel(
+                model="gpt-4.1",
+                openai_client=client,
+            ),
+            output_type=Plan,
+        )
 
-    runner = await Runner.run(
-        plan_agent,
-        "Please help me to make a plan to answer the user question."
-    )
+        runner = await Runner.run(
+            plan_agent,
+            "Please help me to make a plan to answer the user question."
+        )
 
-    return runner.final_output
+        return runner.final_output
 
 
 

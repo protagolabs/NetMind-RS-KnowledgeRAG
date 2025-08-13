@@ -166,9 +166,9 @@ async def get_embedding_normal(text: str) -> List[float]:
         >>> len(vector)  # 1536
         >>> isinstance(vector[0], float)  # True
     """
-    client = AsyncOpenAI(api_key=OPENAI_API_KEY)
-    response = await client.embeddings.create(input=text, model="text-embedding-3-small")
-    return response.data[0].embedding
+    async with AsyncOpenAI(api_key=OPENAI_API_KEY) as client:
+        response = await client.embeddings.create(input=text, model="text-embedding-3-small")
+        return response.data[0].embedding
 
 
 async def embedding_doc(dataset: list) -> list:
@@ -220,34 +220,34 @@ async def embedding_doc(dataset: list) -> list:
         - 处理大数据集时考虑时间成本
     """
     
-    client = AsyncOpenAI(api_key=OPENAI_API_KEY)
-    results = []
-    
-    for doc in tqdm(dataset):
+    async with AsyncOpenAI(api_key=OPENAI_API_KEY) as client:
+        results = []
         
-        semaphore = asyncio.Semaphore(10)  # 限制并发数为10
-        async def get_embedding(text: str) -> List[float]:
-            async with semaphore:
-                response = await client.embeddings.create(input=text, model="text-embedding-3-small")
-                return response.data[0].embedding
+        for doc in tqdm(dataset):
             
-        doc_key_words = " ".join(doc["key_words"])
-        
-        doc_analysis = DocAnalysisWithEmbedding(**doc)
-        doc_analysis.summary_embedding_vector = await get_embedding_normal(doc_analysis.summary)
-        doc_analysis.key_words_embedding_vector = await get_embedding_normal(doc_key_words)
-        tasks = [get_embedding(insight) for insight in doc_analysis.insights]
-        doc_analysis.insights_embedding_vector = await asyncio.gather(*tasks)
-        
-        local_result = doc_analysis.model_dump()
-        results.append(local_result)
-        
-        # # 保存到相对路径
-        # output_file = Path("experiments_docs_processed") / "paper_set_1_docs.json"
-        # output_file.parent.mkdir(parents=True, exist_ok=True)
-        # with open(output_file, "w", encoding="utf-8") as f:
-        #     json.dump(results, f, ensure_ascii=False, indent=4)
-        
+            semaphore = asyncio.Semaphore(10)  # 限制并发数为10
+            async def get_embedding(text: str) -> List[float]:
+                async with semaphore:
+                    response = await client.embeddings.create(input=text, model="text-embedding-3-small")
+                    return response.data[0].embedding
+            
+            doc_key_words = " ".join(doc["key_words"])
+            
+            doc_analysis = DocAnalysisWithEmbedding(**doc)
+            doc_analysis.summary_embedding_vector = await get_embedding_normal(doc_analysis.summary)
+            doc_analysis.key_words_embedding_vector = await get_embedding_normal(doc_key_words)
+            tasks = [get_embedding(insight) for insight in doc_analysis.insights]
+            doc_analysis.insights_embedding_vector = await asyncio.gather(*tasks)
+            
+            local_result = doc_analysis.model_dump()
+            results.append(local_result)
+            
+            # # 保存到相对路径
+            # output_file = Path("experiments_docs_processed") / "paper_set_1_docs.json"
+            # output_file.parent.mkdir(parents=True, exist_ok=True)
+            # with open(output_file, "w", encoding="utf-8") as f:
+            #     json.dump(results, f, ensure_ascii=False, indent=4)
+            
         return results
     
 async def embedding_chunk(dataset: list) -> list:
@@ -311,34 +311,34 @@ async def embedding_chunk(dataset: list) -> list:
         - 考虑成本控制和批量优化
     """
     
-    client = AsyncOpenAI(api_key=OPENAI_API_KEY)
-    results = []
-    
-    for chunk in tqdm(dataset):
+    async with AsyncOpenAI(api_key=OPENAI_API_KEY) as client:
+        results = []
         
-        semaphore = asyncio.Semaphore(10)  # 限制并发数为10
-        async def get_embedding(text: str) -> List[float]:
-            async with semaphore:
-                response = await client.embeddings.create(input=text, model="text-embedding-3-small")
-                return response.data[0].embedding
+        for chunk in tqdm(dataset):
             
-        chunk_key_words = " ".join(chunk["key_words"])
-        
-        chunk_analysis = ChunkAnalysisWithEmbedding(**chunk)
-        chunk_analysis.summary_embedding_vector = await get_embedding_normal(chunk_analysis.summary)
-        chunk_analysis.key_words_embedding_vector = await get_embedding_normal(chunk_key_words)
-        tasks = [get_embedding(insight) for insight in chunk_analysis.insights]
-        chunk_analysis.insights_embedding_vector = await asyncio.gather(*tasks)
-        
-        local_result = chunk_analysis.model_dump()
-        results.append(local_result)
-        
-        # 保存到相对路径
-        # output_file = Path("experiments_docs_processed") / "paper_set_1_chunks.json"
-        # output_file.parent.mkdir(parents=True, exist_ok=True)
-        # with open(output_file, "w", encoding="utf-8") as f:
-        #     json.dump(results, f, ensure_ascii=False, indent=4)
-        
+            semaphore = asyncio.Semaphore(10)  # 限制并发数为10
+            async def get_embedding(text: str) -> List[float]:
+                async with semaphore:
+                    response = await client.embeddings.create(input=text, model="text-embedding-3-small")
+                    return response.data[0].embedding
+                
+            chunk_key_words = " ".join(chunk["key_words"])
+            
+            chunk_analysis = ChunkAnalysisWithEmbedding(**chunk)
+            chunk_analysis.summary_embedding_vector = await get_embedding_normal(chunk_analysis.summary)
+            chunk_analysis.key_words_embedding_vector = await get_embedding_normal(chunk_key_words)
+            tasks = [get_embedding(insight) for insight in chunk_analysis.insights]
+            chunk_analysis.insights_embedding_vector = await asyncio.gather(*tasks)
+            
+            local_result = chunk_analysis.model_dump()
+            results.append(local_result)
+            
+            # 保存到相对路径
+            # output_file = Path("experiments_docs_processed") / "paper_set_1_chunks.json"
+            # output_file.parent.mkdir(parents=True, exist_ok=True)
+            # with open(output_file, "w", encoding="utf-8") as f:
+            #     json.dump(results, f, ensure_ascii=False, indent=4)
+            
         return results
     
             

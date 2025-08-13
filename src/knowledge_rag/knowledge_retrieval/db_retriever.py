@@ -626,6 +626,8 @@ class DBRetriever:
                             chunk_id = hit.entity.get("chunk_id")
                             if chunk_id in chunks_dict:
                                 chunk_info = chunks_dict[chunk_id]
+                                chunk_info['source_id'] = hit.entity.get("source_id")
+                                chunk_info['chunk_id'] = chunk_id
                                 chunk_info['similarity_score'] = float(1.0 / (1.0 + hit.distance))
                                 chunk_info['search_field'] = vector_field
                                 
@@ -759,6 +761,8 @@ class DBRetriever:
                             chunk_id = hit.entity.get("chunk_id")
                             if chunk_id in chunks_dict:
                                 chunk_info = chunks_dict[chunk_id].copy()
+                                chunk_info['source_id'] = hit.entity.get("source_id")
+                                chunk_info['chunk_id'] = chunk_id
                                 chunk_info['similarity_score'] = float(1.0 / (1.0 + hit.distance))
                                 chunk_info['matched_insight'] = hit.entity.get("insight_text")
                                 chunk_info['insight_index'] = hit.entity.get("insight_index")

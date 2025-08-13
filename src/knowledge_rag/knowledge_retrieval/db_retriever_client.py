@@ -617,7 +617,7 @@ class KnowledgeRAGClient:
             response_data = await self._make_request_async(
                 "POST", 
                 "/doc-retrieval", 
-                json_data=request.dict()
+                json_data=request.model_dump()
             )
             return RetrievalResponse(**response_data)
         except PydanticValidationError as e:
@@ -638,7 +638,7 @@ class KnowledgeRAGClient:
             response_data = self._make_request_sync(
                 "POST", 
                 "/doc-retrieval", 
-                json_data=request.dict()
+                json_data=request.model_dump()
             )
             return RetrievalResponse(**response_data)
         except PydanticValidationError as e:
@@ -667,7 +667,7 @@ class KnowledgeRAGClient:
             response_data = await self._make_request_async(
                 "POST", 
                 "/doc-retrieval-by-dataset", 
-                json_data=request.dict()
+                json_data=request.model_dump()
             )
             return RetrievalResponse(**response_data)
         except PydanticValidationError as e:

@@ -159,23 +159,23 @@ async def analysis_doc(doc: str, model: str = "gpt-4.1") -> GenerateDocAnalysis:
     """
     
     local_instruction = deepcopy(doc_analysis_prompts)
-    client = AsyncOpenAI(api_key=OPENAI_API_KEY)
-    agent = Agent(
-        name="Markdown Analyst & Summarizer",
-        instructions=local_instruction,
-        output_type=GenerateDocAnalysis,
-        model=OpenAIChatCompletionsModel(
-            model=model,
-            openai_client=client,
+    async with AsyncOpenAI(api_key=OPENAI_API_KEY) as client:
+        agent = Agent(
+            name="Markdown Analyst & Summarizer",
+            instructions=local_instruction,
+            output_type=GenerateDocAnalysis,
+            model=OpenAIChatCompletionsModel(
+                model=model,
+                openai_client=client,
+            )
         )
-    )
-    
-    result = await Runner.run(
-        agent,
-        input=f"Please help me to analyze the document {doc}",
-    )
-    
-    return result.final_output
+        
+        result = await Runner.run(
+            agent,
+            input=f"Please help me to analyze the document {doc}",
+        )
+        
+        return result.final_output
     
     
 class GenerateChunkAnalysis(BaseModel):
@@ -322,20 +322,20 @@ async def analysis_chunk(chunk: str, doc: str, model: str = "gpt-4.1") -> Genera
     
     local_instruction = deepcopy(chunk_analysis_prompts)
     
-    client = AsyncOpenAI(api_key=OPENAI_API_KEY)
-    agent = Agent(
-        name="Markdown Analyst & Summarizer (Chunk Mode)",
-        instructions=local_instruction,
-        output_type=GenerateChunkAnalysis,
-        model=OpenAIChatCompletionsModel(
-            model=model,
-            openai_client=client,
+    async with AsyncOpenAI(api_key=OPENAI_API_KEY) as client:
+        agent = Agent(
+            name="Markdown Analyst & Summarizer (Chunk Mode)",
+            instructions=local_instruction,
+            output_type=GenerateChunkAnalysis,
+            model=OpenAIChatCompletionsModel(
+                model=model,
+                openai_client=client,
+            )
         )
-    )
-    
-    result = await Runner.run(
-        agent,
-        input=f"""
+        
+        result = await Runner.run(
+            agent,
+            input=f"""
 The full document is:
 {doc}
 
@@ -344,8 +344,8 @@ The chunk is:
 
 Please help me to analyze the chunk.
 """,
-    )
-    return result.final_output
+        )
+        return result.final_output
 
 
         

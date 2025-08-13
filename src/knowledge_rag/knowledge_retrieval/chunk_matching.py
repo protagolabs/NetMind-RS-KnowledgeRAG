@@ -165,30 +165,31 @@ async def chunk_matching(user_question: str, chunk_summary: str, chunk_insights:
     """
     local_prompt = deepcopy(chunk_matching_prompts)
     prompt = local_prompt.format(user_question=user_question, chunk_summary=chunk_summary, chunk_insights=chunk_insights)
-    client = AsyncOpenAI(api_key=OPENAI_API_KEY)
-    agent = Agent(
-        name="chunk_matching",
-        instructions=prompt,
-        model=OpenAIChatCompletionsModel(
-            model=MATCHING_MODEL,
-            openai_client=client,
-        ),
-        model_settings=ModelSettings(temperature=0.0),
-        output_type=ChunkMatchingResult,
-    )
+    
+    async with AsyncOpenAI(api_key=OPENAI_API_KEY) as client:
+        agent = Agent(
+            name="chunk_matching",
+            instructions=prompt,
+            model=OpenAIChatCompletionsModel(
+                model=MATCHING_MODEL,
+                openai_client=client,
+            ),
+            model_settings=ModelSettings(temperature=0.0),
+            output_type=ChunkMatchingResult,
+        )
 
-    result = await Runner.run(
-        agent,
-        input=f"Please help me to analyze the fragment.",
-    )
-    
-    result = ChunkMatchingResultWithIsRelated(
-        analysis_detail=result.final_output.analysis_detail,
-        score=result.final_output.score,
-        is_related=result.final_output.score >= 20,
-    )
-    
-    return result
+        result = await Runner.run(
+            agent,
+            input=f"Please help me to analyze the fragment.",
+        )
+        
+        result = ChunkMatchingResultWithIsRelated(
+            analysis_detail=result.final_output.analysis_detail,
+            score=result.final_output.score,
+            is_related=result.final_output.score >= 20,
+        )
+        
+        return result
 
 async def make_decision_of_chunk_matching(
     query_text: str,

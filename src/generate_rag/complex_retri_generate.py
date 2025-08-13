@@ -545,6 +545,19 @@ class OpenAIWrapper:
         self.client = AsyncOpenAI(api_key=self.api_key)
         self.cost_calculator = OpenAICostCalculator()
     
+    async def close(self):
+        """关闭客户端连接"""
+        if hasattr(self, 'client') and self.client:
+            await self.client.close()
+    
+    async def __aenter__(self):
+        """异步上下文管理器入口"""
+        return self
+    
+    async def __aexit__(self, exc_type, exc_val, exc_tb):
+        """异步上下文管理器出口"""
+        await self.close()
+    
     def _handle_openai_error(self, error: Exception, operation: str) -> str:
         """处理OpenAI API错误。
         

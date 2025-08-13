@@ -71,6 +71,31 @@ class RAGAgent:
             retry_delay=1.0
         )
     
+    async def close(self):
+        """关闭所有客户端连接"""
+        try:
+            # 关闭OpenAI客户端
+            if hasattr(self.intent_recognition_agent, 'openai_client'):
+                await self.intent_recognition_agent.openai_client.close()
+            if hasattr(self.query_rewrite_agent, 'openai_client'):
+                await self.query_rewrite_agent.openai_client.close()
+            if hasattr(self.generation_agent, 'openai_client'):
+                await self.generation_agent.openai_client.close()
+            
+            # 关闭检索客户端
+            if hasattr(self.retrieval_agent, 'close'):
+                await self.retrieval_agent.close()
+        except Exception as e:
+            logger.warning(f"关闭客户端时发生错误: {e}")
+    
+    async def __aenter__(self):
+        """异步上下文管理器入口"""
+        return self
+    
+    async def __aexit__(self, exc_type, exc_val, exc_tb):
+        """异步上下文管理器出口"""
+        await self.close()
+    
     async def _retrieve_selection(self, query: str,  doc_ids: List[str] = []) -> List[dict]:
         """检索并筛选相关文本块。
         
@@ -176,6 +201,10 @@ class RAGAgent:
         for retrieval_result in retrieval_results:
             all_reference.extend(retrieval_result)
         logger.info(f"Number of retrieved chunks: {len(all_reference)}")
+        if all_reference:
+            logger.info(f"Example of retrieved chunks: {json.dumps(all_reference[0], indent=4, ensure_ascii=False)}")
+        else:
+            logger.warning("No chunks were retrieved")
         retrieval_cost = time() - start_time - intent_cost - documents_retrieval_cost - query_rewrite_cost
         logger.info(f"Retrieval cost: {retrieval_cost} seconds")
         

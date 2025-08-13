@@ -660,6 +660,17 @@ async def make_decision_of_chunk_retrieval(
 # Step 4: 回复增强的流程
 
 
-
-
+if __name__ == "__main__":
+    
+    retriever = asyncio.run(create_retriever())
+    query = "什么是 LLM ？"
+    import json 
+    import asyncio
+    with open("/home/bin.liang/Documents/02-research/NetMind-RS-KnowledgeRAG/experiments/doc_set_ids.json", "r") as f:
+        doc_set_ids = json.load(f)
+    doc_ids = doc_set_ids["llm_papers"]
+    
+    each_doc_chunk_number = 10
+    chunks = asyncio.run(chunk_retrieval(retriever, query, doc_ids, each_doc_chunk_number))
+    print(chunks[0])
 
