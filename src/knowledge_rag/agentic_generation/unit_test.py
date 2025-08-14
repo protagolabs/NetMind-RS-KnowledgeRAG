@@ -28,7 +28,7 @@ from knowledge_rag.agentic_generation.rag_agent import RAGAgent
 async def main():
     """主函数，使用异步上下文管理器确保资源正确释放"""
     async with RAGAgent() as rag_agent:
-        query = "How many methods are there in LLM training?"
+        query = "What is the LlaMA model?"
         result = await rag_agent.rag_agent(query)
         print(result)
 

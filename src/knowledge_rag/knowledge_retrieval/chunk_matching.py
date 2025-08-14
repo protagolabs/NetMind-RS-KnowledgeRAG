@@ -40,6 +40,7 @@ import json
 import logging
 from copy import deepcopy
 from typing import List
+import httpx
 from pydantic import BaseModel
 
 from openai import AsyncOpenAI
@@ -176,38 +177,42 @@ Judge the fragment **related** iff it mentions or covers any **specific elements
 """
 
 
+
 async def chunk_matching(user_question: str, chunk_summary: str, chunk_insights: str) -> ChunkMatchingResultWithIsRelated:
-    """ 
+    """
     文档片段匹配
     """
     local_prompt = deepcopy(chunk_matching_prompts)
-    prompt = local_prompt.format(user_question=user_question, chunk_summary=chunk_summary, chunk_insights=chunk_insights)
-    
-    async with AsyncOpenAI(api_key=OPENAI_API_KEY) as client:
-        agent = Agent(
-            name="chunk_matching",
-            instructions=prompt,
-            model=OpenAIChatCompletionsModel(
-                model=MATCHING_MODEL,
-                openai_client=client,
-            ),
-            model_settings=ModelSettings(temperature=0.0),
-            output_type=ChunkMatchingResult,
-        )
+    prompt = local_prompt.format(
+        user_question=user_question,
+        chunk_summary=chunk_summary,
+        chunk_insights=chunk_insights
+    )
 
-        result = await Runner.run(
-            agent,
-            input=f"Please help me to analyze the fragment.",
-        )
-        
-        result = ChunkMatchingResultWithIsRelated(
-            analysis_detail=result.final_output.analysis_detail,
-            score_band=result.final_output.score_band,
-            score=result.final_output.score,
-            is_related=result.final_output.score >= 40,
-        )
-        
-        return result
+    # 关键：把 httpx.AsyncClient 传给 AsyncOpenAI(http_client=hc)
+    async with httpx.AsyncClient(timeout=300) as hc:
+        async with AsyncOpenAI(api_key=OPENAI_API_KEY, http_client=hc) as client:
+            agent = Agent(
+                name="chunk_matching",
+                instructions=prompt,
+                model=OpenAIChatCompletionsModel(
+                    model=MATCHING_MODEL,
+                    openai_client=client,  # 继续复用同一个 client
+                ),
+                model_settings=ModelSettings(temperature=0.0),
+                output_type=ChunkMatchingResult,
+            )
+
+            result = await Runner.run(
+                agent,
+                input="Please help me to analyze the fragment.",
+            )
+
+            return ChunkMatchingResultWithIsRelated(
+                analysis_detail=result.final_output.analysis_detail,
+                score=result.final_output.score,
+                is_related=result.final_output.score >= 40,
+            )
 
 async def make_decision_of_chunk_matching(
     query_text: str,
