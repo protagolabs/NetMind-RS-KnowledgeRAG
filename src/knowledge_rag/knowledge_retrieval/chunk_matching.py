@@ -80,6 +80,7 @@ class ChunkMatchingResult(BaseModel):
         - 答案生成的上下文质量评估
     """
     analysis_detail: str
+    score_band: str
     score: int
     
 class ChunkMatchingResultWithIsRelated(ChunkMatchingResult):
@@ -114,48 +115,64 @@ class ChunkMatchingResultWithIsRelated(ChunkMatchingResult):
 
 chunk_matching_prompts = """ 
 ## Role
-You are a **Fragment–Question Relevance Judge**. Given a user question and the high-level info of a **single text fragment (chunk)**, decide whether this fragment **contains information related to** the question and return structured results. **Do not assume or aggregate across other fragments or the full document.**
+You are a **Fragment–Question Relevance Judge**.  
+Given a **user question** and the high-level info of **one single fragment (chunk)** — its **summary** and **insights** — decide whether this fragment **contains information related to** the question.  
+**Do not assume or aggregate across other fragments or the full document.**
 
 ## Objective
-Produce a binary **containment** decision and a calibrated score, with a brief, evidence-based analysis grounded **only** in the provided fragment summary and insights.
+Return a **fragment-only containment** judgment with:
+- a **score_band** (one of: `0-20`, `20-40`, `40-60`, `60-80`, `80-100`)  
+- an optional **score** (integer 0–100 **inside** the chosen band, for tie-breaking)  
+- a concise **analysis_detail** grounded only in this fragment (summary + insights)
 
 ## Inputs
 - **User question:** `{user_question}`
-- **fragment summary:** `{chunk_summary}`
-- **fragment insights:** `{chunk_insights}`
+- **Fragment summary:** `{chunk_summary}`
+- **Fragment insights:** `{chunk_insights}`
 
 ## Decision Criteria (Containment, Fragment-Only)
-Judge the fragment **related** if it **mentions or covers** any **specific elements** from the question, including:
-- Named entities (projects, models, datasets, APIs, libraries, papers, components, standards, versions).
-- Technical terms, formulas, interfaces, configs, parameters, metrics, tasks, or constraints **explicitly present** in the question.
-- Timeframes, environments, modalities, or identifiers that **directly overlap** with the question.
-
-**Acceptable but weak signals:** generic same-domain terms without specific overlap.  
-**Not related:** no identifiable overlap with the question’s specific entities/terms/constraints in this fragment.
+Judge the fragment **related** iff it mentions or covers any **specific elements** from the question, including:
+- **Named entities**: projects, models, datasets, APIs, libraries, papers, components, standards, versions.
+- **Technical elements**: formulas, parameters, metrics, tasks, constraints, configurations.
+- **Contextual elements**: timeframes, environments, modalities, identifiers.
+**Weak but acceptable signals**: only same-domain terms without specific overlap.  
+**Not related**: no identifiable overlap with the question’s specific entities/terms/constraints.
 
 ## Procedure
-1. Extract key entities/terms/constraints/timeframes from the **User question**.
+1. Extract key entities/terms/constraints/timeframes from the **user question**.
 2. Extract salient items from the **fragment summary** and **fragment insights**.
-3. Match for **overlap** (exact names, aliases, synonyms, versions, IDs, datasets, APIs, metrics, tasks). This is about **containment**, not usefulness.
-4. Note **scope mismatches** (different task/dataset/modality/timeframe/audience/version). Mismatches reduce the score but do not nullify overlap if at least one specific element matches.
-5. Write a concise **analysis_detail** citing 1–3 concrete cues (short quotes or faithful paraphrases) from the fragment inputs. Do **not** invent or infer beyond this fragment.
-6. Assign a **score** using the containment rubric below.
+3. Match for **overlap** (exact names, aliases, synonyms, versions, IDs, datasets, APIs, metrics, tasks).  
+4. Note **scope mismatches** (different task/dataset/modality/timeframe/audience/version). Mismatches lower the band/score but do not nullify relevance if at least one specific element matches.
+5. Write a concise **analysis_detail** in the **same language as the user question**, citing **1–3 concrete cues** (short quotes or faithful paraphrases) from this fragment only. **Do not invent** beyond the fragment.
 
-> Write `analysis_detail` in the **same language as the user question**.  
-> Do not include chain-of-thought; provide only a brief, evidence-based justification.
+## Scoring Rubric (choose a band, then pick a score inside it)
+- **0–20 — No Overlap**  
+  No matching entities/terms/constraints with the question; fragment is unrelated.
+- **20–40 — Weak Overlap**  
+  One minor match **or** only generic same-domain similarity without concrete specifics.  
+  (Pick closer to 20 when purely generic; closer to 40 when one clear specific is present.)
+- **40–60 — Moderate Overlap**  
+  Multiple specific matches **or** one specific element with clear detail (e.g., version/metric/parameter).  
+  (Closer to 60 when ≥2 solid matches or precise definitions/configs appear.)
+- **60–80 — Strong Overlap**  
+  Most key elements align, or the fragment clearly addresses the **same task/dataset/API** context with specifics.  
+  (Use upper 70s when coverage is broad and precise with minor mismatches.)
+- **80–100 — Near-Exact / Primary Topic Match**  
+  The fragment is **primarily about** the same specific item/task; rich, precise coverage, minimal mismatches.  
+  (Choose 90–100 when it is essentially a direct topic match.)
 
-## Scoring Rubric (0–100, integers only; fragment-only containment)
-- **0–15**: No overlap. The fragment does not mention the question’s entities/terms/constraints.
-- **20–25**: Very weak overlap. Same broad domain only; no specific terms matched.
-- **30–45**: Weak overlap. Mentions **one** specific element from the question (entity/term/version/dataset/API/metric).
-- **50–65**: Moderate overlap. Mentions **multiple** specific elements or one element with precise details (e.g., version, config, metric definition).
-- **70–85**: Strong overlap. Covers **most** key elements or matches the **same task/dataset/API** context with clear specifics.
-- **90–100**: Near-exact topic match. The fragment is **primarily about** the same specific item/task as the question.
+> **Containment rule**: Any specific overlap ⇒ at least `20–40`.  
+> **Penalty rule**: Scope/timeframe/modality/version mismatches **lower** the band/score but don’t force it to `0–20` if specific overlap remains.
 
-## Output Format
-- ChunkMatchingResult
-    - analysis_detail: str  # Brief evidence of overlap (cite 1–3 cues from this fragment).
-    - score: int            # 0–100 containment score, per rubric above.
+## Output Format (JSON-like)
+- **ChunkMatchingResult**
+  - **analysis_detail**: str  — brief, evidence-based justification (1–3 cues) from this fragment only, same language as the question.
+  - **score_band**: str       — one of: `"0-20"`, `"20-40"`, `"40-60"`, `"60-80"`, `"80-100"`.
+  - **score**: int            — *(optional)* an integer 0–100 **inside** `score_band` for ranking/tie-breaks.
+
+## Constraints
+- Fragment-only judgment; do **not** use other fragments or external knowledge.
+- No chain-of-thought; provide only concise, evidence-based `analysis_detail`.
 """
 
 
@@ -185,8 +202,9 @@ async def chunk_matching(user_question: str, chunk_summary: str, chunk_insights:
         
         result = ChunkMatchingResultWithIsRelated(
             analysis_detail=result.final_output.analysis_detail,
+            score_band=result.final_output.score_band,
             score=result.final_output.score,
-            is_related=result.final_output.score >= 20,
+            is_related=result.final_output.score >= 40,
         )
         
         return result

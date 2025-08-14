@@ -46,7 +46,7 @@ class RewrittenQuery(BaseModel):
     """
     original_query: str
     rewritten_query: str
-    intent_type: int
+    intent_flag: int
     reasoning: str
     
 class QueryRewriteItem(BaseModel):
@@ -56,8 +56,8 @@ class QueryRewriteItem(BaseModel):
         rewritten_query: 改写后的查询
         reasoning: 改写理由
     """
-    rewritten_query: str = Field(..., description="改写后的查询")
     reasoning: str = Field(..., description="改写理由")
+    rewritten_query: str = Field(..., description="改写后的查询")
     
     
 class QueryRewriteResult(BaseModel):
@@ -66,6 +66,7 @@ class QueryRewriteResult(BaseModel):
     Attributes:
         queries: 改写后的查询列表
     """
+    intent_flag: int = Field(..., description="意图标志，1表示信息汇总型，0表示事实型")
     queries: List[QueryRewriteItem] = Field(..., description="改写后的查询列表")
     
     
@@ -106,33 +107,44 @@ class QueryRewriteAgent:
         设置查询改写的提示模板和OpenAI客户端。提示模板包含了详细的
         改写指令，能够根据不同意图类型生成合适的改写查询。
         """
-        self.prompt = """You are an expert in information retrieval and query rewriting.
-Given:
-- The original user query: "{query}"
-- The query type: {intent_description}
-- The reasoning/intention behind the query: {intent_reasoning}
-- A summary (or keywords) of all documents in the current database: {documents_summary}
+        self.prompt = """You are an expert in both intent recognition and query rewriting.
 
-Your task:
-1. Based on the query type and intent, rewrite the original query into multiple alternative versions, each approaching the information need from a different angle.
-2. For information aggregation (summarization/listing) queries, ensure the rewrites cover a wide range of relevant aspects and perspectives from the document summaries.
-3. For fact-based queries, make each rewrite target specific, clearly identifiable information in the database.
-4. Each rewritten query must have a clear retrieval focus and be formulated to maximize the recall of relevant information in the database, making explicit use of document summaries or keywords as reference.
-5. Generate up to {max_queries} diverse rewritten queries.
+Your overall task:
+Given a user query and a summary/keywords of the documents in the database, you must:
+1. Determine the query's intent — specifically, whether it is a "concept listing" type (e.g., summary or listing questions).
+2. Based on that intent, rewrite the query into multiple alternative versions that maximize relevant information retrieval.
 
-Instructions:
-- Use the original query and the summaries/keywords of all database documents together as context to inform your rewrites.
-- Leverage your understanding of the query type and intention to tailor each rewrite for optimal information coverage and retrieval precision.
-- Output each rewritten query as a separate item in a numbered list.
 
-Please generate the rewritten queries now.
+Step 1 — Intent Recognition  
+Determine whether the "User Question" involves the intent of "concept listing", such as summary-type or listing-type questions.  
+If yes, set `intent_flag = 1`; otherwise, `intent_flag = 0`.
+
+Example:
+[User Question]: Based on the inpatient medical records of Zhuque Central Hospital, summarize the diagnostic basis and differential diagnosis of Ge Moumou.  
+intent_flag = 1
+
+[User Question]: Who won the men's 100m at the Tokyo Olympics?  
+intent_flag = 0
+
+Step 2 — Query Rewriting (use intent_flag in your reasoning)  
+
+Input:
+- Original user query: "{query}"
+- Summary (or keywords) of all documents in the database: {documents_summary}
+- intent_flag: (your determination from Step 1)
+
+Rewriting rules:
+1. If intent_flag = 1 (aggregation / summarization / concept listing), ensure rewrites cover a wide range of relevant aspects and perspectives from the document summaries.
+2. If intent_flag = 0 (fact-based), make each rewrite target specific, clearly identifiable information in the database.
+3. Each rewritten query must have a clear retrieval focus and be formulated to maximize recall of relevant information, explicitly leveraging document summaries or keywords.
+4. Generate up to {max_queries} diverse rewritten queries.
+5. Each rewrite should approach the information need from a different angle.   
 """
         self.openai_client = OpenAIClient()
         
     async def rewrite_query(
         self, 
-        query: str, 
-        intent: QueryIntent, 
+        query: str,  
         documents_summary: str,
         max_queries: int = 2
     ) -> Tuple[List[RewrittenQuery], Dict[str, float]]:
@@ -169,13 +181,10 @@ Please generate the rewritten queries now.
             如果API调用失败，返回空的改写查询列表
         """
         
-        intent_description = "information aggregation" if intent.intent_type == 1 else "fact-based"
         
         local_prompt = deepcopy(self.prompt) 
         local_prompt = local_prompt.format(
             query=query, 
-            intent_description=intent_description, 
-            intent_reasoning=intent.reasoning, 
             documents_summary=documents_summary,
             max_queries=max_queries
         )
@@ -198,12 +207,9 @@ Please generate the rewritten queries now.
             rewritten_query = RewrittenQuery(
                 original_query=query,
                 rewritten_query=query_item.rewritten_query,
-                intent_type=intent.intent_type,
+                intent_flag=parsed_result.intent_flag,
                 reasoning=query_item.reasoning
             )
             rewritten_queries.append(rewritten_query)
         
         return rewritten_queries, cost_info
-        
-        
-        

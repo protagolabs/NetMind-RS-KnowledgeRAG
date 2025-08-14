@@ -36,7 +36,8 @@ from traceloop.sdk.decorators import workflow
 
 Traceloop.init(
     app_name="knowledge_rag",
-    api_key="tl_1e636be3e4dd41c2b4d3e9dad4b6ae6f"
+    # api_key="tl_1e636be3e4dd41c2b4d3e9dad4b6ae6f"
+    api_key=""
 )
 
 class RAGAgent:
@@ -65,7 +66,8 @@ class RAGAgent:
         self.generation_agent = GenerationAgent()
         
         self.retrieval_agent = create_client(
-            base_url="http://localhost:8955",
+            # base_url="http://localhost:8955",
+            base_url="http://71.178.110.3:8955",
             timeout=30.0,
             max_retries=3,
             retry_delay=1.0
@@ -120,11 +122,17 @@ class RAGAgent:
             doc_ids=doc_ids
         )
         chunks_result = chunks_response.results 
+        logger.info(f"Retrieved {len(chunks_result)} chunks for query: {query}")
+        # 根据chunk_id进行去重
+        unique_chunks = {chunk['chunk_id']: chunk for chunk in chunks_result}
+        chunks_result = list(unique_chunks.values())
+        logger.info(f"After deduplication, {len(chunks_result)} unique chunks remain")    
         
         selected_chunks = await make_decision_of_chunk_retrieval(
             query_text=query,
             chunks=chunks_result
         ) 
+        logger.info(f"Selected {len(selected_chunks)} chunks after filtering")
         
         return selected_chunks
         
@@ -163,12 +171,6 @@ class RAGAgent:
         start_time = time()
         logger.info(f"RAG Agent is processing query: {query}")
         
-        # Step 1: Intent Recognition
-        intent_result, intent_cost = await self.intent_recognition_agent.recognize_intent(query)
-        logger.info(f"Intent Recognition Agent is processing query: {query}")
-        intent_cost = time() - start_time
-        logger.info(f"Intent Recognition Agent cost: {intent_cost} seconds")
-        
         documents_response = await self.retrieval_agent.retrieve_documents_by_dataset_async(
             data_set_type=dataset_type,
             query=query
@@ -183,18 +185,18 @@ class RAGAgent:
                 doc_ids.append(doc_id)
                 doc_summaries.append(doc_summary)
         logger.info(f"Documents are retrieved: {json.dumps(doc_ids, indent=4, ensure_ascii=False)}")
-        documents_retrieval_cost = time() - start_time - intent_cost
+        documents_retrieval_cost = time() - start_time
         logger.info(f"Documents retrieval cost: {documents_retrieval_cost} seconds")
         
         documents_summary = "\n".join(doc_summaries)
         
-        # Step 2: Query Rewriting
-        rewritten_queries, query_rewrite_cost = await self.query_rewrite_agent.rewrite_query(query, intent_result, documents_summary)
+        # Step 1: Query Rewriting
+        rewritten_queries, query_rewrite_cost = await self.query_rewrite_agent.rewrite_query(query, documents_summary)
         logger.info(f"Rewritten queries are generated: {json.dumps([query.rewritten_query for query in rewritten_queries], indent=4, ensure_ascii=False)}")
-        query_rewrite_cost = time() - start_time - intent_cost - documents_retrieval_cost
+        query_rewrite_cost = time() - start_time - documents_retrieval_cost
         logger.info(f"Query rewrite cost: {query_rewrite_cost} seconds") 
         
-        # Step 3: Retrieval
+        # Step 2: Retrieval
         tasks = [self._retrieve_selection(rewritten_query.rewritten_query, doc_ids) for rewritten_query in rewritten_queries]
         retrieval_results = await asyncio.gather(*tasks)
         all_reference = [] # type: ignore
@@ -205,13 +207,20 @@ class RAGAgent:
             logger.info(f"Example of retrieved chunks: {json.dumps(all_reference[0], indent=4, ensure_ascii=False)}")
         else:
             logger.warning("No chunks were retrieved")
-        retrieval_cost = time() - start_time - intent_cost - documents_retrieval_cost - query_rewrite_cost
+        
+        retrieval_cost = time() - start_time - documents_retrieval_cost - query_rewrite_cost
         logger.info(f"Retrieval cost: {retrieval_cost} seconds")
         
-        # Step 4: Generation
-        final_answer, generation_cost = await self.generation_agent.generate_answer(query, intent_result, all_reference)
+        # Step 3: Generation
+        logger.info(f"len(all_reference): {len(all_reference)}")
+        # 使用chunk_id 再过滤一次，确保每个chunk_id只保留一个
+        unique_references = {chunk['chunk_id']: chunk for chunk in all_reference}
+        all_reference = list(unique_references.values())
+        logger.info(f"After deduplication, {len(all_reference)} unique chunks remain")
+        intent_flag = rewritten_queries[0].intent_flag
+        final_answer, generation_cost = await self.generation_agent.generate_answer(query, intent_flag, all_reference)
         logger.info(f"Final answer is generated: {final_answer}")
-        generation_cost = time() - start_time - intent_cost - documents_retrieval_cost - query_rewrite_cost - retrieval_cost
+        generation_cost = time() - start_time - documents_retrieval_cost - query_rewrite_cost - retrieval_cost
         logger.info(f"Generation cost: {generation_cost} seconds")
         
         total_cost = time() - start_time

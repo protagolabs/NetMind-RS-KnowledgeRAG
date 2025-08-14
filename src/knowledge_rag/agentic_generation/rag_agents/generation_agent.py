@@ -63,10 +63,10 @@ class GenerationAgent:
     
     示例：
         agent = GenerationAgent()
-        intent = QueryIntent(query="什么是深度学习", intent_type=0, reasoning="...")
+        intent_flag = 1  # 1表示信息汇总型，0表示事实型
         answer, cost = await agent.generate_answer(
             original_query="什么是深度学习",
-            intent=intent,
+            intent_flag=intent_flag,
             retrieval_text="检索到的相关内容..."
         )
     """
@@ -91,9 +91,6 @@ where `reference_order_number` corresponds to the order of the source in the Ref
 
 **Question type:**  
 `{intent_description}`
-
-**Question intent:**  
-`{intent_reasoning}`
 
 **Retrieved content (from multiple chunks and documents):**  
 {retrieval_text}  
@@ -135,7 +132,7 @@ where `reference_order_number` corresponds to the order of the source in the Ref
     async def generate_answer(
         self, 
         original_query: str, 
-        intent: QueryIntent, 
+        intent_flag: int, 
         retrieval_text: str
     ) -> Tuple[str, Dict[str, float]]:
         """生成最终答案。
@@ -145,7 +142,7 @@ where `reference_order_number` corresponds to the order of the source in the Ref
         
         Args:
             original_query: 用户原始查询
-            intent: 意图识别结果，包含意图类型和推理过程
+            intent_flag: 意图标志，1表示信息汇总型，0表示事实型
             retrieval_text: 检索到的相关文本内容
             
         Returns:
@@ -172,14 +169,13 @@ where `reference_order_number` corresponds to the order of the source in the Ref
         异常处理：
             如果生成结果为空，抛出ValueError异常
         """
-        
-        intent_description = "information aggregation" if intent.intent_type == 1 else "fact-based"
-        
+
+        intent_description = "information aggregation" if intent_flag == 1 else "fact-based"
+
         local_prompt = deepcopy(self.prompt)
         local_prompt = local_prompt.format(
             original_query=original_query, 
             intent_description=intent_description, 
-            intent_reasoning=intent.reasoning, 
             retrieval_text=retrieval_text
         )
         messages = [{"role": "developer", "content": local_prompt}]
