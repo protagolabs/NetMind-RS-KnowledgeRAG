@@ -211,6 +211,7 @@ async def chunk_matching(user_question: str, chunk_summary: str, chunk_insights:
             return ChunkMatchingResultWithIsRelated(
                 analysis_detail=result.final_output.analysis_detail,
                 score=result.final_output.score,
+                score_band=result.final_output.score_band,
                 is_related=result.final_output.score >= 40,
             )
 

@@ -28,7 +28,7 @@ from knowledge_rag.agentic_generation.rag_agent import RAGAgent
 async def main():
     """主函数，使用异步上下文管理器确保资源正确释放"""
     async with RAGAgent() as rag_agent:
-        query = "What is the LlaMA model?"
+        query = "What were the training durations and number of epochs used for pre-training and fine-tuning the RealFormer-augmented BERT, ADMIN, and ETC models in the experiments, and which hardware platforms were used?"
         result = await rag_agent.rag_agent(query)
         print(result)
 
