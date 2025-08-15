@@ -62,7 +62,7 @@ except ImportError:
 logger = logging.getLogger(__name__)
 
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
-MATCHING_MODEL = os.getenv("MATCHING_MODEL", "gpt-4.1")
+MATCHING_MODEL = os.getenv("MATCHING_MODEL", "gpt-5-mini-2025-08-07")
 INTENT_RECOGNITION_MODEL_NAME = os.getenv("INTENT_RECOGNITION_MODEL_NAME", "gpt-4.1")
 QUERY_REWRITE_MODEL_NAME = os.getenv("QUERY_REWRITE_MODEL_NAME", "gpt-4.1")
 GENERATION_MODEL_NAME = os.getenv("GENERATION_MODEL_NAME", "gpt-4.1")
