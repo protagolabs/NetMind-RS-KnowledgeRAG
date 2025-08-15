@@ -28,7 +28,7 @@ from knowledge_rag.agentic_generation.rag_agent import RAGAgent
 async def main():
     """主函数，使用异步上下文管理器确保资源正确释放"""
     async with RAGAgent() as rag_agent:
-        query = "What were the training durations and number of epochs used for pre-training and fine-tuning the RealFormer-augmented BERT, ADMIN, and ETC models in the experiments, and which hardware platforms were used?"
+        query = "What are some prominent pre-training approaches in natural language processing mentioned in the document, and how do they differ in their objective or methodology?"
         result = await rag_agent.rag_agent(query)
         print(result)
 
