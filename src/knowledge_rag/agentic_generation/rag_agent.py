@@ -205,6 +205,10 @@ class RAGAgent:
         
         # Step 1: Query Rewriting
         rewritten_queries, query_rewrite_cost_info = await self.query_rewrite_agent.rewrite_query(query, documents_summary)
+        if len(rewritten_queries) == 0:
+            logger.warning("No rewritten queries were generated")
+            raise ValueError("No rewritten queries were generated")
+            
         logger.info(f"Rewritten queries are generated: {json.dumps([query.rewritten_query for query in rewritten_queries], indent=4, ensure_ascii=False)}")
         query_rewrite_cost = time() - start_time - documents_retrieval_cost
         logger.info(f"Query rewrite cost: {query_rewrite_cost} seconds") 
@@ -238,8 +242,18 @@ class RAGAgent:
         # 提取chunk IDs
         chunk_ids = [chunk.get('chunk_id', '') for chunk in all_reference if chunk.get('chunk_id')]
         
+        if len(all_reference) != 0:
+            all_reference_text = ""
+            for index, chunk in enumerate(all_reference):
+                all_reference_text += f"---------Reference {index+1}---------\n"
+                all_reference_text += f"Summary: {chunk.get('summary', '')}\n"
+                all_reference_text += f"Insights: {chunk.get('insights', '')}\n"
+                all_reference_text += f"OriginalContent: {chunk.get('chunk_markdown_content', '')}\n\n"
+        else:
+            all_reference_text = "You do not have any reference to answer this question. Please try to answer the question based on your knowledge. And let the user know that you do not have any reference to answer this question."
+        
         intent_flag = rewritten_queries[0].intent_flag
-        final_answer, generation_cost_info = await self.generation_agent.generate_answer(query, intent_flag, all_reference)
+        final_answer, generation_cost_info = await self.generation_agent.generate_answer(query, intent_flag, all_reference_text)
         logger.info(f"Final answer is generated: {final_answer}")
         generation_cost = time() - start_time - documents_retrieval_cost - query_rewrite_cost - retrieval_cost
         logger.info(f"Generation cost: {generation_cost} seconds")

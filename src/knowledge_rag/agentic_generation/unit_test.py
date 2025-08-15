@@ -21,16 +21,32 @@
         - 这是一个信息汇总型查询，用于测试系统的术语提取和整理能力
 """
 
+import json
+from tqdm.auto import tqdm
 from typing import List
 from knowledge_rag.agentic_generation.rag_agent import RAGAgent
 
 
 async def main():
     """主函数，使用异步上下文管理器确保资源正确释放"""
+    
+    with open("data/questions.json", "r") as f:
+        questions = json.load(f)
+    
+    all_results = []
     async with RAGAgent() as rag_agent:
-        query = "What are some prominent pre-training approaches in natural language processing mentioned in the document, and how do they differ in their objective or methodology?"
-        result = await rag_agent.rag_agent(query)
-        print(result)
+        for question in tqdm(questions):
+            query = question['question']
+            result = await rag_agent.rag_agent(query) 
+            question['xyz_answer'] = result['answer']
+            question['chunks'] = result['chunk_ids']
+            question['cost_breakdown'] = result['cost_breakdown']
+            question['performance_metrics'] = result['performance_metrics']
+            question['metadata'] = result['metadata']
+            all_results.append(question)
+            
+            with open("data/results_20250815.json", "w") as f:
+                json.dump(all_results, f, indent=4)
 
 if __name__ == "__main__":
     import asyncio

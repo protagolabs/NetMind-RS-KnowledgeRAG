@@ -197,6 +197,8 @@ Rewriting rules:
             temperature=0.2
         )
         
+        print(result)
+        
         if result is None:
             return [], {}
         

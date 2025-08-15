@@ -50,6 +50,12 @@ class OpenAICostCalculator:
         Returns:
             包含各项费用的字典
         """
+        
+        for key, value in self.cost_table.items():
+            if model.startswith(key):
+                model = key
+                break
+        
         input_cost = input_tokens * self.cost_table[model]["input_cost_per_token"]
         output_cost = output_tokens * self.cost_table[model]["output_cost_per_token"]
         total_cost = input_cost + output_cost
@@ -163,8 +169,10 @@ class OpenAIClient:
             
             return completion.choices[0].message.parsed, cost_info # type: ignore
         except Exception as e:
-            error_msg = self._handle_openai_error(e, "结构化响应解析")
-            return None
+            import traceback 
+            error_message = traceback.format_exc()
+            print(error_message)
+            raise ValueError(f"Error in parse_structured_response: {error_message}")
     
     async def generate_text(
         self,
