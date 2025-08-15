@@ -1,0 +1,562 @@
+{
+  "single_doc_multi_chunk": {
+    "Time-related": [
+      {
+        "des": "This question integrates information from chunks 0 and 8 to highlight the time-related aspect of the GLaM model training, energy usage, and how it compares to GPT-3 in terms of energy and carbon efficiency. The information is specific and answerable using the details from the chunks, which mention the training months and energy metrics, making the file name and selected chunks correct.",
+        "question": "During which months was GLaM trained, and how did its total energy consumption and carbon emissions compare to GPT-3?",
+        "answer": "GLaM was trained in August and September 2021. Its total energy consumption was 213 MWh, which is one-sixth of GPT-3's 1287 MWh, and its carbon emissions were 18.7 net tCO2e for 280B tokens and 40.2 net tCO2e for 600B tokens, compared to 552 net tCO2e for GPT-3.",
+        "question_type": "Time-related",
+        "chunk": [
+          {
+            "doc_id": "doc_GLam_Efficient_Scali_f90bdd10_20250730_041208",
+            "chunk_id": [
+              "chunk_GLam_idx010_cda2b7",
+              "chunk_GLam_idx026_5f787a"
+            ]
+          }
+        ]
+      },
+      {
+        "des": "This question is classified as 'Time-related' because it requires identifying and synthesizing epochs, training steps, and the duration of training for multiple models discussed in the document. The answer references chunks 3, 4, and 5, which collectively provide the number of epochs used for pre-training and fine-tuning in BERT, ADMIN, and ETC experiments, as well as the time taken, hardware details, and other training configurations. The referenced chunk IDs and document filename accurately point to the sections where this information is presented.",
+        "question": "What were the training durations and number of epochs used for pre-training and fine-tuning the RealFormer-augmented BERT, ADMIN, and ETC models in the experiments, and which hardware platforms were used?",
+        "answer": "For experiments with the RealFormer-augmented BERT models, pre-training was conducted on TPUs: 128 TPU v3 cores for BERT-Small/Base/Large and 256 TPU v3 cores for BERT-xLarge, with pre-training steps of 1 million (1M) and 500,000 (500K); fine-tuning was done on 8 TPU v2 cores. For ADMIN (NMT) experiments, training was on NVIDIA A100 GPUs with 50 epochs across all models, using varying numbers of GPUs depending on model size (e.g., 4, 8, or 16 GPUs), with training times between 9.3 and 72 hours as per model and language pair. For ETC models, pre-training and fine-tuning were carried out on TPU v3 cores, with fine-tuning epochs varying by task: WikiHop (15 epochs), HotpotQA (5 epochs), Natural Questions (2 epochs), OpenKP (2 epochs).",
+        "question_type": "Time-related",
+        "chunk": [
+          {
+            "doc_id": "doc_RealFormer_Transform_63a3e243_20250730_041429",
+            "chunk_id": [
+              "chunk_RealFormer_idx015_1c0800",
+              "chunk_RealFormer_idx016_c6a986",
+              "chunk_RealFormer_idx017_0f1688"
+            ]
+          }
+        ]
+      }
+    ],
+    "Explanatory": [
+      {
+        "des": "This question leverages information from chunks 0, 1, and 2 to cover the experimental results and ablation studies of Transformer-XL, combining details about its performance, the datasets used, and the effects of its two core innovations. The question is explanatory, asking for a synthesis and explanation rather than a simple lookup or fact. The filenames and chunk IDs are accurate, as the described content comes directly from the stated chunks.",
+        "question": "How does Transformer-XL's use of the recurrence mechanism and new positional encoding scheme contribute to its performance on benchmarks compared to previous state-of-the-art models, and what evidence supports these contributions?",
+        "answer": "Transformer-XL introduces a recurrence mechanism and a novel positional encoding scheme, both of which are shown through ablation studies to improve its ability to model long-term dependencies and achieve superior performance. On benchmarks like WikiText-103, enwik8, text8, One Billion Word, and Penn Treebank, Transformer-XL achieves new state-of-the-art results, such as reducing the perplexity on WikiText-103 from 20.5 to 18.3 and breaking through 1.0 bpc on enwik8. Ablation studies show that both the recurrence and the new encoding are necessary to obtain the best results—increasing attention length at evaluation improves perplexity only when using their positional encoding. Even under memory constraints, Transformer-XL outperforms baselines. On datasets without long-term dependencies, such as One Billion Word, the recurrence mechanism still improves performance due to solving the context fragmentation problem. Furthermore, the Relative Effective Context Length (RECL) results show Transformer-XL can model dependencies up to 900 words long, far surpassing recurrent networks and vanilla Transformers, substantiating its strengths in handling longer-term dependencies.",
+        "question_type": "Explanatory",
+        "chunk": [
+          {
+            "doc_id": "doc_Transformer_XL_Atten_c8b4db4e_20250730_031701",
+            "chunk_id": [
+              "chunk_Transformer_idx008_7548b4",
+              "chunk_Transformer_idx009_ee6fcc",
+              "chunk_Transformer_idx010_488754"
+            ]
+          }
+        ]
+      },
+      {
+        "des": "This question integrates information from multiple chunks about the setup, methods, and evaluation for knowledge-intensive reasoning tasks (specifically HotPotQA and FEVER), which is covered across chunk 1 and chunk 2. The question asks for a comparison between the tasks and how the ReAct and CoT-SC methods are combined, reflecting the detailed experiment setup, interaction action space, evaluation procedure, and the rationale behind combining internal and external knowledge. The selected chunks (1, 2) comprehensively cover the relevant procedures and reasoning, accurately supporting both the question and the answer.",
+        "question": "How were the HotPotQA and FEVER tasks set up for evaluating knowledge-intensive reasoning, and what methods were used to combine the ReAct and self-consistency chain-of-thought (CoT-SC) approaches for improved performance?",
+        "answer": "HotPotQA and FEVER were set up in a question-only format, where models only receive the question or claim as input and must rely on internal knowledge or retrieve knowledge via a designed Wikipedia web API with actions such as 'search[entity]', 'lookup[string]', and 'finish[answer]'. The action space simulates human interaction with Wikipedia and limits retrieval to a small portion of information, requiring explicit reasoning. For evaluation, the ReAct approach used few-shot exemplars and multi-step trajectories with reasoning and action steps. To improve performance, ReAct was combined with self-consistency chain-of-thought (CoT-SC) prompting by letting the model switch between methods based on heuristics: switching from ReAct to CoT-SC if ReAct fails to answer within a set number of steps, and from CoT-SC to ReAct if self-consistency confidence is low (i.e., the majority answer among CoT-SC samples occurs less than half the time).",
+        "question_type": "Explanatory",
+        "chunk": [
+          {
+            "doc_id": "doc_ReAct_Synergizing_Re_89ae60cd_20250730_032749",
+            "chunk_id": [
+              "chunk_ReAct_idx005_89fc54",
+              "chunk_ReAct_idx006_848491"
+            ]
+          }
+        ]
+      }
+    ],
+    "Domain-specific document QA": [
+      {
+        "des": "This question integrates information from several chunks to discuss both the specific performance results of LoRA and other adaptation methods on GPT-3 175B (from chunks 0 and 1), and the kinds of evaluation datasets used for these benchmarks (from chunk 5). This allows for a domain-specific document QA question that goes beyond a simple lookup of a single result and instead contextualizes where and how the performance was evaluated. The selected file name and chunk IDs are correct because the Table 4 results and explanation of GPT-3 175B experiments are in chunks 0 and 1, while the dataset descriptions are in chunk 5.",
+        "question": "What datasets were used to evaluate the performance of LoRA and other adaptation methods on GPT-3 175B, and how did LoRA's performance compare to other methods on these datasets?",
+        "answer": "The datasets used to evaluate the performance of LoRA and other adaptation methods on GPT-3 175B were WikiSQL, MultiNLI-matched (MNLI-m), and SAMSum. According to the reported results, LoRA matched or exceeded the fine-tuning baselines on all three datasets. Specifically, for GPT-3 (LoRA) with 37.7M trainable parameters, the accuracies were 74.0% on WikiSQL, 91.6% on MNLI-m, and Rouge-1/2/L scores of 53.4/29.2/45.1 on SAMSum. These results were better than or competitive with prior approaches, including full fine-tuning.",
+        "question_type": "Domain-specific document QA",
+        "chunk": [
+          {
+            "doc_id": "doc_LoRA_Low_Rank_Adapta_d5e8bd97_20250730_035554",
+            "chunk_id": [
+              "chunk_LoRA_idx012_ec66f5",
+              "chunk_LoRA_idx013_f1731e",
+              "chunk_LoRA_idx022_158070"
+            ]
+          }
+        ]
+      },
+      {
+        "des": "This is a good question because it synthesizes information from multiple chunks to explain the key components and innovations of the pre-training and fine-tuning framework presented in the document. The answer integrates the model training process from chunks 1, 2, 4, 5, and 6, referencing both the methodology and the empirical results. The selected chunk IDs correctly correspond to the discussed aspects of the approach: the motivation (chunk 2), overall framework (chunk 4), technical details (chunk 5), summary and results (chunk 1, chunk 6).",
+        "question": "How does the generative pre-training and discriminative fine-tuning framework for language understanding leverage unlabeled data, what model architecture does it use, and what performance improvements were observed compared to previous approaches?",
+        "answer": "The generative pre-training and discriminative fine-tuning framework first pre-trains a large-capacity language model using a language modeling objective on a diverse, unlabeled corpus of text. This is followed by fine-tuning the model on specific, supervised tasks such as natural language inference, question answering, semantic similarity assessment, and text classification. The approach uses a multi-layer Transformer architecture for the language model, which applies multi-headed self-attention and position-wise feedforward layers, enabling the model to capture long-range dependencies in text. During fine-tuning, task-specific input adaptations are used with minimal changes to the pre-trained model. Empirically, this framework outperformed discriminatively trained, task-specific models, achieving state-of-the-art results on 9 out of 12 evaluated benchmarks. For example, it obtained absolute improvements of 8.9% on the Stories Cloze Test (commonsense reasoning), 5.7% on RACE (question answering), and 1.5% on MultiNLI (textual entailment).",
+        "question_type": "Domain-specific document QA",
+        "chunk": [
+          {
+            "doc_id": "doc_Improving_Language_U_49e9b44a_20250730_034543",
+            "chunk_id": [
+              "chunk_Improving_idx001_a8100d",
+              "chunk_Improving_idx002_a50904",
+              "chunk_Improving_idx004_381104",
+              "chunk_Improving_idx005_e0c723",
+              "chunk_Improving_idx009_a1d3ea"
+            ]
+          }
+        ]
+      }
+    ],
+    "Fact-checking": [
+      {
+        "des": "This is a good fact-checking question as it synthesizes information from multiple chunks, specifically regarding the effectiveness of the ReAct prompting approach across different large language models. Chunk 3 provides GPT-3 and PaLM-540B experiment results and the claim that ReAct prompting’s effectiveness generalizes, while chunk 0 mentions the effort for reproducibility by providing GPT-3 experiments. These chunks together allow us to verify a claim about ReAct prompting’s generalizability and effectiveness, making the answer accurate and directly supported by the cited content. The file name and chunk IDs are correct because both are needed to reference the experiments and the context in which generalizability is discussed.",
+        "question": "Is the claim correct that ReAct prompting achieves generalizable and effective performance across different large language models such as GPT-3 and PaLM-540B?",
+        "answer": "Correct. Experiments show that ReAct prompting is effective across different large language models, with GPT-3 (text-davinci-002) even outperforming PaLM-540B on HotpotQA and ALFWorld, confirming the approach's generalizability.",
+        "question_type": "Fact-checking",
+        "chunk": [
+          {
+            "doc_id": "doc_ReAct_Synergizing_Re_89ae60cd_20250730_032749",
+            "chunk_id": [
+              "chunk_ReAct_idx012_ee90b9",
+              "chunk_ReAct_idx015_0207bd"
+            ]
+          }
+        ]
+      },
+      {
+        "des": "This question is a fact-checking question leveraging multiple chunks that describe the ReAct method's key features, improvements over baselines, and its implementation details. Specifically, chunks 1, 2, and 6 provide complementary information regarding ReAct's integration of reasoning and acting, how it compares to state-of-the-art baselines, and its performance and human interpretability. These chunks together enable a precise verification of whether the claims made about ReAct's advantages are accurate. The chosen chunk IDs and file name are appropriate since the answer directly references evidence from these sections.",
+        "question": "Is it correct to claim that the ReAct approach enables large language models to generate both reasoning traces and actions in an interleaved manner, leading to improved performance over existing baselines on language and decision-making tasks as well as providing more interpretable, human-like solutions?",
+        "answer": "Correct. The ReAct approach indeed enables large language models to generate reasoning traces and actions in an interleaved manner, resulting in greater synergy between reasoning and acting. This provides higher performance over state-of-the-art baselines on diverse tasks such as question answering and interactive decision-making, and produces human-like, interpretable task-solving trajectories.",
+        "question_type": "Fact-checking",
+        "chunk": [
+          {
+            "doc_id": "doc_ReAct_Synergizing_Re_89ae60cd_20250730_032749",
+            "chunk_id": [
+              "chunk_ReAct_idx001_9c546e",
+              "chunk_ReAct_idx010_770724",
+              "chunk_ReAct_idx027_d17261"
+            ]
+          }
+        ]
+      }
+    ],
+    "Lookup / Factual": [
+      {
+        "des": "This Lookup / Factual question synthesizes information from multiple chunks (1, 2, 4, 5, and 8) to probe the unique methods and contributions that allowed DeepSeekMath 7B to achieve strong mathematical reasoning performance, as described throughout the document. The answer integrates key points about data preparation, innovative training methods, and new reinforcement learning techniques, accurately summarizing what distinguishes DeepSeekMath 7B according to the text. The selected chunk IDs are correct as each provides essential evidence for the question and answer.",
+        "question": "What key strategies and innovations enabled DeepSeekMath 7B to achieve strong mathematical reasoning capabilities compared to other open-source models?",
+        "answer": "DeepSeekMath 7B's strong mathematical reasoning capabilities are attributed to several key strategies and innovations: (1) the creation and use of a large-scale, high-quality, multilingual DeepSeekMath Corpus, sourced from Common Crawl using a fastText-based classifier and refined by human annotation; (2) initializing training from the DeepSeek-Coder-Base-v1.5 7B model, leveraging prior code training to benefit mathematical reasoning; (3) extensive math-focused training, including chain-of-thought and program-of-thought instruction tuning; and (4) introducing Group Relative Policy Optimization (GRPO), a variant of Proximal Policy Optimization (PPO), which enhances mathematical reasoning and optimizes memory usage. These combined efforts resulted in DeepSeekMath 7B achieving performance close to state-of-the-art models like Gemini-Ultra and GPT-4, while outperforming other open-source counterparts.",
+        "question_type": "Lookup / Factual",
+        "chunk": [
+          {
+            "doc_id": "doc_Training_language_mo_eb834608_20250730_033911",
+            "chunk_id": [
+              "chunk_Training_idx001_c5cb92",
+              "chunk_Training_idx002_8775fc",
+              "chunk_Training_idx010_bec2a1",
+              "chunk_Training_idx011_939cd2",
+              "chunk_Training_idx024_c06a7f"
+            ]
+          }
+        ]
+      },
+      {
+        "des": "This is a good Lookup / Factual question because it synthesizes key methodological and comparative insights from at least three chunks—chunks 0, 2, and 4—to clearly inquire about the specific process of prompt construction using AUTOPROMPT and how the method's results compare to manual prompt creation. The question requires an answer that integrates the overview and mechanics of token replacement and optimization, as well as comparative performance outcomes between manual and automated prompts for models like BERT and RoBERTa. The file and chunk IDs referenced capture the necessary content to support an accurate, multi-faceted answer.",
+        "question": "How does AUTOPROMPT automatically construct prompts for masked language models, and how does its performance in tasks such as sentiment analysis compare to manual prompt-based approaches for models like BERT and RoBERTa?",
+        "answer": "AUTOPROMPT constructs customized prompts for a specific task and masked language model (MLM) by taking original task inputs and mapping them to a sequence of tokens using a template that includes a special [MASK] token. The method introduces trigger tokens into the prompt, which are initialized as [MASK] tokens and iteratively updated using a gradient-based search to maximize the likelihood that the desired label appears in the [MASK] position. In each iteration, trigger tokens are evaluated and replaced with candidates that are estimated to improve label likelihood, using batches of labeled data and repeated updates. The final prompt is chosen based on its performance on withheld development data. In comparison to manually constructed prompts, AUTOPROMPT-generated prompts performed significantly better; for example, in sentiment analysis, BERT's accuracy improved from 63.2% (manual) to 82.3% (AUTOPROMPT), and RoBERTa improved from 85.2% (manual) to 91.4% (AUTOPROMPT). These results indicate that automatically generated prompts are more effective and can elicit model knowledge more reliably than those constructed by intuition.",
+        "question_type": "Lookup / Factual",
+        "chunk": [
+          {
+            "doc_id": "doc_AutoPrompt_Eliciting_6081d079_20250730_035901",
+            "chunk_id": [
+              "chunk_AutoPrompt_idx003_c2dd9b",
+              "chunk_AutoPrompt_idx005_f1b1e5",
+              "chunk_AutoPrompt_idx008_07a64b",
+              "chunk_AutoPrompt_idx009_f46336"
+            ]
+          }
+        ]
+      }
+    ],
+    "True/False": [
+      {
+        "des": "This True/False question leverages the information in chunk 0 and chunk 1 regarding the process and outcomes of curating and post-processing a high-quality vision-language alignment dataset for MiniGPT-4. Specifically, chunk 0 describes generating and manually refining 5,000 image-text pairs, with only about 3,500 ultimately meeting the quality standards for the second-stage alignment. Chunk 1 describes how these curated pairs are used in the second-stage fine-tuning. The answer is 'True' because both chunks confirm that approximately 3,500 high-quality pairs were used for the second-stage process. The chunk_ids reflect the exact relevant sections.",
+        "question": "Is it true that only about 3,500 out of 5,000 initially generated image-text pairs were ultimately used for the second-stage alignment of MiniGPT-4 after manual qualification and post-processing?",
+        "answer": "True",
+        "question_type": "True/False",
+        "chunk": [
+          {
+            "doc_id": "doc_6224_MiniGPT_4_Enhan_cf6497ae_20250730_040115",
+            "chunk_id": [
+              "chunk_6224_idx006_c3f28b",
+              "chunk_6224_idx007_3bce40"
+            ]
+          }
+        ]
+      },
+      {
+        "des": "This is a good question because it tests whether MiniGPT-4's improved performance over BLIP-2, especially in handling advanced vision-language tasks such as meme interpretation, recipe generation, advertisement creation, and poem composition, is consistently supported across both qualitative and quantitative analysis. The answer accurately references chunk 1 and chunk 2 for MiniGPT-4's performance superiority, as well as chunk 3, which further discusses the significant reductions in failure rates after the second-stage fine-tuning. The selected file and chunk IDs are appropriate as all cited content is found in the provided document and specifically addresses the comparative analysis between MiniGPT-4 and BLIP-2.",
+        "question": "Is it true that MiniGPT-4 outperforms BLIP-2 in advanced vision-language tasks such as meme interpretation, recipe generation, advertisement creation, and poem composition, and that it achieves significantly lower failure rates in detailed caption and poem generation tasks after second-stage fine-tuning?",
+        "answer": "True",
+        "question_type": "True/False",
+        "chunk": [
+          {
+            "doc_id": "doc_6224_MiniGPT_4_Enhan_cf6497ae_20250730_040115",
+            "chunk_id": [
+              "chunk_6224_idx009_18e934",
+              "chunk_6224_idx010_cde9b7",
+              "chunk_6224_idx011_e27a5c"
+            ]
+          }
+        ]
+      }
+    ],
+    "List / Set": [
+      {
+        "des": "This is a good question because it leverages chunks 3 and 4, both of which describe the movement options for Alice's simulation along the x and y axes. The answer is accurate and directly supported by the provided code snippets and descriptions: Alice can (1) increase x by 2 and decrease y by 5, (2) increase x by 1 and decrease y by 2, or (3) keep x unchanged and increase y by 4. The file name and chunk IDs are correctly selected as they both contribute to the full list of movement options.",
+        "question": "What are the three different ways Alice can move a point during each iteration in the described simulation?",
+        "answer": "The three options for Alice's movement during each iteration are: (1) increase x by 2 and decrease y by 5, (2) increase x by 1 and decrease y by 2, and (3) keep x unchanged and increase y by 4.",
+        "question_type": "List / Set",
+        "chunk": [
+          {
+            "doc_id": "doc_Textbooks_Are_All_Yo_0639274d_20250730_032939",
+            "chunk_id": [
+              "chunk_Textbooks_idx037_6fb877",
+              "chunk_Textbooks_idx038_619ebc"
+            ]
+          }
+        ]
+      },
+      {
+        "des": "This is a good List / Set type question because it draws on multiple chunks that describe notable approaches to unsupervised and supervised pre-training techniques in natural language processing. Chunk 1 explains unsupervised feature-based approaches, including ELMo and sentence/paragraph embeddings, while chunk 2 describes unsupervised fine-tuning methods and models such as OpenAI GPT. Chunk 3 includes transfer learning from supervised sources. Combining these three chunks provides a comprehensive set of prominent methods in pre-training for language models, making the answer both accurate and comprehensive. The chunk IDs and filenames are correctly linked to the source sentences that list the approaches.",
+        "question": "What are some prominent pre-training approaches in natural language processing mentioned in the document, and how do they differ in their objective or methodology?",
+        "answer": "Prominent pre-training approaches in natural language processing include:\n\n1. Unsupervised feature-based approaches, such as pre-trained word embeddings (e.g., Brown et al., Word2Vec, GloVe), which use objectives like left-to-right language modeling or discriminating correct from incorrect words, and extend to sentence or paragraph embeddings with objectives such as ranking next sentences or denoising autoencoders.\n2. Contextual embedding methods like ELMo, which extract features from both left-to-right and right-to-left language models, producing context-sensitive representations by concatenating the outputs.\n3. Unsupervised fine-tuning approaches, where sentence or document encoders are pre-trained from unlabeled text and then fine-tuned for downstream tasks (e.g., ULMFiT, OpenAI GPT). These often use left-to-right language modeling or autoencoder tasks.\n4. Transfer learning from supervised data, where models are pre-trained on large supervised datasets for tasks such as natural language inference or machine translation, and then fine-tuned for specific tasks.\n\nThese approaches differ in whether they use feature-based or fine-tuning strategies, their training objectives (e.g., left-to-right prediction, masked token prediction, sentence ranking), and the type of contextual information they use (unidirectional vs. bidirectional).",
+        "question_type": "List / Set",
+        "chunk": [
+          {
+            "doc_id": "doc_BERT_Pre_training_of_67f0368a_20250730_033757",
+            "chunk_id": [
+              "chunk_BERT_idx004_799a95",
+              "chunk_BERT_idx005_50d819",
+              "chunk_BERT_idx006_90535f"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "multi_doc_multi_chunk": {
+    "Explanatory": [
+      {
+        "des": "This question synthesizes information from the 'doc_Retrieval_Augmented__4e3d4bc0_20250730_032513' document (chunks 15-19) and the 'doc_Exploring_the_Limits_6013e909_20250730_040318' document (chunks 11-13). The question focuses on how pre-training objectives/data and retrieval-augmented architectures contribute to the success of large language models on knowledge-intensive NLP tasks. Both documents discuss foundational elements for state-of-the-art performance in knowledge-intensive NLP, including model architecture (seq2seq, RAG), usage of pre-trained data, denoising objectives, and the combination of parametric and non-parametric memory. The selected chunk IDs reflect where this information is introduced or discussed in detail. This explanatory-style question is challenging and requires an understanding of multiple design choices in current LLM research.",
+        "question": "How do retrieval-augmented architectures and the choice of pre-training objectives and datasets influence the performance of large language models in knowledge-intensive NLP tasks, and what are the comparative benefits of combining parametric and non-parametric memory components?",
+        "answer": "Retrieval-augmented architectures, such as the Retrieval-Augmented Generation (RAG) models, enhance large language model performance by combining parametric memory (a pre-trained seq2seq transformer like BART) with non-parametric memory (a dense vector index of Wikipedia accessed via a neural retriever). According to the RAG paper, this approach 'generates more specific, diverse and factual language than a state-of-the-art parametric-only seq2seq baseline,' and allows knowledge to be 'directly revised and expanded, and accessed knowledge can be inspected and interpreted' (doc_Retrieval_Augmented__4e3d4bc0_20250730_032513, chunks 15, 16).\n\nAdditionally, pre-training objectives such as denoising (e.g., BERT-style objectives or those used for BART) and the careful selection of large, diverse datasets (such as Common Crawl or the C4 dataset) are crucial for transfer learning and improve model generalization and speed (doc_Exploring_the_Limits_6013e909_20250730_040318, chunks 11, 12, 13). The exploration of span-corruption over iid masking as a denoising objective offers training speed-ups and marginal accuracy improvements. As noted, 'the most significant difference in performance we observed was that denoising objectives outperformed language modeling and deshuffling for pre-training.'\n\nThe comparative advantage of combining parametric and non-parametric memory is that models can not only generalize from extensive pre-training but also retrieve and ground generations in up-to-date and explicit facts, thereby improving factual accuracy and adaptability over purely parameter-based knowledge stores.",
+        "question_type": "Explanatory",
+        "chunk": [
+          {
+            "doc_id": "doc_Retrieval_Augmented__4e3d4bc0_20250730_032513",
+            "chunk_id": [
+              "chunk_Retrieval_idx001_9ba287",
+              "chunk_Retrieval_idx002_473e7f",
+              "chunk_Retrieval_idx005_955a3f",
+              "chunk_Retrieval_idx006_7995ac"
+            ]
+          },
+          {
+            "doc_id": "doc_Exploring_the_Limits_6013e909_20250730_040318",
+            "chunk_id": [
+              "chunk_Exploring_idx024_e25af2",
+              "chunk_Exploring_idx025_7b2b35",
+              "chunk_Exploring_idx026_1526b6"
+            ]
+          }
+        ]
+      },
+      {
+        "des": "This question synthesizes data from at least two documents (doc_Finetuned_Language_M_25628252_20250730_033513 and doc_RLAIF_Scaling_Reinfo_ded55003_20250730_034958) regarding the training of reward models (RMs) for reinforcement learning from human feedback (RLHF) and related techniques. The answer correctly addresses the key findings about human- vs. AI-derived reward models, initialization approaches, and the surprising relationship between reward model accuracy and RLHF final performance, all of which are directly referenced in the selected chunks.",
+        "question": "What differences were observed between reward models (RMs) trained on human feedback versus AI feedback, and how did the initialization technique and RM accuracy relate to the final reinforcement learning policy performance, according to the studies on large language model finetuning and RLHF?",
+        "answer": "Reward models (RMs) trained on human feedback consistently outperformed those trained on AI feedback in terms of pairwise accuracy on a holdout set of human preferences, as seen in summarization (human: 79.3%, AI: 74.2%), helpful dialogue (human: 76.0%, AI: 67.8%), and harmless dialogue tasks (human: 72.1%, AI: 69.7%). The initialization of summarization RMs from PaLM 2 XS or from the SFT model produced similar but slightly variable outcomes (PaLM 2 XS/Human: 79.3%, SFT/Human: 78.7%; PaLM 2 XS/AI: 73.0%, SFT/AI: 74.2%). However, higher reward model accuracy did not always translate to better final reinforcement learning performance: for instance, summarization RMs trained with different prompting techniques had reversed accuracy rankings compared to final RL performance, suggesting RM accuracy does not fully predict RLHF or RLAIF effectiveness.",
+        "question_type": "Explanatory",
+        "chunk": [
+          {
+            "doc_id": "doc_Finetuned_Language_M_25628252_20250730_033513",
+            "chunk_id": [
+              "chunk_Finetuned_idx025_ccb161"
+            ]
+          },
+          {
+            "doc_id": "doc_RLAIF_Scaling_Reinfo_ded55003_20250730_034958",
+            "chunk_id": [
+              "chunk_RLAIF_idx034_c78edf"
+            ]
+          }
+        ]
+      }
+    ],
+    "Lookup / Factual": [
+      {
+        "des": "This question integrates information from both the doc_QLoRA_Efficient_Fine_6e74f985_20250730_032114 and doc_FLAN_INSTRUCTION_TUNIN_f6c0c39c_20250730_031844 files to ask about the datasets and benchmarks used during the finetuning and evaluation of instruction-tuned models, highlighting the connection between QLoRA-based instruction tuning and open instruction datasets such as FLAN and Alpaca. The answer accurately references the use of FLAN v2 and Alpaca for large-scale instruction tuning as well as the use of MMLU for evaluation, tying together details from multiple relevant chunks. The selected files and chunk IDs are correct as both files present details needed to fully answer the question.",
+        "question": "Which datasets were used for instruction tuning and evaluation in experiments with QLoRA finetuning on large language models, and what benchmark was used to assess the models' performance?",
+        "answer": "For QLoRA instruction tuning experiments on large language models, the datasets used included FLAN v2 and Alpaca, as stated: \"we finetune LLaMA 7B through 65B on two instruction following datasets, Alpaca and FLAN v2, and evaluate on the MMLU benchmark via 5-shot accuracy.\" Additionally, FLAN is described as a large-scale instruction tuning corpus in which models are evaluated for their ability to generalize to unseen tasks (\"we aggregate 62 text datasets ... into a single mixture ... then instruction tune a pretrained language model on the mixture of all datasets\"). The main benchmark used for evaluation is MMLU (Massive Multitask Language Understanding).",
+        "question_type": "Lookup / Factual",
+        "chunk": [
+          {
+            "doc_id": "doc_QLoRA_Efficient_Fine_6e74f985_20250730_032114",
+            "chunk_id": [
+              "chunk_QLoRA_idx006_cc2eab",
+              "chunk_QLoRA_idx007_f01a25"
+            ]
+          },
+          {
+            "doc_id": "doc_FLAN_INSTRUCTION_TUNIN_f6c0c39c_20250730_031844",
+            "chunk_id": [
+              "chunk_Finetuned_idx004_6cb11b",
+              "chunk_Finetuned_idx005_b64cea"
+            ]
+          }
+        ]
+      },
+      {
+        "des": "This question synthesizes and compares the performance of LLaMA and GPT-3 language models on the TriviaQA benchmark, drawing on details and results from both the doc_LLaMA_Language_Models-are_ft_20250730_035956 and doc_WebGPT_Browser_assis_e4a075b4_20250730_031925 files. Chunks from the first document highlight LLaMA's state-of-the-art performance and provide specific numbers for the TriviaQA benchmark, while the second document presents GPT-3's TriviaQA exact match scores and setup. By comparing the two, the answer combines results from multiple documents for a clear, factual lookup question.",
+        "question": "How do the TriviaQA benchmark exact match scores compare between LLaMA and GPT-3 language models according to the reported evaluations?",
+        "answer": "According to reported evaluations, LLaMA-65B achieved an exact match score of 68.2% in the zero-shot setting on TriviaQA (doc_LLaMA_Language_Models-are_ft_20250730_035956, chunk 2). GPT-3 175B achieved an exact match score of 58.7% (total) on the TriviaQA development set (doc_WebGPT_Browser_assis_e4a075b4_20250730_031925, chunk 29). Thus, LLaMA-65B outperforms GPT-3 175B on this benchmark.",
+        "question_type": "Lookup / Factual",
+        "chunk": [
+          {
+            "doc_id": "doc_LLaMA_Language_Models-are_ft_20250730_035956",
+            "chunk_id": [
+              "chunk_LLaMA_idx010_7ccf35"
+            ]
+          },
+          {
+            "doc_id": "doc_WebGPT_Browser_assis_e4a075b4_20250730_031925",
+            "chunk_id": [
+              "chunk_WebGPT_idx033_d30477"
+            ]
+          }
+        ]
+      }
+    ],
+    "Time-related": [
+      {
+        "des": "This is a time-related, cross-document question about the carbon footprint and energy consumption for large language models' training and development, which combines detailed figures and contextual data from two different documents: one about Codex and another about LLaMA. Both documents explicitly discuss energy consumed and methods for evaluating the carbon footprint. These are comparable and complementary perspectives from contemporary large model development, making it a strong multi-source question.",
+        "question": "How much energy was consumed and what were the estimated carbon emissions from training and developing large language models such as Codex and LLaMA, and what methods or factors influenced the measurement of their carbon footprint?",
+        "answer": "For Codex, the training of GPT-3-12B (which underlies Codex) consumed hundreds of petaflop/s-days of compute and was performed on a platform (Azure) that sources significant amounts of renewable energy and purchases carbon credits, thereby reducing its carbon footprint (Codex: 7.6). For LLaMA, the estimated energy consumption for developing the models was around 2,638 MWh, leading to a total emission of 1,015 tCO2e (tons of carbon dioxide equivalent), using the US national average carbon intensity factor of 0.385 kg CO2e/KWh (LLaMA: 6). Both documents highlight that the actual carbon impact depends on energy sources (such as renewable energy or national grid intensity) and that reporting standards included factors such as duration of computation and number/type of GPU resources.",
+        "question_type": "Time-related",
+        "chunk": [
+          {
+            "doc_id": "doc_Codex_Paper_9f58051b_20250730_033034",
+            "chunk_id": [
+              "chunk_Evaluating_idx026_c115e4"
+            ]
+          },
+          {
+            "doc_id": "doc_LLaMA_Open_and_Effic_e00739a0_20250730_035416",
+            "chunk_id": [
+              "chunk_LLaMA_idx022_2ded59"
+            ]
+          }
+        ]
+      },
+      {
+        "des": "This question synthesizes information about pre-training datasets for large language models from both 'doc_Exploring_the_Limits_6013e909_20250730_040318' and 'doc_Language_Models_are__7668c87d_20250730_035137', with support from related works noted in 'doc_Language_Models_are__587f3579_20250730_035956'. The answer accurately captures the timing, size, and characteristics of the Colossal Clean Crawled Corpus (C4), details on when it was collected, and how concerns about data contamination have been raised and studied. All referenced chunk IDs directly provide factual information on the subject.",
+        "question": "When was the Colossal Clean Crawled Corpus (C4) dataset used for language model pre-training collected, what steps were taken to clean it, and how has its use affected concerns about benchmark data contamination?",
+        "answer": "The Colossal Clean Crawled Corpus (C4) was created by downloading web-extracted text from Common Crawl in April 2019 and applying a series of filters to remove non-natural language, duplicates, and undesired content (doc_Exploring_the_Limits_6013e909_20250730_040318, chunk 7). The filtering steps included: keeping lines ending in terminal punctuation, filtering for English language content, removing lines with offensive or placeholder text, removing code and boilerplate, and deduplicating repeated text. This process resulted in a dataset of about 750 GB of reasonably clean English text. However, the increasing use of such large internet-sourced datasets, including C4 and Common Crawl, has raised concerns about contamination of benchmarks used to evaluate language models, as highlighted in the analysis in 'Language_Models_are__7668c87d_20250730_035137' (chunk 16). Efforts have been made to detect and analyze overlap between training data and benchmarks, finding potential contamination in certain benchmarks but generally negligible effects on reported performance, except for a few flagged cases.",
+        "question_type": "Time-related",
+        "chunk": [
+          {
+            "doc_id": "doc_Exploring_the_Limits_6013e909_20250730_040318",
+            "chunk_id": [
+              "chunk_Exploring_idx005_0f784d"
+            ]
+          },
+          {
+            "doc_id": "doc_Language_Models_are__7668c87d_20250730_035137",
+            "chunk_id": [
+              "chunk_Language_idx036_4f5b2e"
+            ]
+          }
+        ]
+      }
+    ],
+    "Domain-specific document QA": [
+      {
+        "des": "This question integrates information from multiple documents that discuss reward modeling in Reinforcement Learning from Human Feedback (RLHF) and its application to large language models (LLMs). Chunk 16 from doc_RLAIF_Scaling_Reinfo_ded55003_20250730_034958 describes the process of reward modeling by training a reward model on human preference data using pairs of model outputs. Chunk 17 from doc_Training_language_mo_ccd531c7_20250730_034052 elaborates on practical approaches, including batching techniques and loss/overfitting adjustments, for efficiently training reward models in the context of LLM alignment. The selected chunk IDs are correct because both specifically detail the technical methodology of reward model training and evaluation as applied to LLMs, covering both theory and implementation.",
+        "question": "How is reward modeling conducted in Reinforcement Learning from Human Feedback (RLHF) for large language models, and what techniques are used to effectively train reward models on human preferences?",
+        "answer": "Reward modeling in RLHF for large language models involves sampling pairs of responses from a supervised fine-tuned (SFT) model (or similar), which are then rated by human annotators for preference. As described, 'these annotations form a dataset of triplets (input, preferred response, non-preferred response),' and the reward model is trained to assign higher scores to preferred responses using a sigmoid-based loss function. To increase efficiency and prevent overfitting, labelers may be presented with multiple responses (e.g., 4–9), producing multiple comparisons per prompt. Batching all comparisons from a prompt as a single batch element helps avoid overfitting and makes training computationally efficient, as it reduces redundant forward passes and improves validation accuracy and log loss. The loss is normalized so human demonstration scores are centered before RL. (Chunks 16 and 17)",
+        "question_type": "Domain-specific document QA",
+        "chunk": [
+          {
+            "doc_id": "doc_RLAIF_Scaling_Reinfo_ded55003_20250730_034958",
+            "chunk_id": [
+              "chunk_RLAIF_idx027_afd4aa"
+            ]
+          },
+          {
+            "doc_id": "doc_Training_language_mo_ccd531c7_20250730_034052",
+            "chunk_id": [
+              "chunk_Training_idx008_752e49"
+            ]
+          }
+        ]
+      },
+      {
+        "des": "This question brings together explanations of the weak-to-strong generalization problem in LLM alignment from 'doc_Weak_to_Strong_Gener_a267ac2_20250730_033136' and relates it to practical alignment practices such as RLHF discussed in context of GPT-4 in 'doc_GPT_4_Technical_Repo_4c161bd2_20250730_040728'. The answer leverages both the methodological foundations and the implications for current scaling and alignment work, accurately synthesizing the intent and techniques from both sources.",
+        "question": "How does the 'weak-to-strong generalization' methodology help inform the alignment of large language models like GPT-4, and what are some advantages and limitations of this approach in the context of aligning superhuman models using techniques like RLHF?",
+        "answer": "The 'weak-to-strong generalization' methodology is a research technique that explores how models much stronger than their supervisors can be aligned and evaluated. In this setup, a weak supervisor model labels data, and a much more capable 'strong student' model is trained only on these weak labels; its performance is compared to one trained with ground-truth labels. This methodology offers advantages such as enabling scalable, empirical studies with available weak and strong models, facilitating scaling law research without direct human involvement, and being applicable to many tasks. As stated: 'It can be studied for any task of interest, making it easy to empirically test across a wide range of settings. Success will be practically useful even before we develop superhuman models: for example, if we find ways to align GPT-4 with only weak human supervision or with only GPT-3-level supervision, that would make it more convenient to align models today.' (doc_Weak_to_Strong_Gener_a267ac2_20250730_033136, chunk 27). However, there are limitations such as imitation saliency (future models may not imitate weak supervisors in the same way) and pretraining leakage (current models' pretraining may already include strong supervision signals). In the context of aligning LLMs like GPT-4, these insights relate directly to practices like RLHF (Reinforcement Learning from Human Feedback), where models are fine-tuned to align with human preferences and refusals. The weak-to-strong setup provides an empirical analog to scaling up human-aligned supervision, as described in the GPT-4 report: 'To align pretrained language models today, we finetune them using imitation learning on human demonstrations...or by using methods such as reinforcement learning from human feedback (RLHF)' (doc_Weak_to_Strong_Gener_a267ac2_20250730_033136, chunk 26). Thus, weak-to-strong generalization clarifies both methodological progress and current limits in aligning superhuman models such as GPT-4 using RLHF and scalable oversight approaches.",
+        "question_type": "Domain-specific document QA",
+        "chunk": [
+          {
+            "doc_id": "doc_Weak_to_Strong_Gener_a267ac2_20250730_033136",
+            "chunk_id": [
+              "chunk_Weak_idx003_746b3e",
+              "chunk_Weak_idx004_b81100"
+            ]
+          },
+          {
+            "doc_id": "doc_GPT_4_Technical_Repo_4c161bd2_20250730_040728",
+            "chunk_id": [
+              "chunk_GPT_idx015_793a23"
+            ]
+          }
+        ]
+      }
+    ],
+    "Fact-checking": [
+      {
+        "des": "This is a good fact-checking question because it asks whether ERNIE, a knowledge-enhanced pre-trained language model, outperforms BERT on knowledge-driven NLP tasks, specifically utilizing information mentioned in both the BERT and ERNIE documents. The answer is accurate and supported by direct references: the ERNIE document explicitly states that ERNIE significantly outperforms BERT on knowledge-driven tasks, and the BERT document provides the baseline performance and state-of-the-art context for BERT. The chunk selections reference both models and demonstrate the improvement that ERNIE offers when incorporating extra knowledge.",
+        "question": "Is it correct to claim that ERNIE significantly outperforms BERT on knowledge-driven NLP tasks by incorporating entity knowledge, and does ERNIE also achieve comparable results to BERT on other common NLP tasks?",
+        "answer": "Correct. According to the introduction of the ERNIE paper, \"The experimental results show that ERNIE significantly outperforms the state-of-the-art model BERT on these knowledge-driven tasks, by taking full advantage of lexical, syntactic, and knowledge information. We also evaluate ERNIE on other common NLP tasks, and ERNIE still achieves comparable results.\" The BERT paper establishes BERT as the state-of-the-art baseline across numerous NLP tasks.",
+        "question_type": "Fact-checking",
+        "chunk": [
+          {
+            "doc_id": "doc_ERNIE_Enhanced_Langu_d955d05c_20250730_040629",
+            "chunk_id": [
+              "chunk_ERNIE_idx002_f3e683"
+            ]
+          },
+          {
+            "doc_id": "doc_BERT_Pre-training_of_D_e12e23ab_20250730_040616",
+            "chunk_id": [
+              "chunk_BERT_idx010_4f3c38"
+            ]
+          }
+        ]
+      },
+      {
+        "des": "This question is focused on the ethical and societal risks associated with the use of AI-generated feedback and alignment techniques for large language models. The answer synthesizes and fact-checks claims about the risks, such as bias amplification and misuse potential, based on chunks from both doc_RLAIF_Scaling_Reinfo_ded55003_20250730_034958 (on risks of bias transfer and misuse from AI-generated preferences) and doc_Training_language_mo_ccd531c7_20250730_034052 (on broader impacts and risks of misuse of alignment techniques). Both documents independently highlight similar risks, and thus this is an appropriate fact-checking question whose answer involves referencing both sources.",
+        "question": "Is it accurate to claim that using AI-generated feedback and alignment techniques to train large language models carries risks such as amplifying biases present in the base models and increasing potential for misuse (e.g., generating misinformation or toxic content)?",
+        "answer": "Correct. Both documents explicitly acknowledge these risks. Chunk 13 from doc_RLAIF_Scaling_Reinfo_ded55003_20250730_034958 states: 'Utilizing AI-generated feedback as a source for model alignment has the potential risk of transferring biases from off-the-shelf LLMs to generated preferences. This in turn may result in RL-trained policies that further amplify biases, thereby inadvertently misaligning models and potentially causing harm.' It further warns about misuse risk: 'reducing the barriers to aligning LLMs also carries the risk of facilitating their misuse for malicious purposes ... to generate convincing misinformation or produce hateful and abusive content.' Similarly, chunk 25 from doc_Training_language_mo_ccd531c7_20250730_034052 says: 'making language models better at following user intentions also makes them easier to misuse. It may be easier to use these models to generate convincing misinformation, or hateful or abusive content.'",
+        "question_type": "Fact-checking",
+        "chunk": [
+          {
+            "doc_id": "doc_RLAIF_Scaling_Reinfo_ded55003_20250730_034958",
+            "chunk_id": [
+              "chunk_RLAIF_idx023_fe8071"
+            ]
+          },
+          {
+            "doc_id": "doc_Training_language_mo_ccd531c7_20250730_034052",
+            "chunk_id": [
+              "chunk_Training_idx023_d211b0"
+            ]
+          }
+        ]
+      }
+    ],
+    "True/False": [
+      {
+        "des": "This is a good True/False question because it connects the evaluation of language model truthfulness using the TruthfulQA dataset, as described in both the doc_Training_language_mo_ccd531c7 and doc_LLaMA_Open_and_Effic_e00739a0 documents. The answer is directly verifiable from both sources: the Training_language_mo document specifically says it uses TruthfulQA to evaluate truthfulness, and the LLaMA document reports their model's performance on the TruthfulQA benchmark, confirming that LLaMA is evaluated on this metric. The relevant file and chunk IDs are cited from both documents for complete coverage.",
+        "question": "True or False: Both InstructGPT and LLaMA models have been evaluated for truthfulness using the TruthfulQA dataset.",
+        "answer": "True",
+        "question_type": "True/False",
+        "chunk": [
+          {
+            "doc_id": "doc_Training_language_mo_ccd531c7_20250730_034052",
+            "chunk_id": [
+              "chunk_Training_idx009_5f8710"
+            ]
+          },
+          {
+            "doc_id": "doc_LLaMA_Open_and_Effic_e00739a0_20250730_035416",
+            "chunk_id": [
+              "chunk_LLaMA_idx021_c46909"
+            ]
+          }
+        ]
+      },
+      {
+        "des": "This is a True/False question that connects information about the training approaches for aligning large language models from both doc_Training_language_mo_eb834608_20250730_033911 (which describes the use of Proximal Policy Optimization (PPO) and introduces Group Relative Policy Optimization (GRPO)), and doc_WebGPT_Browser_assis_e4a075b4_20250730_031925 (which describes the use of PPO in training WebGPT for RLHF). Both documents discuss the RL phase of LLM alignment, and both explicitly refer to PPO as the standard RL algorithm. This makes it appropriate to judge the statement as true and reference the respective chunks.",
+        "question": "True or False: Proximal Policy Optimization (PPO) is a commonly used reinforcement learning algorithm for fine-tuning large language models with human feedback, and has been applied both in WebGPT and general LLM RLHF pipelines.",
+        "answer": "True",
+        "question_type": "True/False",
+        "chunk": [
+          {
+            "doc_id": "doc_Training_language_mo_eb834608_20250730_033911",
+            "chunk_id": [
+              "chunk_Training_idx015_8aa688"
+            ]
+          },
+          {
+            "doc_id": "doc_WebGPT_Browser_assis_e4a075b4_20250730_031925",
+            "chunk_id": [
+              "chunk_WebGPT_idx005_6c836f"
+            ]
+          }
+        ]
+      }
+    ],
+    "List / Set": [
+      {
+        "des": "This question compares model adaptation and compression methods referenced in both the DistilBERT and LoRA papers, specifically focusing on various strategies for reducing the size or improving the efficiency of large language models. Both sources discuss alternative techniques and their orthogonality. The answer is accurate as it synthesizes explicit lists from each document and properly cites chunk IDs. The chunk from DistilBERT (doc_DistilBERT_a_distill_74507d3e_20250730_032910, chunk 3) discusses task-specific distillation, pruning, quantization, and multi-distillation, while the LoRA paper (doc_LoRA_Low_Rank_Adapta_d5e8bd97_20250730_035554, chunk 15) mentions LoRA, combining methods, and parameter-efficient adaptation techniques such as adapters and prompt/prefix tuning, as well as referencing related works.",
+        "question": "What are several methods proposed for efficiently adapting or compressing large language models, and how do the DistilBERT and LoRA papers compare or combine these approaches?",
+        "answer": "Several methods for efficiently adapting or compressing large language models include:\n- Knowledge distillation (both task-specific and general-purpose), where a smaller student model is trained to replicate a larger teacher model. (DistilBERT)\n- Multi-distillation (combining knowledge of multiple teachers via multi-task learning). (DistilBERT)\n- Pruning (removing weights or entire attention heads with minimal performance loss). (DistilBERT)\n- Quantization (reducing numerical precision to shrink the model). (DistilBERT)\n- Adapter layers (inserting small trainable modules without updating the bulk of the pretrained model weights). (LoRA)\n- Low-rank adaptation (LoRA: introducing low-rank matrices to update a small subset of parameters). (LoRA)\n- Parameter-efficient tuning (e.g., prompt tuning, prefix tuning, and their combinations with LoRA). (LoRA)\n\nThe LoRA paper emphasizes that its low-rank adaptation technique is orthogonal and can be combined with other efficient adaptation methods, such as pruning, quantization, or adapters, for potential further improvements. DistilBERT, in turn, recommends general-purpose distillation as more broadly useful than only task-specific distillation and points out that pruning and quantization can be applied independently of distillation.",
+        "question_type": "List / Set",
+        "chunk": [
+          {
+            "doc_id": "doc_DistilBERT_a_distill_74507d3e_20250730_032910",
+            "chunk_id": [
+              "chunk_DistilBERT_idx009_99757f"
+            ]
+          },
+          {
+            "doc_id": "doc_LoRA_Low_Rank_Adapta_d5e8bd97_20250730_035554",
+            "chunk_id": [
+              "chunk_LoRA_idx019_736cb9"
+            ]
+          }
+        ]
+      },
+      {
+        "des": "This question is a List / Set type as it involves enumerating benchmarks and datasets used for evaluating large language models (LLMs) in the context of open-domain QA, reasoning, commonsense, and completion from multiple documents. It combines benchmark lists from doc_GLam_Efficient_Scali_f90bdd10_20250730_041208 (chunk 7), model results for question answering from doc_Toolformer_Language__9d342a3c_20250730_035744 (chunk 23), details on code tasks from doc_PaLM_Scaling_Languag_4fdcc458_20250730_032232 (chunk 20), and also mentions evaluations in doc_LLaMA_Open_and_Effic_e00739a0_20250730_035416 (chunk 12). This makes the question comprehensive, directly answerable from the selected chunks, and useful for understanding key LLM evaluation standards.",
+        "question": "What are the main benchmark datasets used to evaluate large language models on open-domain question answering, reading comprehension, reasoning, commonsense, and code tasks?",
+        "answer": "The main benchmark datasets used to evaluate large language models include:\n\n- Open-Domain Question Answering: TriviaQA, Natural Questions (NQ), Web Questions (WebQS)\n- Cloze and Completion: LAMBADA, HellaSwag, StoryCloze\n- Winograd-Style: Winograd, WinoGrande\n- Common Sense Reasoning: PIQA, ARC (Easy and Challenge), OpenBookQA\n- In-context Reading Comprehension: DROP, CoQA, QuAC, SQuADv2, RACEh, RACE-m\n- SuperGLUE: BoolQ, CB, COPA, RTE, WiC, WSC, MultiRC, ReCoRD\n- Natural Language Inference: ANLI R1, R2, R3\n- Code Tasks: HumanEval, MBPP, TransCoder, DeepFix, and GSM8K-Python\n- Math and Reasoning: ASDiv, SVAMP, MAWPS, GSM8K, AQuA, CommonsenseQA, StrategyQA\n\nThese benchmarks are used across different works to assess the performance of LLMs on a range of language, reasoning, and code generation abilities.",
+        "question_type": "List / Set",
+        "chunk": [
+          {
+            "doc_id": "doc_GLam_Efficient_Scali_f90bdd10_20250730_041208",
+            "chunk_id": [
+              "chunk_GLam_idx021_17a9cc"
+            ]
+          },
+          {
+            "doc_id": "doc_Toolformer_Language__9d342a3c_20250730_035744",
+            "chunk_id": [
+              "chunk_Toolformer_idx010_d5894c",
+              "chunk_Toolformer_idx009_4eb9b6",
+              "chunk_Toolformer_idx008_3385b9"
+            ]
+          },
+          {
+            "doc_id": "doc_PaLM_Scaling_Languag_4fdcc458_20250730_032232",
+            "chunk_id": [
+              "chunk_PaLM_idx017_119447",
+              "chunk_PaLM_idx018_19320f",
+              "chunk_PaLM_idx019_41a046"
+            ]
+          },
+          {
+            "doc_id": "doc_LLaMA_Open_and_Effic_e00739a0_20250730_035416",
+            "chunk_id": [
+              "chunk_LLaMA_idx027_6a2ce7"
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

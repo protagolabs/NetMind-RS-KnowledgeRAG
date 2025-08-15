@@ -146,7 +146,7 @@ Rewriting rules:
         self, 
         query: str,  
         documents_summary: str,
-        max_queries: int = 2
+        max_queries: int = 4
     ) -> Tuple[List[RewrittenQuery], Dict[str, float]]:
         """改写用户查询。
         
@@ -157,7 +157,7 @@ Rewriting rules:
             query: 用户原始查询
             intent: 意图识别结果，包含意图类型和推理过程
             documents_summary: 知识库中所有文档的摘要信息
-            max_queries: 最大改写查询数量，默认为5
+            max_queries: 最大改写查询数量，默认为4
             
         Returns:
             包含以下内容的元组：
@@ -211,5 +211,12 @@ Rewriting rules:
                 reasoning=query_item.reasoning
             )
             rewritten_queries.append(rewritten_query)
-        
+        # 同时也要把原始的query也放进去
+        rewritten_queries.append(RewrittenQuery(
+            original_query=query,
+            rewritten_query=query,
+            intent_flag=parsed_result.intent_flag,
+            reasoning="原始查询"
+        ))
+
         return rewritten_queries, cost_info
