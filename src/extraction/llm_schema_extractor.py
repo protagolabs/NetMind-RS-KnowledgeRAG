@@ -8,7 +8,7 @@ for comprehensive and accurate knowledge extraction.
 import os
 import json
 import logging
-from typing import List, Dict, Any, Optional, Tuple
+from typing import List, Dict, Any, Optional, Tuple, Union
 from datetime import datetime
 from pathlib import Path
 
@@ -78,7 +78,7 @@ class LLMSchemaExtractor:
         content: str,
         schema: DocumentSchema,
         chunk_id: Optional[str] = None
-    ) -> List[Dict[str, Any]]:
+    ) -> Tuple[List[Dict[str, Any]], Dict[str, Any]]:
         """
         Extract entities using LLM based on schema.
         
@@ -88,7 +88,7 @@ class LLMSchemaExtractor:
             chunk_id: Optional chunk identifier
             
         Returns:
-            List of extracted entities
+            Tuple of (List of extracted entities, usage dict)
         """
         entity_schema = schema.entity_schema
         
@@ -141,6 +141,13 @@ Focus on technical contributions, not generic concepts. Be comprehensive."""
                 response_format={"type": "json_object"}
             )
             
+            # Track usage for cost calculation
+            usage = {
+                "prompt_tokens": response.usage.prompt_tokens,
+                "completion_tokens": response.usage.completion_tokens,
+                "total_tokens": response.usage.total_tokens
+            }
+            
             result = json.loads(response.choices[0].message.content)
             entities = result.get("entities", []) if "entities" in result else result
             
@@ -153,11 +160,11 @@ Focus on technical contributions, not generic concepts. Be comprehensive."""
                 for entity in entities:
                     entity["chunk_id"] = chunk_id
             
-            return entities
+            return entities, usage
             
         except Exception as e:
             logger.error(f"LLM extraction failed: {e}")
-            return []
+            return [], {}
     
     def extract_relationships_with_llm(
         self,
@@ -165,7 +172,7 @@ Focus on technical contributions, not generic concepts. Be comprehensive."""
         entities: List[Dict[str, Any]],
         schema: DocumentSchema,
         chunk_id: Optional[str] = None
-    ) -> List[Dict[str, Any]]:
+    ) -> Tuple[List[Dict[str, Any]], Dict[str, Any]]:
         """
         Extract relationships using LLM based on schema.
         
@@ -176,7 +183,7 @@ Focus on technical contributions, not generic concepts. Be comprehensive."""
             chunk_id: Optional chunk identifier
             
         Returns:
-            List of extracted relationships
+            Tuple of (List of extracted relationships, usage dict)
         """
         rel_schema = schema.relationship_schema
         
@@ -235,6 +242,13 @@ Be comprehensive and precise."""
                 response_format={"type": "json_object"}
             )
             
+            # Track usage for cost calculation
+            usage = {
+                "prompt_tokens": response.usage.prompt_tokens,
+                "completion_tokens": response.usage.completion_tokens,
+                "total_tokens": response.usage.total_tokens
+            }
+            
             result = json.loads(response.choices[0].message.content)
             relationships = result.get("relationships", []) if "relationships" in result else result
             
@@ -247,15 +261,15 @@ Be comprehensive and precise."""
                 for rel in relationships:
                     rel["chunk_id"] = chunk_id
             
-            return relationships
+            return relationships, usage
             
         except Exception as e:
             logger.error(f"LLM relationship extraction failed: {e}")
-            return []
+            return [], {}
     
     def extract_from_document(
         self,
-        document_path: Path,
+        document_path,
         override_type: Optional[DocumentType] = None,
         max_chunks: int = 10
     ) -> Dict[str, Any]:
@@ -263,24 +277,36 @@ Be comprehensive and precise."""
         Extract knowledge from document using LLM and schema.
         
         Args:
-            document_path: Path to document or parsed JSON
+            document_path: Path to document, parsed JSON, or EnhancedParsedDocument object
             override_type: Optional document type override
             max_chunks: Maximum chunks to process
             
         Returns:
-            Extraction results
+            Extraction results with output_file, entity_count, relationship_count
         """
-        # Load document
-        if document_path.suffix == ".json":
-            with open(document_path, 'r') as f:
-                data = json.load(f)
-            content = data.get("content", "")
-            chunks = data.get("text_chunks", [])
+        # Handle different input types
+        if isinstance(document_path, EnhancedParsedDocument):
+            # Direct EnhancedParsedDocument object
+            parsed_doc = document_path
+            # Access content directly from parsed_doc, not from metadata
+            content = parsed_doc.content
+            chunks = parsed_doc.text_chunks
+            doc_name = getattr(parsed_doc.metadata, "file_name", "document")
+        elif isinstance(document_path, (str, Path)):
+            document_path = Path(document_path)
+            doc_name = document_path.name
+            if document_path.suffix == ".json":
+                with open(document_path, 'r') as f:
+                    data = json.load(f)
+                content = data.get("content", "")
+                chunks = data.get("text_chunks", [])
+            else:
+                # Would need proper document parsing
+                with open(document_path, 'r') as f:
+                    content = f.read()
+                chunks = []
         else:
-            # Would need proper document parsing
-            with open(document_path, 'r') as f:
-                content = f.read()
-            chunks = []
+            raise TypeError(f"Unsupported document type: {type(document_path)}")
         
         # Classify document
         if override_type:
@@ -288,66 +314,84 @@ Be comprehensive and precise."""
             schema = get_schema(doc_type)
         else:
             doc_type, _, schema = self.classifier.classify(
-                content[:5000],
-                filename=document_path.name
+                content[:5000] if content else (chunks[0].content[:5000] if chunks else ""),
+                filename=doc_name
             )
         
         logger.info(f"Processing as {doc_type} with {schema.document_type} schema")
         
         all_entities = []
         all_relationships = []
+        self.last_usage = []  # Track API usage for cost tracking
         
         # Process chunks or full content
         if chunks:
             # Process each chunk
             for i, chunk in enumerate(chunks[:max_chunks]):
-                chunk_content = chunk.get("content", "") if isinstance(chunk, dict) else str(chunk)
-                chunk_id = chunk.get("id", f"chunk_{i}") if isinstance(chunk, dict) else f"chunk_{i}"
+                # Handle ContentChunk objects from EnhancedParsedDocument
+                if hasattr(chunk, 'content'):
+                    chunk_content = chunk.content
+                    chunk_id = chunk.chunk_id if hasattr(chunk, 'chunk_id') else f"chunk_{i}"
+                elif isinstance(chunk, dict):
+                    chunk_content = chunk.get("content", "")
+                    chunk_id = chunk.get("id", f"chunk_{i}")
+                else:
+                    chunk_content = str(chunk)
+                    chunk_id = f"chunk_{i}"
                 
                 logger.info(f"Processing chunk {i+1}/{min(len(chunks), max_chunks)}")
                 
                 # Extract entities from chunk
-                entities = self.extract_entities_with_llm(
+                entities, entity_usage = self.extract_entities_with_llm(
                     chunk_content,
                     schema,
                     chunk_id
                 )
                 all_entities.extend(entities)
+                if entity_usage:
+                    self.last_usage.append(entity_usage)
                 
                 # Extract relationships from chunk
-                relationships = self.extract_relationships_with_llm(
+                relationships, rel_usage = self.extract_relationships_with_llm(
                     chunk_content,
                     entities,
                     schema,
                     chunk_id
                 )
                 all_relationships.extend(relationships)
+                if rel_usage:
+                    self.last_usage.append(rel_usage)
         else:
             # Process full content in sections
             sections = content.split('\n\n')
             for i, section in enumerate(sections[:max_chunks]):
                 if len(section) > 100:  # Skip very short sections
-                    entities = self.extract_entities_with_llm(
+                    entities, entity_usage = self.extract_entities_with_llm(
                         section,
                         schema,
                         f"section_{i}"
                     )
                     all_entities.extend(entities)
+                    if entity_usage:
+                        self.last_usage.append(entity_usage)
                     
-                    relationships = self.extract_relationships_with_llm(
+                    relationships, rel_usage = self.extract_relationships_with_llm(
                         section,
                         entities,
                         schema,
                         f"section_{i}"
                     )
                     all_relationships.extend(relationships)
+                    if rel_usage:
+                        self.last_usage.append(rel_usage)
         
         # Deduplicate
         all_entities = self._deduplicate_entities(all_entities)
         all_relationships = self._deduplicate_relationships(all_relationships)
         
-        return {
-            "document_type": doc_type,
+        # Prepare extraction results
+        extraction_results = {
+            "document_type": doc_type.value if hasattr(doc_type, 'value') else str(doc_type),
             "schema_used": schema.document_type,
             "entities": all_entities,
             "relationships": all_relationships,
@@ -360,8 +404,39 @@ Be comprehensive and precise."""
             "extraction_metadata": {
                 "timestamp": datetime.now().isoformat(),
                 "model": self.model,
-                "chunks_processed": min(len(chunks) if chunks else len(sections), max_chunks)
+                "chunks_processed": min(len(chunks) if chunks else len(content.split('\n\n')), max_chunks)
             }
+        }
+        
+        # Save extraction results to file if document was from EnhancedParsedDocument
+        if isinstance(document_path, EnhancedParsedDocument):
+            # Create output filename based on document metadata
+            base_name = getattr(parsed_doc.metadata, "file_name", "document").replace(".pdf", "").replace(".json", "")
+            # Try to get the original file path from metadata
+            if hasattr(parsed_doc.metadata, "file_path") and parsed_doc.metadata.file_path:
+                # Save next to the original PDF file
+                original_path = Path(parsed_doc.metadata.file_path)
+                output_path = original_path.parent / f"{base_name}.llm_extraction.json"
+            else:
+                # Fallback to current directory
+                output_path = Path(f"./{base_name}.llm_extraction.json")
+            
+            with open(output_path, 'w', encoding='utf-8') as f:
+                json.dump(extraction_results, f, indent=2, ensure_ascii=False, default=str)
+            
+            logger.info(f"Extraction results saved to: {output_path}")
+        else:
+            output_path = str(document_path).replace(".json", ".llm_extraction.json")
+            with open(output_path, 'w', encoding='utf-8') as f:
+                json.dump(extraction_results, f, indent=2, ensure_ascii=False, default=str)
+        
+        # Return in the format expected by the pipeline
+        return {
+            "output_file": str(output_path),
+            "entity_count": len(all_entities),
+            "relationship_count": len(all_relationships),
+            "document_type": doc_type.value if hasattr(doc_type, 'value') else str(doc_type),
+            "extraction_results": extraction_results  # Include full results for backward compatibility
         }
     
     def _deduplicate_entities(self, entities: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
@@ -470,51 +545,59 @@ def test_llm_extraction(model: str = "gpt-3.5-turbo", max_chunks: int = 5):
     print(f"{'='*40}")
     
     print(f"\nDocument Type: {results['document_type']}")
-    print(f"Schema Used: {results['schema_used']}")
+    print(f"Output File: {results['output_file']}")
+    print(f"Entity Count: {results['entity_count']}")
+    print(f"Relationship Count: {results['relationship_count']}")
     
-    print(f"\nEntities Extracted: {results['statistics']['total_entities']}")
-    print("Entity Types:")
-    for entity_type, count in results['statistics']['entity_types'].items():
-        print(f"  • {entity_type}: {count}")
+    # Access the detailed extraction results
+    extraction_data = results.get('extraction_results', {})
     
-    print(f"\nRelationships Extracted: {results['statistics']['total_relationships']}")
-    print("Relationship Types:")
-    for rel_type, count in results['statistics']['relationship_types'].items():
-        print(f"  • {rel_type}: {count}")
+    if extraction_data:
+        print(f"\nSchema Used: {extraction_data.get('schema_used', 'N/A')}")
+        
+        stats = extraction_data.get('statistics', {})
+        if stats.get('entity_types'):
+            print("\nEntity Types:")
+            for entity_type, count in stats['entity_types'].items():
+                print(f"  • {entity_type}: {count}")
+        
+        if stats.get('relationship_types'):
+            print("\nRelationship Types:")
+            for rel_type, count in stats['relationship_types'].items():
+                print(f"  • {rel_type}: {count}")
+        
+        # Show sample entities
+        entities = extraction_data.get('entities', [])
+        if entities:
+            print(f"\n{'='*40}")
+            print("SAMPLE ENTITIES")
+            print(f"{'='*40}")
+            
+            for entity in entities[:10]:
+                print(f"\n[{entity['type']}] {entity['name']}")
+                if entity.get('description'):
+                    print(f"  Description: {entity['description']}")
+                if entity.get('confidence'):
+                    print(f"  Confidence: {entity['confidence']:.2f}")
+                if entity.get('attributes'):
+                    print(f"  Attributes: {entity['attributes']}")
+        
+        # Show sample relationships
+        relationships = extraction_data.get('relationships', [])
+        if relationships:
+            print(f"\n{'='*40}")
+            print("SAMPLE RELATIONSHIPS")
+            print(f"{'='*40}")
+            
+            for rel in relationships[:10]:
+                print(f"\n{rel['source']} --[{rel['type']}]--> {rel['target']}")
+                if rel.get('description'):
+                    print(f"  {rel['description']}")
+                if rel.get('evidence'):
+                    print(f"  Evidence: {rel['evidence'][:100]}...")
     
-    # Show sample entities
     print(f"\n{'='*40}")
-    print("SAMPLE ENTITIES")
-    print(f"{'='*40}")
-    
-    for entity in results['entities'][:10]:
-        print(f"\n[{entity['type']}] {entity['name']}")
-        if entity.get('description'):
-            print(f"  Description: {entity['description']}")
-        if entity.get('confidence'):
-            print(f"  Confidence: {entity['confidence']:.2f}")
-        if entity.get('attributes'):
-            print(f"  Attributes: {entity['attributes']}")
-    
-    # Show sample relationships
-    print(f"\n{'='*40}")
-    print("SAMPLE RELATIONSHIPS")
-    print(f"{'='*40}")
-    
-    for rel in results['relationships'][:10]:
-        print(f"\n{rel['source']} --[{rel['type']}]--> {rel['target']}")
-        if rel.get('description'):
-            print(f"  {rel['description']}")
-        if rel.get('evidence'):
-            print(f"  Evidence: {rel['evidence'][:100]}...")
-    
-    # Save results
-    output_path = doc_path.parent / f"{doc_path.stem}_llm_extraction.json"
-    with open(output_path, 'w') as f:
-        json.dump(results, f, indent=2)
-    
-    print(f"\n{'='*40}")
-    print(f"Results saved to: {output_path}")
+    print(f"Results saved to: {results['output_file']}")
     print(f"{'='*40}")
 
 

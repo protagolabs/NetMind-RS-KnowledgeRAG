@@ -30,7 +30,7 @@ class PaperStorageManager:
         # Neo4j configuration
         neo4j_uri: str = "bolt://localhost:7687",
         neo4j_username: str = "neo4j",
-        neo4j_password: str = "password",
+        neo4j_password: str = "gfll9999",
         neo4j_database: str = "neo4j",
         
         # ChromaDB configuration
@@ -135,10 +135,24 @@ class PaperStorageManager:
                 )
                 relationships.append(rel)
             
-            # Extract paper metadata
-            paper_path = json_path.replace('.enhanced_llm_extraction.json', '')
+            # Extract paper metadata - handle both .llm_extraction.json and .enhanced_llm_extraction.json
+            paper_path = json_path.replace('.enhanced_llm_extraction.json', '').replace('.llm_extraction.json', '')
             if not paper_path.endswith('.pdf'):
                 paper_path += '.pdf'
+            
+            # Try to load chunks from the enhanced.json file if available
+            chunks = data.get('chunks', [])
+            if not chunks:
+                # Try to load from corresponding enhanced.json file
+                enhanced_json_path = json_path.replace('.enhanced_llm_extraction.json', '.enhanced.json').replace('.llm_extraction.json', '.enhanced.json')
+                if Path(enhanced_json_path).exists():
+                    try:
+                        with open(enhanced_json_path, 'r', encoding='utf-8') as f:
+                            enhanced_data = json.load(f)
+                            chunks = enhanced_data.get('text_chunks', [])
+                            self.logger.info(f"Loaded {len(chunks)} chunks from {enhanced_json_path}")
+                    except Exception as e:
+                        self.logger.warning(f"Could not load chunks from {enhanced_json_path}: {e}")
             
             paper = ExtractedPaper(
                 file_path=paper_path,
@@ -148,7 +162,7 @@ class PaperStorageManager:
                 entities=entities,
                 relationships=relationships,
                 metadata=data.get('metadata', {}),
-                chunks=data.get('chunks', [])
+                chunks=chunks
             )
             
             return paper

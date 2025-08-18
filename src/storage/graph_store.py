@@ -35,7 +35,7 @@ class PaperGraphStore:
         self,
         uri: str = "bolt://localhost:7687",
         username: str = "neo4j",
-        password: str = "password",
+        password: str = "gfll9999",
         database: str = "neo4j"
     ):
         """
@@ -177,6 +177,8 @@ class PaperGraphStore:
                     UNWIND $chunks AS chunk
                     MERGE (c:Chunk {chunk_id: chunk.chunk_id, paper_path: $paper_path})
                     SET c.content = chunk.content,
+                        c.chunk_type = chunk.chunk_type,
+                        c.word_count = chunk.word_count,
                         c.sequence = chunk.sequence
                     WITH c
                     MATCH (p:Paper {file_path: $paper_path})
@@ -185,8 +187,10 @@ class PaperGraphStore:
                     
                     chunks_data = [
                         {
-                            'chunk_id': chunk.get('chunk_id', f"chunk_{i}"),
+                            'chunk_id': chunk.get('id', chunk.get('chunk_id', f"chunk_{i}")),
                             'content': chunk.get('content', ''),
+                            'chunk_type': chunk.get('chunk_type', 'text'),
+                            'word_count': chunk.get('word_count', 0),
                             'sequence': i
                         }
                         for i, chunk in enumerate(paper.chunks)
@@ -207,9 +211,6 @@ class PaperGraphStore:
                         e.context = $context,
                         e.chunk_id = $chunk_id,
                         e.created_at = $created_at
-                    WITH e
-                    MATCH (p:Paper {file_path: $paper_path})
-                    MERGE (p)-[:CONTAINS_ENTITY]->(e)
                     """
                     
                     await tx.run(entity_query, {
@@ -229,13 +230,26 @@ class PaperGraphStore:
                         chunk_link_query = """
                         MATCH (e:Entity {name: $name, type: $type, paper_path: $paper_path})
                         MATCH (c:Chunk {chunk_id: $chunk_id, paper_path: $paper_path})
-                        MERGE (e)-[:FOUND_IN]->(c)
+                        MERGE (c)-[:CONTAINS_ENTITY]->(e)
                         """
                         
                         await tx.run(chunk_link_query, {
                             'name': entity.name,
                             'type': entity.type,
                             'chunk_id': entity.chunk_id,
+                            'paper_path': paper.file_path
+                        })
+                    else:
+                        # If no chunk_id, link directly to paper (fallback)
+                        paper_link_query = """
+                        MATCH (e:Entity {name: $name, type: $type, paper_path: $paper_path})
+                        MATCH (p:Paper {file_path: $paper_path})
+                        MERGE (p)-[:CONTAINS_ENTITY]->(e)
+                        """
+                        
+                        await tx.run(paper_link_query, {
+                            'name': entity.name,
+                            'type': entity.type,
                             'paper_path': paper.file_path
                         })
                 
@@ -305,8 +319,12 @@ class PaperGraphStore:
                 CALL db.index.fulltext.queryNodes("entitySearch", $search_text)
                 YIELD node, score
                 {where_clause}
-                MATCH (p:Paper)-[:CONTAINS_ENTITY]->(node)
-                RETURN node, score, p
+                OPTIONAL MATCH (c:Chunk)-[:CONTAINS_ENTITY]->(node)
+                OPTIONAL MATCH (p:Paper)-[:HAS_CHUNK]->(c)
+                OPTIONAL MATCH (p2:Paper)-[:CONTAINS_ENTITY]->(node)
+                WITH node, score, COALESCE(p, p2) as paper
+                WHERE paper IS NOT NULL
+                RETURN node, score, paper
                 ORDER BY score DESC
                 LIMIT $limit
                 """
@@ -316,7 +334,7 @@ class PaperGraphStore:
                 search_results = []
                 async for record in result:
                     entity = record['node']
-                    paper = record['p']
+                    paper = record['paper']
                     score = record['score']
                     
                     search_result = SearchResult(
@@ -330,7 +348,8 @@ class PaperGraphStore:
                             'confidence': entity.get('confidence', 1.0),
                             'attributes': json.loads(entity.get('attributes', '{}')),
                             'context': entity.get('context'),
-                            'paper_title': paper.get('title')
+                            'paper_title': paper.get('title'),
+                            'chunk_id': entity.get('chunk_id')
                         }
                     )
                     search_results.append(search_result)
@@ -393,6 +412,62 @@ class PaperGraphStore:
                 self.logger.error(f"Relationship search failed: {e}")
                 return []
     
+    async def get_paper_chunks_with_entities(self, file_path: str) -> Dict[str, Any]:
+        """
+        Get all chunks for a paper and their associated entities.
+        
+        Args:
+            file_path: Path to the paper file
+            
+        Returns:
+            Dictionary with chunks and their entities
+        """
+        async with self.driver.session(database=self.database) as session:
+            try:
+                # Get all chunks for the paper with their entities
+                query = """
+                MATCH (p:Paper {file_path: $file_path})-[:HAS_CHUNK]->(c:Chunk)
+                OPTIONAL MATCH (c)-[:CONTAINS_ENTITY]->(e:Entity)
+                WITH c, COLLECT(DISTINCT {
+                    name: e.name,
+                    type: e.type,
+                    description: e.description,
+                    confidence: e.confidence
+                }) as entities
+                ORDER BY c.sequence
+                RETURN c.chunk_id as chunk_id,
+                       c.content as content,
+                       c.chunk_type as chunk_type,
+                       c.word_count as word_count,
+                       c.sequence as sequence,
+                       entities
+                """
+                
+                result = await session.run(query, file_path=file_path)
+                chunks = []
+                
+                async for record in result:
+                    chunk_data = {
+                        'chunk_id': record['chunk_id'],
+                        'content': record['content'][:200] + '...' if len(record.get('content', '')) > 200 else record.get('content', ''),
+                        'chunk_type': record.get('chunk_type', 'text'),
+                        'word_count': record.get('word_count', 0),
+                        'sequence': record['sequence'],
+                        'entities': [e for e in record['entities'] if e.get('name')]  # Filter out empty entities
+                    }
+                    chunks.append(chunk_data)
+                
+                return {
+                    'file_path': file_path,
+                    'chunks': chunks,
+                    'total_chunks': len(chunks),
+                    'total_entities': sum(len(c['entities']) for c in chunks)
+                }
+                
+            except Exception as e:
+                self.logger.error(f"Failed to get paper chunks with entities: {e}")
+                return {}
+    
     async def get_paper_graph(self, file_path: str) -> Dict[str, Any]:
         """
         Get the complete graph for a specific paper.
@@ -405,10 +480,14 @@ class PaperGraphStore:
         """
         async with self.driver.session(database=self.database) as session:
             try:
-                # Get paper and all its entities
+                # Get paper and all its entities (through chunks or directly)
                 entity_query = """
-                MATCH (p:Paper {file_path: $file_path})-[:CONTAINS_ENTITY]->(e:Entity)
-                RETURN e
+                MATCH (p:Paper {file_path: $file_path})
+                OPTIONAL MATCH (p)-[:HAS_CHUNK]->(c:Chunk)-[:CONTAINS_ENTITY]->(e1:Entity)
+                OPTIONAL MATCH (p)-[:CONTAINS_ENTITY]->(e2:Entity)
+                WITH COLLECT(DISTINCT e1) + COLLECT(DISTINCT e2) as entities
+                UNWIND entities as e
+                RETURN DISTINCT e
                 """
                 
                 entity_result = await session.run(entity_query, file_path=file_path)
@@ -424,10 +503,18 @@ class PaperGraphStore:
                 
                 # Get all relationships between entities in this paper
                 rel_query = """
-                MATCH (p:Paper {file_path: $file_path})-[:CONTAINS_ENTITY]->(e1:Entity)
-                MATCH (e1)-[r:PAPER_RELATIONSHIP]->(e2:Entity)
+                MATCH (p:Paper {file_path: $file_path})
+                OPTIONAL MATCH (p)-[:HAS_CHUNK]->(c1:Chunk)-[:CONTAINS_ENTITY]->(e1:Entity)
+                OPTIONAL MATCH (p)-[:HAS_CHUNK]->(c2:Chunk)-[:CONTAINS_ENTITY]->(e2:Entity)
+                OPTIONAL MATCH (p)-[:CONTAINS_ENTITY]->(e3:Entity)
+                OPTIONAL MATCH (p)-[:CONTAINS_ENTITY]->(e4:Entity)
+                WITH COLLECT(DISTINCT e1) + COLLECT(DISTINCT e3) as source_entities,
+                     COLLECT(DISTINCT e2) + COLLECT(DISTINCT e4) as target_entities
+                UNWIND source_entities as se
+                UNWIND target_entities as te
+                MATCH (se)-[r:PAPER_RELATIONSHIP]->(te)
                 WHERE r.paper_path = $file_path
-                RETURN e1.name as source, e2.name as target, r
+                RETURN se.name as source, te.name as target, r
                 """
                 
                 rel_result = await session.run(rel_query, file_path=file_path)
