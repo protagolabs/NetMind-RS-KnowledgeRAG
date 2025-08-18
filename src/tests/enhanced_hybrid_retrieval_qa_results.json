@@ -1,0 +1,1498 @@
+[
+  {
+    "question_id": 1,
+    "doc_chunk_type": "single_doc_single_chunk",
+    "question_type": "Domain-specific document QA",
+    "question": "How does code training affect the mathematical reasoning ability of a language model, and what are the findings regarding one-stage versus two-stage code and math training?",
+    "expected_answer": "Code training improves a language model’s ability to perform mathematical reasoning, both with and without tool use. Under a two-stage training regime, code training alone significantly enhances the ability to solve mathematical problems using Python, and further math training provides additional improvements. In one-stage training, mixing code and math tokens helps mitigate catastrophic forgetting and benefits both coding and program-aided reasoning, although it can compromise mathematical reasoning without tool use in smaller models due to capacity limitations.",
+    "expected_chunks": [
+      {
+        "doc_id": "doc_Training_language_mo_eb834608_20250730_033911",
+        "chunk_id": "chunk_Training_idx024_c06a7f"
+      }
+    ],
+    "generated_answer": "- Code training is a method that enhances a model's ability to solve mathematical problems [2]. This suggests that code training could potentially improve a language model's mathematical reasoning abilities, although the retrieved content does not provide specific details on how this process works.\n- The content mentions a two-step approach in the context of automating the selection of sets of label tokens [15]. However, it does not provide a direct comparison or findings regarding one-stage versus two-stage code and math training.\n- The use of models like the Transformer, which is based on attention mechanisms, has been suggested to improve performance on tasks such as machine translation [9]. This could imply that such models might also benefit from code training in terms of mathematical reasoning, although the content does not provide explicit evidence for this.\n- The content also mentions the use of AUTO-PROMPT, an automated method to create prompts for a diverse set of tasks, based on a gradient-guided search [12]. This could potentially be applied in the context of code and math training, although the content does not provide specific details on this application.\n- The content does not provide specific findings from experiments on math training [1], nor does it provide specific information on the impact of code training on the mathematical reasoning ability of a language model.\n\n**References:**\n[1] /home/administrator/projects/NetMind-RS-KnowledgeRAG/paper_sets/paper_set_1/docs/Training language models to follow instructions.pdf (chunk: N/A, method: Initial Entity (BM25), score: 4.957)\n    Entity: Math training experiments\n[2] /home/administrator/projects/NetMind-RS-KnowledgeRAG/paper_sets/paper_set_1/docs/Training language models to follow instructions.pdf (chunk: N/A, method: Initial Entity (BM25), score: 4.924)\n    Entity: Code training\n[9] /home/administrator/projects/NetMind-RS-KnowledgeRAG/src/tests/Attention Is All You Need.llm_extraction.json (chunk: chunk_0, method: Semantic Chunk Search, score: 0.000)\n[12] /home/administrator/projects/NetMind-RS-KnowledgeRAG/paper_sets/test_sets/docs/AutoPrompt Eliciting Knowledge from Language Models with Automatically Generated Prompts.llm_extraction.json (chunk: chunk_0, method: Semantic Chunk Search, score: 0.000)\n[15] /home/administrator/projects/NetMind-RS-KnowledgeRAG/paper_sets/test_sets/docs/AutoPrompt Eliciting Knowledge from Language Models with Automatically Generated Prompts.llm_extraction.json (chunk: chunk_2, method: Semantic Chunk Search, score: 0.000)\n",
+    "retrieved_count": 15,
+    "llm_selected_count": 5,
+    "retrieval_methods_used": [
+      "initial_entity_bm25_search",
+      "semantic_chunk_search"
+    ],
+    "top_scores": [
+      4.956815621479535,
+      4.923535994032078,
+      3.3270321361058603,
+      3.3045437476530233,
+      1.6635160680529302
+    ],
+    "references": [
+      {
+        "index": 1,
+        "source_file": "/home/administrator/projects/NetMind-RS-KnowledgeRAG/paper_sets/paper_set_1/docs/Training language models to follow instructions.pdf",
+        "chunk_id": null,
+        "retrieval_method": "initial_entity_bm25_search",
+        "entity": "Math training experiments",
+        "score": 4.956815621479535
+      },
+      {
+        "index": 2,
+        "source_file": "/home/administrator/projects/NetMind-RS-KnowledgeRAG/paper_sets/paper_set_1/docs/Training language models to follow instructions.pdf",
+        "chunk_id": null,
+        "retrieval_method": "initial_entity_bm25_search",
+        "entity": "Code training",
+        "score": 4.923535994032078
+      },
+      {
+        "index": 9,
+        "source_file": "/home/administrator/projects/NetMind-RS-KnowledgeRAG/src/tests/Attention Is All You Need.llm_extraction.json",
+        "chunk_id": "chunk_0",
+        "retrieval_method": "semantic_chunk_search",
+        "entity": null,
+        "score": 0.0
+      },
+      {
+        "index": 12,
+        "source_file": "/home/administrator/projects/NetMind-RS-KnowledgeRAG/paper_sets/test_sets/docs/AutoPrompt Eliciting Knowledge from Language Models with Automatically Generated Prompts.llm_extraction.json",
+        "chunk_id": "chunk_0",
+        "retrieval_method": "semantic_chunk_search",
+        "entity": null,
+        "score": 0.0
+      },
+      {
+        "index": 15,
+        "source_file": "/home/administrator/projects/NetMind-RS-KnowledgeRAG/paper_sets/test_sets/docs/AutoPrompt Eliciting Knowledge from Language Models with Automatically Generated Prompts.llm_extraction.json",
+        "chunk_id": "chunk_2",
+        "retrieval_method": "semantic_chunk_search",
+        "entity": null,
+        "score": 0.0
+      }
+    ],
+    "retrieved_context": [
+      {
+        "index": 1,
+        "entity_name": "Math training experiments",
+        "entity_type": "EXPERIMENT",
+        "chunk_id": null,
+        "method": "initial_entity_bm25_search",
+        "score": 4.956815621479535,
+        "content_preview": "Findings shared from experiments on math training"
+      },
+      {
+        "index": 2,
+        "entity_name": "Code training",
+        "entity_type": "METHODOLOGY",
+        "chunk_id": null,
+        "method": "initial_entity_bm25_search",
+        "score": 4.923535994032078,
+        "content_preview": "Training method improving models' ability to solve mathematical problems"
+      },
+      {
+        "index": 3,
+        "entity_name": "Natural Language Reasoning",
+        "entity_type": "MODEL",
+        "chunk_id": null,
+        "method": "initial_entity_bm25_search",
+        "score": 3.3270321361058603,
+        "content_preview": "Model for natural language reasoning"
+      },
+      {
+        "index": 4,
+        "entity_name": "Math Datasets",
+        "entity_type": "DATASET",
+        "chunk_id": null,
+        "method": "initial_entity_bm25_search",
+        "score": 3.3045437476530233,
+        "content_preview": "Datasets used for testing mathematical reasoning abilities"
+      },
+      {
+        "index": 5,
+        "entity_name": "mathematical model",
+        "entity_type": "MODEL",
+        "chunk_id": null,
+        "method": "initial_entity_bm25_search",
+        "score": 1.6635160680529302,
+        "content_preview": "Model used for mathematical calculations"
+      },
+      {
+        "index": 6,
+        "entity_name": null,
+        "entity_type": null,
+        "chunk_id": "chunk_4",
+        "method": "semantic_chunk_search",
+        "score": 0.0,
+        "content_preview": "We further observe that, as expected, bigger models are better, and dropout is very helpful in avoiding over-fitting. To evaluate the importance of different components of the Transformer, we varied o..."
+      },
+      {
+        "index": 7,
+        "entity_name": null,
+        "entity_type": null,
+        "chunk_id": "chunk_6",
+        "method": "semantic_chunk_search",
+        "score": 0.0,
+        "content_preview": "In some data-scarce settings, it may be more effective to prompt language models than to finetune them for the task. our method can be trivially extended to standard language models, and thus maybe us..."
+      },
+      {
+        "index": 8,
+        "entity_name": null,
+        "entity_type": null,
+        "chunk_id": "chunk_5",
+        "method": "semantic_chunk_search",
+        "score": 0.0,
+        "content_preview": "Factorization tricks for LSTM networks. Neural machine translation in linear time. Deep residual learning for image recognition. Recurrent neural network grammars. Structured attention networks. Long ..."
+      },
+      {
+        "index": 9,
+        "entity_name": null,
+        "entity_type": null,
+        "chunk_id": "chunk_0",
+        "method": "semantic_chunk_search",
+        "score": 0.0,
+        "content_preview": "We propose a new simple network architecture, the Transformer, based solely on attention mechanisms, dispensing with recurrence and convolutions entirely. Experiments on two machine translation tasks ..."
+      },
+      {
+        "index": 10,
+        "entity_name": null,
+        "entity_type": null,
+        "chunk_id": "chunk_1",
+        "method": "semantic_chunk_search",
+        "score": 0.0,
+        "content_preview": "Most competitive neural sequence transduction models have an encoder-decoder structure We employ a residual connection around each of the two sub-layers, followed by layer normalization The encoder is..."
+      }
+    ]
+  },
+  {
+    "question_id": 2,
+    "doc_chunk_type": "single_doc_single_chunk",
+    "question_type": "Domain-specific document QA",
+    "question": "What are the main benefits of DistilBERT compared to the original BERT model in terms of size, performance, and speed?",
+    "expected_answer": "DistilBERT reduces the size of a BERT model by 40%, retains 97% of its language understanding capabilities, and is 60% faster.",
+    "expected_chunks": [
+      {
+        "doc_id": "doc_DistilBERT_a_distill_74507d3e_20250730_032910",
+        "chunk_id": "chunk_DistilBERT_idx001_276279"
+      }
+    ],
+    "generated_answer": "- DistilBERT is a distilled version of the BERT model designed for faster and lighter processing [1]. \n- While the exact details of how DistilBERT improves on size, performance, and speed compared to the original BERT model are not provided in the retrieved content, the mention of it being a \"distilled\" version suggests that it may be smaller and more efficient [1].\n- The retrieved content does not provide specific information on how the performance and speed of DistilBERT compare to the original BERT model.\n\n**References:**\n[1] /home/administrator/projects/NetMind-RS-KnowledgeRAG/paper_sets/paper_set_1/docs/Exploring the Limits of Transfer Learning with a Unified Text-to-Text Transformer.pdf (chunk: N/A, method: Initial Entity (BM25), score: 6.565)\n    Entity: DistilBERT\n",
+    "retrieved_count": 15,
+    "llm_selected_count": 1,
+    "retrieval_methods_used": [
+      "initial_entity_bm25_search",
+      "semantic_chunk_search",
+      "initial_entity_semantic_search"
+    ],
+    "top_scores": [
+      6.564714658709438,
+      6.54275092936803,
+      3.2934131736526946,
+      1.6578749058025624,
+      0.010424375534057617
+    ],
+    "references": [
+      {
+        "index": 1,
+        "source_file": "/home/administrator/projects/NetMind-RS-KnowledgeRAG/paper_sets/paper_set_1/docs/Exploring the Limits of Transfer Learning with a Unified Text-to-Text Transformer.pdf",
+        "chunk_id": null,
+        "retrieval_method": "initial_entity_bm25_search",
+        "entity": "DistilBERT",
+        "score": 6.564714658709438
+      }
+    ],
+    "retrieved_context": [
+      {
+        "index": 1,
+        "entity_name": "DistilBERT",
+        "entity_type": "MODEL",
+        "chunk_id": null,
+        "method": "initial_entity_bm25_search",
+        "score": 6.564714658709438,
+        "content_preview": "Distilled version of BERT for faster and lighter processing"
+      },
+      {
+        "index": 2,
+        "entity_name": "BERT SQuAD model",
+        "entity_type": "MODEL",
+        "chunk_id": null,
+        "method": "initial_entity_bm25_search",
+        "score": 6.54275092936803,
+        "content_preview": "BERT model fine-tuned for the Stanford Question Answering Dataset (SQuAD)"
+      },
+      {
+        "index": 3,
+        "entity_name": "Story ending prediction by transferable bert",
+        "entity_type": "MODEL",
+        "chunk_id": null,
+        "method": "initial_entity_bm25_search",
+        "score": 3.2934131736526946,
+        "content_preview": "Model for predicting story endings using transferable BERT"
+      },
+      {
+        "index": 4,
+        "entity_name": "BERT model",
+        "entity_type": "MODEL",
+        "chunk_id": null,
+        "method": "initial_entity_bm25_search",
+        "score": 1.6578749058025624,
+        "content_preview": "BERT model fine-tuned for the Stanford Question Answering Dataset (SQuAD)"
+      },
+      {
+        "index": 5,
+        "entity_name": "RoBERTa",
+        "entity_type": "MODEL",
+        "chunk_id": null,
+        "method": "initial_entity_semantic_search",
+        "score": 0.010424375534057617,
+        "content_preview": "Robustly optimized BERT pretraining approach"
+      },
+      {
+        "index": 6,
+        "entity_name": null,
+        "entity_type": null,
+        "chunk_id": "chunk_4",
+        "method": "semantic_chunk_search",
+        "score": 0.0,
+        "content_preview": "We further observe that, as expected, bigger models are better, and dropout is very helpful in avoiding over-fitting. To evaluate the importance of different components of the Transformer, we varied o..."
+      },
+      {
+        "index": 7,
+        "entity_name": null,
+        "entity_type": null,
+        "chunk_id": "chunk_3",
+        "method": "semantic_chunk_search",
+        "score": 0.0,
+        "content_preview": "For fair comparison between AU-TOPROMPT and finetuning, we use Mosbach et al.'s recommended parameters for finetuning on small datasets. We compare to the performance of BERT and RoBERTa finetuned on ..."
+      },
+      {
+        "index": 8,
+        "entity_name": null,
+        "entity_type": null,
+        "chunk_id": "chunk_0",
+        "method": "semantic_chunk_search",
+        "score": 0.0,
+        "content_preview": "We propose a new simple network architecture, the Transformer, based solely on attention mechanisms, dispensing with recurrence and convolutions entirely. Experiments on two machine translation tasks ..."
+      },
+      {
+        "index": 9,
+        "entity_name": null,
+        "entity_type": null,
+        "chunk_id": "chunk_6",
+        "method": "semantic_chunk_search",
+        "score": 0.0,
+        "content_preview": "In some data-scarce settings, it may be more effective to prompt language models than to finetune them for the task. our method can be trivially extended to standard language models, and thus maybe us..."
+      },
+      {
+        "index": 10,
+        "entity_name": null,
+        "entity_type": null,
+        "chunk_id": "chunk_5",
+        "method": "semantic_chunk_search",
+        "score": 0.0,
+        "content_preview": "Our prompts for BERT outperform their LAMA and LPAQA counterparts, which provides further evidence that AUTOPROMPT produces better probes. We compare AUTOPROMPT to LAMA and LPAQA (their prompts are st..."
+      }
+    ]
+  },
+  {
+    "question_id": 3,
+    "doc_chunk_type": "single_doc_single_chunk",
+    "question_type": "Explanatory",
+    "question": "How can the perception of whether a word is 'bad' change over time?",
+    "expected_answer": "Words and their meanings change over time, so one word might be considered 'bad' to one generation and not bad 100 years later.",
+    "expected_chunks": [
+      {
+        "doc_id": "doc_WebGPT_Browser_assis_e4a075b4_20250730_031925",
+        "chunk_id": "chunk_WebGPT_idx040_ce362a"
+      }
+    ],
+    "generated_answer": "- The perception of whether a word is 'bad' can change over time through the training of language models. Language models are trained to follow instructions with human feedback [3]. This implies that the perception of a word can be influenced by the feedback provided during the training process.\n- The context in which a word is used can also influence its perception over time. Neural language models use context to understand and interpret words [4]. Therefore, if the context in which a word is used changes over time, the perception of that word can also change.\n- The use of language models like GPT-3 and BERT can also influence the perception of a word over time. These models are trained on large amounts of text data and can generate responses based on that training [6]. If the training data changes over time, the model's perception of a word can change as well.\n- The perception of a word can also change through the use of attention mechanisms in language models, which follow long-distance dependencies in the text [8]. This means that the meaning and perception of a word can be influenced by its relationship with other words in the text, which can change over time.\n\nNote: The retrieved content does not provide specific examples of how the perception of a word has changed over time.\n\n**References:**\n[3] /home/administrator/projects/NetMind-RS-KnowledgeRAG/paper_sets/paper_set_1/docs/GPT-4 Technical Report.pdf (chunk: N/A, method: Initial Entity (BM25), score: 1.669)\n    Entity: models training\n[4] /home/administrator/projects/NetMind-RS-KnowledgeRAG/paper_sets/paper_set_1/docs/Transformer-XL Attentive Language Models.pdf (chunk: N/A, method: Initial Entity (BM25), score: 1.658)\n    Entity: Sharp nearby, fuzzy far away\n[6] /home/administrator/projects/NetMind-RS-KnowledgeRAG/paper_sets/test_sets/docs/AutoPrompt Eliciting Knowledge from Language Models with Automatically Generated Prompts.llm_extraction.json (chunk: chunk_6, method: Semantic Chunk Search, score: 0.000)\n[8] /home/administrator/projects/NetMind-RS-KnowledgeRAG/src/tests/Attention Is All You Need.llm_extraction.json (chunk: chunk_6, method: Semantic Chunk Search, score: 0.000)\n",
+    "retrieved_count": 15,
+    "llm_selected_count": 4,
+    "retrieval_methods_used": [
+      "initial_entity_bm25_search",
+      "semantic_chunk_search"
+    ],
+    "top_scores": [
+      5.147708087285295,
+      4.956815621479535,
+      1.6691957511380882,
+      1.6578749058025624,
+      1.6411786646773594
+    ],
+    "references": [
+      {
+        "index": 3,
+        "source_file": "/home/administrator/projects/NetMind-RS-KnowledgeRAG/paper_sets/paper_set_1/docs/GPT-4 Technical Report.pdf",
+        "chunk_id": null,
+        "retrieval_method": "initial_entity_bm25_search",
+        "entity": "models training",
+        "score": 1.6691957511380882
+      },
+      {
+        "index": 4,
+        "source_file": "/home/administrator/projects/NetMind-RS-KnowledgeRAG/paper_sets/paper_set_1/docs/Transformer-XL Attentive Language Models.pdf",
+        "chunk_id": null,
+        "retrieval_method": "initial_entity_bm25_search",
+        "entity": "Sharp nearby, fuzzy far away",
+        "score": 1.6578749058025624
+      },
+      {
+        "index": 6,
+        "source_file": "/home/administrator/projects/NetMind-RS-KnowledgeRAG/paper_sets/test_sets/docs/AutoPrompt Eliciting Knowledge from Language Models with Automatically Generated Prompts.llm_extraction.json",
+        "chunk_id": "chunk_6",
+        "retrieval_method": "semantic_chunk_search",
+        "entity": null,
+        "score": 0.0
+      },
+      {
+        "index": 8,
+        "source_file": "/home/administrator/projects/NetMind-RS-KnowledgeRAG/src/tests/Attention Is All You Need.llm_extraction.json",
+        "chunk_id": "chunk_6",
+        "retrieval_method": "semantic_chunk_search",
+        "entity": null,
+        "score": 0.0
+      }
+    ],
+    "retrieved_context": [
+      {
+        "index": 1,
+        "entity_name": "Perplexity",
+        "entity_type": "METRIC",
+        "chunk_id": null,
+        "method": "initial_entity_bm25_search",
+        "score": 5.147708087285295,
+        "content_preview": "Analyzing perplexity degradation when removing outlier features"
+      },
+      {
+        "index": 2,
+        "entity_name": "performance",
+        "entity_type": "METRIC",
+        "chunk_id": null,
+        "method": "initial_entity_bm25_search",
+        "score": 4.956815621479535,
+        "content_preview": "Measure of system performance"
+      },
+      {
+        "index": 3,
+        "entity_name": "models training",
+        "entity_type": "METHODOLOGY",
+        "chunk_id": null,
+        "method": "initial_entity_bm25_search",
+        "score": 1.6691957511380882,
+        "content_preview": "Methodology for training language models to follow instructions with human feedback"
+      },
+      {
+        "index": 4,
+        "entity_name": "Sharp nearby, fuzzy far away",
+        "entity_type": "MODEL",
+        "chunk_id": null,
+        "method": "initial_entity_bm25_search",
+        "score": 1.6578749058025624,
+        "content_preview": "How neural language models use context"
+      },
+      {
+        "index": 5,
+        "entity_name": "Lost in the middle",
+        "entity_type": "MODEL",
+        "chunk_id": null,
+        "method": "initial_entity_bm25_search",
+        "score": 1.6411786646773594,
+        "content_preview": "Model related to how language models use long contexts"
+      },
+      {
+        "index": 6,
+        "entity_name": null,
+        "entity_type": null,
+        "chunk_id": "chunk_6",
+        "method": "semantic_chunk_search",
+        "score": 0.0,
+        "content_preview": "In some data-scarce settings, it may be more effective to prompt language models than to finetune them for the task. our method can be trivially extended to standard language models, and thus maybe us..."
+      },
+      {
+        "index": 7,
+        "entity_name": null,
+        "entity_type": null,
+        "chunk_id": "chunk_4",
+        "method": "semantic_chunk_search",
+        "score": 0.0,
+        "content_preview": "We further observe that, as expected, bigger models are better, and dropout is very helpful in avoiding over-fitting. To evaluate the importance of different components of the Transformer, we varied o..."
+      },
+      {
+        "index": 8,
+        "entity_name": null,
+        "entity_type": null,
+        "chunk_id": "chunk_6",
+        "method": "semantic_chunk_search",
+        "score": 0.0,
+        "content_preview": "Many of the attention heads attend to a distant dependency of the verb 'making', completing the phrase 'making...more difficult'. Attentions here shown only for the word 'making'. Different colors rep..."
+      },
+      {
+        "index": 9,
+        "entity_name": null,
+        "entity_type": null,
+        "chunk_id": "chunk_2",
+        "method": "semantic_chunk_search",
+        "score": 0.0,
+        "content_preview": "In this section, we develop a general two-step approach to automate the selection of the sets of label tokens $V_y$. In the second step, we substitute h (i) with the MLM's output word embeddings wout ..."
+      },
+      {
+        "index": 10,
+        "entity_name": null,
+        "entity_type": null,
+        "chunk_id": "chunk_5",
+        "method": "semantic_chunk_search",
+        "score": 0.0,
+        "content_preview": "Our prompts for BERT outperform their LAMA and LPAQA counterparts, which provides further evidence that AUTOPROMPT produces better probes. We compare AUTOPROMPT to LAMA and LPAQA (their prompts are st..."
+      }
+    ]
+  },
+  {
+    "question_id": 4,
+    "doc_chunk_type": "single_doc_single_chunk",
+    "question_type": "Explanatory",
+    "question": "What are some of the main ethical challenges and unintended biases associated with large language models?",
+    "expected_answer": "Main ethical challenges and unintended biases associated with large language models include representation bias, issues with the selection and documentation of training data, privacy concerns, environmental impact, and socially harmful biases such as gender-profession correlations and negative sentiments towards racial, religious, and disability groups. There is also a significant need for better evaluation methods to measure and mitigate these biases and potential harms.",
+    "expected_chunks": [
+      {
+        "doc_id": "doc_GLam_Efficient_Scali_f90bdd10_20250730_041208",
+        "chunk_id": "chunk_GLam_idx014_888879"
+      }
+    ],
+    "generated_answer": "The retrieved content does not directly address the main ethical challenges and unintended biases associated with large language models. However, it does provide some insights that could indirectly relate to these issues:\n\n- Large language models, such as those based on the Transformer architecture, are complex and require significant resources for training [2][7]. This could potentially lead to ethical challenges related to access and equity, as only entities with substantial resources could develop and control these models.\n- The use of pretraining and finetuning in language models [3] could introduce biases if the training data contains biases. This is because the models learn from the data they are trained on, and any biases in the data could be reflected in the model's outputs.\n- The use of automated methods to create prompts for language models [6][10] could potentially lead to unintended biases if the automation process is not carefully controlled and monitored.\n\nPlease note that these points are inferred from the provided content and do not directly answer the question about the main ethical challenges and unintended biases associated with large language models. More specific information on these topics is not available in the retrieved content.\n\n**References:**\n[2] /home/administrator/projects/NetMind-RS-KnowledgeRAG/paper_sets/paper_set_1/docs/Exploring the Limits of Transfer Learning with a Unified Text-to-Text Transformer.pdf (chunk: N/A, method: Initial Entity (BM25), score: 3.293)\n    Entity: Transformer-based language model\n[3] /home/administrator/projects/NetMind-RS-KnowledgeRAG/paper_sets/paper_set_1/docs/Chain-of-Thought Prompting Elicits Reasoning in Large Language Models.pdf (chunk: N/A, method: Initial Entity (BM25), score: 1.664)\n    Entity: pretrained language model\n[6] /home/administrator/projects/NetMind-RS-KnowledgeRAG/paper_sets/test_sets/docs/AutoPrompt Eliciting Knowledge from Language Models with Automatically Generated Prompts.llm_extraction.json (chunk: chunk_0, method: Semantic Chunk Search, score: 0.000)\n[7] /home/administrator/projects/NetMind-RS-KnowledgeRAG/src/tests/Attention Is All You Need.llm_extraction.json (chunk: chunk_4, method: Semantic Chunk Search, score: 0.000)\n[10] /home/administrator/projects/NetMind-RS-KnowledgeRAG/paper_sets/test_sets/docs/AutoPrompt Eliciting Knowledge from Language Models with Automatically Generated Prompts.llm_extraction.json (chunk: chunk_2, method: Semantic Chunk Search, score: 0.000)\n",
+    "retrieved_count": 15,
+    "llm_selected_count": 5,
+    "retrieval_methods_used": [
+      "initial_entity_bm25_search",
+      "semantic_chunk_search",
+      "initial_entity_semantic_search"
+    ],
+    "top_scores": [
+      3.3383915022761763,
+      3.2934131736526946,
+      1.6635160680529302,
+      1.6522718738265116,
+      0.013626575469970703
+    ],
+    "references": [
+      {
+        "index": 2,
+        "source_file": "/home/administrator/projects/NetMind-RS-KnowledgeRAG/paper_sets/paper_set_1/docs/Exploring the Limits of Transfer Learning with a Unified Text-to-Text Transformer.pdf",
+        "chunk_id": null,
+        "retrieval_method": "initial_entity_bm25_search",
+        "entity": "Transformer-based language model",
+        "score": 3.2934131736526946
+      },
+      {
+        "index": 3,
+        "source_file": "/home/administrator/projects/NetMind-RS-KnowledgeRAG/paper_sets/paper_set_1/docs/Chain-of-Thought Prompting Elicits Reasoning in Large Language Models.pdf",
+        "chunk_id": null,
+        "retrieval_method": "initial_entity_bm25_search",
+        "entity": "pretrained language model",
+        "score": 1.6635160680529302
+      },
+      {
+        "index": 6,
+        "source_file": "/home/administrator/projects/NetMind-RS-KnowledgeRAG/paper_sets/test_sets/docs/AutoPrompt Eliciting Knowledge from Language Models with Automatically Generated Prompts.llm_extraction.json",
+        "chunk_id": "chunk_0",
+        "retrieval_method": "semantic_chunk_search",
+        "entity": null,
+        "score": 0.0
+      },
+      {
+        "index": 7,
+        "source_file": "/home/administrator/projects/NetMind-RS-KnowledgeRAG/src/tests/Attention Is All You Need.llm_extraction.json",
+        "chunk_id": "chunk_4",
+        "retrieval_method": "semantic_chunk_search",
+        "entity": null,
+        "score": 0.0
+      },
+      {
+        "index": 10,
+        "source_file": "/home/administrator/projects/NetMind-RS-KnowledgeRAG/paper_sets/test_sets/docs/AutoPrompt Eliciting Knowledge from Language Models with Automatically Generated Prompts.llm_extraction.json",
+        "chunk_id": "chunk_2",
+        "retrieval_method": "semantic_chunk_search",
+        "entity": null,
+        "score": 0.0
+      }
+    ],
+    "retrieved_context": [
+      {
+        "index": 1,
+        "entity_name": "autoregressive language model",
+        "entity_type": "MODEL",
+        "chunk_id": null,
+        "method": "initial_entity_bm25_search",
+        "score": 3.3383915022761763,
+        "content_preview": "Autoregressive Language Model"
+      },
+      {
+        "index": 2,
+        "entity_name": "Transformer-based language model",
+        "entity_type": "MODEL",
+        "chunk_id": null,
+        "method": "initial_entity_bm25_search",
+        "score": 3.2934131736526946,
+        "content_preview": "A language model based on the Transformer architecture"
+      },
+      {
+        "index": 3,
+        "entity_name": "pretrained language model",
+        "entity_type": "MODEL",
+        "chunk_id": null,
+        "method": "initial_entity_bm25_search",
+        "score": 1.6635160680529302,
+        "content_preview": "Finetuning a pretrained language model"
+      },
+      {
+        "index": 4,
+        "entity_name": "Language Understanding Model",
+        "entity_type": "MODEL",
+        "chunk_id": null,
+        "method": "initial_entity_bm25_search",
+        "score": 1.6522718738265116,
+        "content_preview": "A model for natural language understanding tasks"
+      },
+      {
+        "index": 5,
+        "entity_name": null,
+        "entity_type": null,
+        "chunk_id": "chunk_6",
+        "method": "semantic_chunk_search",
+        "score": 0.013626575469970703,
+        "content_preview": "In some data-scarce settings, it may be more effective to prompt language models than to finetune them for the task. our method can be trivially extended to standard language models, and thus maybe us..."
+      },
+      {
+        "index": 6,
+        "entity_name": null,
+        "entity_type": null,
+        "chunk_id": "chunk_0",
+        "method": "semantic_chunk_search",
+        "score": 0.0,
+        "content_preview": "Using AUTO-PROMPT, we show that masked language models (MLMs) have an inherent capability to perform sentiment analysis and natural language inference without additional parameters or finetuning. Thes..."
+      },
+      {
+        "index": 7,
+        "entity_name": null,
+        "entity_type": null,
+        "chunk_id": "chunk_4",
+        "method": "semantic_chunk_search",
+        "score": 0.0,
+        "content_preview": "We further observe that, as expected, bigger models are better, and dropout is very helpful in avoiding over-fitting. To evaluate the importance of different components of the Transformer, we varied o..."
+      },
+      {
+        "index": 8,
+        "entity_name": null,
+        "entity_type": null,
+        "chunk_id": "chunk_7",
+        "method": "semantic_chunk_search",
+        "score": 0.0,
+        "content_preview": "To measure the effects of the AUTOPROMPT search hyperparameters, we plot the validation accuracy as a function of label set size |Vy| and the number of trigger tokens |xtrig|. Following [Petroni et al..."
+      },
+      {
+        "index": 9,
+        "entity_name": null,
+        "entity_type": null,
+        "chunk_id": "chunk_5",
+        "method": "semantic_chunk_search",
+        "score": 0.0,
+        "content_preview": "Our prompts for BERT outperform their LAMA and LPAQA counterparts, which provides further evidence that AUTOPROMPT produces better probes. We compare AUTOPROMPT to LAMA and LPAQA (their prompts are st..."
+      },
+      {
+        "index": 10,
+        "entity_name": null,
+        "entity_type": null,
+        "chunk_id": "chunk_2",
+        "method": "semantic_chunk_search",
+        "score": 0.0,
+        "content_preview": "In this section, we develop a general two-step approach to automate the selection of the sets of label tokens $V_y$. In the second step, we substitute h (i) with the MLM's output word embeddings wout ..."
+      }
+    ]
+  },
+  {
+    "question_id": 5,
+    "doc_chunk_type": "single_doc_single_chunk",
+    "question_type": "Fact-checking",
+    "question": "Is it correct to claim that sharing parameters across the encoder and decoder in Transformer models can lower the total parameter count with minimal performance sacrifice?",
+    "expected_answer": "Correct. The chunk notes that sharing parameters across the encoder and decoder performed nearly as well and is an effective means of lowering the total parameter count without sacrificing much performance.",
+    "expected_chunks": [
+      {
+        "doc_id": "doc_Exploring_the_Limits_6013e909_20250730_040318",
+        "chunk_id": "chunk_Exploring_idx019_16a7ca"
+      }
+    ],
+    "generated_answer": "Based on the retrieved content:\n\n- The Transformer model architecture uses attention mechanisms and does not rely on recurrence or convolutions, which can reduce training time and improve parallelizability [6].\n- The best performing models connect the encoder and decoder through an attention mechanism [6].\n- The Transformer uses multi-head attention in different ways, and due to the reduced dimension of each head, the total computational cost is similar to that of single-head attention with full dimensionality [7].\n\nHowever, the retrieved content does not directly address whether sharing parameters across the encoder and decoder in Transformer models can lower the total parameter count with minimal performance sacrifice.\n\n**References:**\n[6] /home/administrator/projects/NetMind-RS-KnowledgeRAG/src/tests/Attention Is All You Need.llm_extraction.json (chunk: chunk_0, method: Semantic Chunk Search, score: 0.024)\n[7] /home/administrator/projects/NetMind-RS-KnowledgeRAG/src/tests/Attention Is All You Need.llm_extraction.json (chunk: chunk_2, method: Semantic Chunk Search, score: 0.019)\n",
+    "retrieved_count": 15,
+    "llm_selected_count": 2,
+    "retrieval_methods_used": [
+      "initial_entity_bm25_search",
+      "semantic_chunk_search",
+      "initial_entity_semantic_search"
+    ],
+    "top_scores": [
+      4.940119760479042,
+      3.3045437476530233,
+      1.6749143509706892,
+      1.6691957511380882,
+      0.13997352123260498
+    ],
+    "references": [
+      {
+        "index": 6,
+        "source_file": "/home/administrator/projects/NetMind-RS-KnowledgeRAG/src/tests/Attention Is All You Need.llm_extraction.json",
+        "chunk_id": "chunk_0",
+        "retrieval_method": "semantic_chunk_search",
+        "entity": null,
+        "score": 0.023636281490325928
+      },
+      {
+        "index": 7,
+        "source_file": "/home/administrator/projects/NetMind-RS-KnowledgeRAG/src/tests/Attention Is All You Need.llm_extraction.json",
+        "chunk_id": "chunk_2",
+        "retrieval_method": "semantic_chunk_search",
+        "entity": null,
+        "score": 0.01878201961517334
+      }
+    ],
+    "retrieved_context": [
+      {
+        "index": 1,
+        "entity_name": "Transformer-based language model",
+        "entity_type": "MODEL",
+        "chunk_id": null,
+        "method": "initial_entity_bm25_search",
+        "score": 4.940119760479042,
+        "content_preview": "A language model based on the Transformer architecture"
+      },
+      {
+        "index": 2,
+        "entity_name": "Transformer model",
+        "entity_type": "MODEL",
+        "chunk_id": null,
+        "method": "initial_entity_bm25_search",
+        "score": 3.3045437476530233,
+        "content_preview": "Base Transformer model and its architectural variants"
+      },
+      {
+        "index": 3,
+        "entity_name": "Transformer",
+        "entity_type": "MODEL",
+        "chunk_id": null,
+        "method": "initial_entity_bm25_search",
+        "score": 1.6749143509706892,
+        "content_preview": "Transformer model architecture"
+      },
+      {
+        "index": 4,
+        "entity_name": "sparse transformer",
+        "entity_type": "MODEL",
+        "chunk_id": null,
+        "method": "initial_entity_bm25_search",
+        "score": 1.6691957511380882,
+        "content_preview": "type of transformer model"
+      },
+      {
+        "index": 5,
+        "entity_name": null,
+        "entity_type": null,
+        "chunk_id": "chunk_4",
+        "method": "semantic_chunk_search",
+        "score": 0.13997352123260498,
+        "content_preview": "We further observe that, as expected, bigger models are better, and dropout is very helpful in avoiding over-fitting. To evaluate the importance of different components of the Transformer, we varied o..."
+      },
+      {
+        "index": 6,
+        "entity_name": null,
+        "entity_type": null,
+        "chunk_id": "chunk_0",
+        "method": "semantic_chunk_search",
+        "score": 0.023636281490325928,
+        "content_preview": "We propose a new simple network architecture, the Transformer, based solely on attention mechanisms, dispensing with recurrence and convolutions entirely. Experiments on two machine translation tasks ..."
+      },
+      {
+        "index": 7,
+        "entity_name": null,
+        "entity_type": null,
+        "chunk_id": "chunk_2",
+        "method": "semantic_chunk_search",
+        "score": 0.01878201961517334,
+        "content_preview": "In addition to attention sub-layers, each of the layers in our encoder and decoder contains a fully connected feed-forward network... The Transformer uses multi-head attention in three different ways...."
+      },
+      {
+        "index": 8,
+        "entity_name": "Transformer architecture",
+        "entity_type": "MODEL",
+        "chunk_id": null,
+        "method": "initial_entity_semantic_search",
+        "score": 0.013833343982696533,
+        "content_preview": "Transformer model architecture"
+      },
+      {
+        "index": 9,
+        "entity_name": null,
+        "entity_type": null,
+        "chunk_id": "chunk_1",
+        "method": "semantic_chunk_search",
+        "score": 0.0,
+        "content_preview": "Most competitive neural sequence transduction models have an encoder-decoder structure We employ a residual connection around each of the two sub-layers, followed by layer normalization The encoder is..."
+      },
+      {
+        "index": 10,
+        "entity_name": null,
+        "entity_type": null,
+        "chunk_id": "chunk_6",
+        "method": "semantic_chunk_search",
+        "score": 0.0,
+        "content_preview": "In some data-scarce settings, it may be more effective to prompt language models than to finetune them for the task. our method can be trivially extended to standard language models, and thus maybe us..."
+      }
+    ]
+  },
+  {
+    "question_id": 6,
+    "doc_chunk_type": "single_doc_single_chunk",
+    "question_type": "Fact-checking",
+    "question": "Is there a Universal Sentence Encoder module listed as an option for text input embedding modules?",
+    "expected_answer": "Correct. The Universal Sentence Encoder is listed as an option for text input embedding modules, including its TensorFlow Hub handle.",
+    "expected_chunks": [
+      {
+        "doc_id": "doc_Parameter_Efficient__ad6cfe09_20250730_033706",
+        "chunk_id": "chunk_Parameter_idx014_92a062"
+      }
+    ],
+    "generated_answer": "- The Universal Sentence Encoder is mentioned as a model for encoding English sentences [2]. \n- However, the retrieved content does not specify whether the Universal Sentence Encoder is an option for text input embedding modules.\n\n**References:**\n[2] /home/administrator/projects/NetMind-RS-KnowledgeRAG/paper_sets/paper_set_1/docs/Parameter-Efficient Transfer Learning for NLP.pdf (chunk: N/A, method: Initial Entity (BM25), score: 3.316)\n    Entity: Universal sentence encoder for English\n",
+    "retrieved_count": 15,
+    "llm_selected_count": 1,
+    "retrieval_methods_used": [
+      "initial_entity_bm25_search",
+      "semantic_chunk_search"
+    ],
+    "top_scores": [
+      6.586826347305389,
+      3.3157498116051247,
+      3.3157498116051247,
+      3.282357329354719,
+      1.6522718738265116
+    ],
+    "references": [
+      {
+        "index": 2,
+        "source_file": "/home/administrator/projects/NetMind-RS-KnowledgeRAG/paper_sets/paper_set_1/docs/Parameter-Efficient Transfer Learning for NLP.pdf",
+        "chunk_id": null,
+        "retrieval_method": "initial_entity_bm25_search",
+        "entity": "Universal sentence encoder for English",
+        "score": 3.3157498116051247
+      }
+    ],
+    "retrieved_context": [
+      {
+        "index": 1,
+        "entity_name": "Supervised learning of universal sentence representations",
+        "entity_type": "METHODOLOGY",
+        "chunk_id": null,
+        "method": "initial_entity_bm25_search",
+        "score": 6.586826347305389,
+        "content_preview": "A supervised learning approach for universal sentence representations"
+      },
+      {
+        "index": 2,
+        "entity_name": "Universal sentence encoder for English",
+        "entity_type": "MODEL",
+        "chunk_id": null,
+        "method": "initial_entity_bm25_search",
+        "score": 3.3157498116051247,
+        "content_preview": "A model for encoding English sentences"
+      },
+      {
+        "index": 3,
+        "entity_name": "K-Encoder",
+        "entity_type": "MODEL",
+        "chunk_id": null,
+        "method": "initial_entity_bm25_search",
+        "score": 3.3157498116051247,
+        "content_preview": "Knowledgeable encoder for fusing heterogeneous information"
+      },
+      {
+        "index": 4,
+        "entity_name": "sentence structure",
+        "entity_type": "METHODOLOGY",
+        "chunk_id": null,
+        "method": "initial_entity_bm25_search",
+        "score": 3.282357329354719,
+        "content_preview": "Rules governing the arrangement of words in a sentence"
+      },
+      {
+        "index": 5,
+        "entity_name": "encoder-decoder architecture",
+        "entity_type": "MODEL",
+        "chunk_id": null,
+        "method": "initial_entity_bm25_search",
+        "score": 1.6522718738265116,
+        "content_preview": "Architecture with both encoder and decoder components"
+      },
+      {
+        "index": 6,
+        "entity_name": null,
+        "entity_type": null,
+        "chunk_id": "chunk_1",
+        "method": "semantic_chunk_search",
+        "score": 0.0,
+        "content_preview": "Most competitive neural sequence transduction models have an encoder-decoder structure We employ a residual connection around each of the two sub-layers, followed by layer normalization The encoder is..."
+      },
+      {
+        "index": 7,
+        "entity_name": null,
+        "entity_type": null,
+        "chunk_id": "chunk_2",
+        "method": "semantic_chunk_search",
+        "score": 0.0,
+        "content_preview": "In addition to attention sub-layers, each of the layers in our encoder and decoder contains a fully connected feed-forward network... The Transformer uses multi-head attention in three different ways...."
+      },
+      {
+        "index": 8,
+        "entity_name": null,
+        "entity_type": null,
+        "chunk_id": "chunk_2",
+        "method": "semantic_chunk_search",
+        "score": 0.0,
+        "content_preview": "In this section, we develop a general two-step approach to automate the selection of the sets of label tokens $V_y$. In the second step, we substitute h (i) with the MLM's output word embeddings wout ..."
+      },
+      {
+        "index": 9,
+        "entity_name": null,
+        "entity_type": null,
+        "chunk_id": "chunk_0",
+        "method": "semantic_chunk_search",
+        "score": 0.0,
+        "content_preview": "Using AUTO-PROMPT, we show that masked language models (MLMs) have an inherent capability to perform sentiment analysis and natural language inference without additional parameters or finetuning. Thes..."
+      },
+      {
+        "index": 10,
+        "entity_name": null,
+        "entity_type": null,
+        "chunk_id": "chunk_4",
+        "method": "semantic_chunk_search",
+        "score": 0.0,
+        "content_preview": "We further observe that, as expected, bigger models are better, and dropout is very helpful in avoiding over-fitting. To evaluate the importance of different components of the Transformer, we varied o..."
+      }
+    ]
+  },
+  {
+    "question_id": 7,
+    "doc_chunk_type": "single_doc_single_chunk",
+    "question_type": "List / Set",
+    "question": "What types of external tools are incorporated into Toolformer?",
+    "expected_answer": "Toolformer incorporates a calculator, a Q&A system, a search engine, a translation system, and a calendar.",
+    "expected_chunks": [
+      {
+        "doc_id": "doc_Toolformer_Language__9d342a3c_20250730_035744",
+        "chunk_id": "chunk_Toolformer_idx001_2b7da3"
+      }
+    ],
+    "generated_answer": "- Toolformer is a model that decides which APIs to call, when to call them, what arguments to pass, and how to incorporate the results into future token prediction [1]. \n- However, the specific external tools or APIs incorporated into Toolformer are not explicitly mentioned in the retrieved content [1]. \n- The content also mentions that Toolformer does not currently consider the computational cost associated with making an API call, which could be a limitation depending on the external tools used [2]. \n- The use of APIs suggests that Toolformer may interact with external tools or services, but the specific tools are not identified in the provided content [1].\n\n**References:**\n[1] /home/administrator/projects/NetMind-RS-KnowledgeRAG/paper_sets/paper_set_1/docs/Toolformer Language Models Can Teach Themselves to Use Tools.pdf (chunk: N/A, method: Initial Entity (BM25), score: 3.282)\n    Entity: Toolformer\n[2] /home/administrator/projects/NetMind-RS-KnowledgeRAG/paper_sets/paper_set_1/docs/Toolformer Language Models Can Teach Themselves to Use Tools.pdf (chunk: N/A, method: Initial Entity (BM25), score: 1.598)\n    Entity: Computational cost consideration\n",
+    "retrieved_count": 15,
+    "llm_selected_count": 2,
+    "retrieval_methods_used": [
+      "initial_entity_bm25_search",
+      "semantic_chunk_search",
+      "initial_entity_semantic_search"
+    ],
+    "top_scores": [
+      3.282357329354719,
+      1.5982564475118053,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "references": [
+      {
+        "index": 1,
+        "source_file": "/home/administrator/projects/NetMind-RS-KnowledgeRAG/paper_sets/paper_set_1/docs/Toolformer Language Models Can Teach Themselves to Use Tools.pdf",
+        "chunk_id": null,
+        "retrieval_method": "initial_entity_bm25_search",
+        "entity": "Toolformer",
+        "score": 3.282357329354719
+      },
+      {
+        "index": 2,
+        "source_file": "/home/administrator/projects/NetMind-RS-KnowledgeRAG/paper_sets/paper_set_1/docs/Toolformer Language Models Can Teach Themselves to Use Tools.pdf",
+        "chunk_id": null,
+        "retrieval_method": "initial_entity_bm25_search",
+        "entity": "Computational cost consideration",
+        "score": 1.5982564475118053
+      }
+    ],
+    "retrieved_context": [
+      {
+        "index": 1,
+        "entity_name": "Toolformer",
+        "entity_type": "MODEL",
+        "chunk_id": null,
+        "method": "initial_entity_bm25_search",
+        "score": 3.282357329354719,
+        "content_preview": "a model trained to decide which APIs to call, when to call them, what arguments to pass, and how to best incorporate the results into future token prediction"
+      },
+      {
+        "index": 2,
+        "entity_name": "Computational cost consideration",
+        "entity_type": "LIMITATION",
+        "chunk_id": null,
+        "method": "initial_entity_bm25_search",
+        "score": 1.5982564475118053,
+        "content_preview": "Toolformer currently does not take into account the tool-dependent computational cost incurred from making an API call."
+      },
+      {
+        "index": 3,
+        "entity_name": null,
+        "entity_type": null,
+        "chunk_id": "chunk_4",
+        "method": "semantic_chunk_search",
+        "score": 0.0,
+        "content_preview": "We further observe that, as expected, bigger models are better, and dropout is very helpful in avoiding over-fitting. To evaluate the importance of different components of the Transformer, we varied o..."
+      },
+      {
+        "index": 4,
+        "entity_name": null,
+        "entity_type": null,
+        "chunk_id": "chunk_7",
+        "method": "semantic_chunk_search",
+        "score": 0.0,
+        "content_preview": "To measure the effects of the AUTOPROMPT search hyperparameters, we plot the validation accuracy as a function of label set size |Vy| and the number of trigger tokens |xtrig|. Following [Petroni et al..."
+      },
+      {
+        "index": 5,
+        "entity_name": null,
+        "entity_type": null,
+        "chunk_id": "chunk_2",
+        "method": "semantic_chunk_search",
+        "score": 0.0,
+        "content_preview": "In addition to attention sub-layers, each of the layers in our encoder and decoder contains a fully connected feed-forward network... The Transformer uses multi-head attention in three different ways...."
+      },
+      {
+        "index": 6,
+        "entity_name": null,
+        "entity_type": null,
+        "chunk_id": "chunk_4",
+        "method": "semantic_chunk_search",
+        "score": 0.0,
+        "content_preview": "and use standard ranking metrics: mean reciprocal rank (MRR), precision-at-1 (P@1), and precision-at-10 (P@10) we split the T-REx triples into a 60-20-20 train/dev/test split and evaluate on the test ..."
+      },
+      {
+        "index": 7,
+        "entity_name": null,
+        "entity_type": null,
+        "chunk_id": "chunk_0",
+        "method": "semantic_chunk_search",
+        "score": 0.0,
+        "content_preview": "We propose a new simple network architecture, the Transformer, based solely on attention mechanisms, dispensing with recurrence and convolutions entirely. Experiments on two machine translation tasks ..."
+      },
+      {
+        "index": 8,
+        "entity_name": null,
+        "entity_type": null,
+        "chunk_id": "chunk_6",
+        "method": "semantic_chunk_search",
+        "score": 0.0,
+        "content_preview": "In some data-scarce settings, it may be more effective to prompt language models than to finetune them for the task. our method can be trivially extended to standard language models, and thus maybe us..."
+      },
+      {
+        "index": 9,
+        "entity_name": null,
+        "entity_type": null,
+        "chunk_id": "chunk_2",
+        "method": "semantic_chunk_search",
+        "score": 0.0,
+        "content_preview": "In this section, we develop a general two-step approach to automate the selection of the sets of label tokens $V_y$. In the second step, we substitute h (i) with the MLM's output word embeddings wout ..."
+      },
+      {
+        "index": 10,
+        "entity_name": null,
+        "entity_type": null,
+        "chunk_id": "chunk_3",
+        "method": "semantic_chunk_search",
+        "score": 0.0,
+        "content_preview": "For fair comparison between AU-TOPROMPT and finetuning, we use Mosbach et al.'s recommended parameters for finetuning on small datasets. We compare to the performance of BERT and RoBERTa finetuned on ..."
+      }
+    ]
+  },
+  {
+    "question_id": 8,
+    "doc_chunk_type": "single_doc_single_chunk",
+    "question_type": "List / Set",
+    "question": "What are three popular chess openings?",
+    "expected_answer": "The Sicilian Defense, the French Defense, and the Caro-Kann Defense.",
+    "expected_chunks": [
+      {
+        "doc_id": "doc_LLaMA_Open_and_Effic_e00739a0_20250730_035416",
+        "chunk_id": "chunk_LLaMA_idx034_738256"
+      }
+    ],
+    "generated_answer": "The retrieved content does not provide specific information on popular chess openings. However, it does provide extensive information on various machine learning models and methodologies, including:\n\n- The Toolformer model, which is trained to decide which APIs to call, when to call them, what arguments to pass, and how to best incorporate the results into future token prediction [1].\n- The in-context learning methodology, which involves the study of learning curves in-context [2].\n- The Transformer network architecture, which is based solely on attention mechanisms [3].\n- The AUTOPROMPT method, which produces better probes and can extract relational information more effectively than the supervised RE model [4].\n- The use of attention mechanisms in the Transformer model [5].\n- The use of masked language models (MLMs) for sentiment analysis and natural language inference [8].\n- The use of Adam Optimization algorithm [13].\n- The use of T-REx triples dataset for collecting training data for AUTOPROMPT [14].\n- The use of Sinusoidal Positional Encoding in the Transformer-XL architecture [15].\n\nWhile these points do not directly answer the question about chess openings, they do provide a wealth of information on related topics in the field of machine learning and natural language processing.\n\n**References:**\n[1] /home/administrator/projects/NetMind-RS-KnowledgeRAG/paper_sets/paper_set_1/docs/Toolformer Language Models Can Teach Themselves to Use Tools.pdf (chunk: N/A, method: Initial Entity (BM25), score: 1.543)\n    Entity: Toolformer\n[2] /home/administrator/projects/NetMind-RS-KnowledgeRAG/paper_sets/paper_set_1/docs/Language Models are Few-Shot Learners.pdf (chunk: N/A, method: Initial Entity (BM25), score: 1.505)\n    Entity: in-context learning\n[3] /home/administrator/projects/NetMind-RS-KnowledgeRAG/src/tests/Attention Is All You Need.llm_extraction.json (chunk: chunk_0, method: Semantic Chunk Search, score: 0.000)\n[4] /home/administrator/projects/NetMind-RS-KnowledgeRAG/paper_sets/test_sets/docs/AutoPrompt Eliciting Knowledge from Language Models with Automatically Generated Prompts.llm_extraction.json (chunk: chunk_5, method: Semantic Chunk Search, score: 0.000)\n[5] /home/administrator/projects/NetMind-RS-KnowledgeRAG/src/tests/Attention Is All You Need.llm_extraction.json (chunk: chunk_1, method: Semantic Chunk Search, score: 0.000)\n[8] /home/administrator/projects/NetMind-RS-KnowledgeRAG/paper_sets/test_sets/docs/AutoPrompt Eliciting Knowledge from Language Models with Automatically Generated Prompts.llm_extraction.json (chunk: chunk_0, method: Semantic Chunk Search, score: 0.000)\n[13] /home/administrator/projects/NetMind-RS-KnowledgeRAG/paper_sets/paper_set_1/docs/PaLM Scaling Language Modeling with Pathways.pdf (chunk: N/A, method: Initial Entity (Semantic), score: 0.000)\n    Entity: Adam Optimization\n[14] /home/administrator/projects/NetMind-RS-KnowledgeRAG/paper_sets/paper_set_1/docs/AutoPrompt Eliciting Knowledge from Language Models with Automatically Generated Prompts.pdf (chunk: N/A, method: Initial Entity (Semantic), score: 0.000)\n    Entity: T-REx triples\n[15] /home/administrator/projects/NetMind-RS-KnowledgeRAG/paper_sets/paper_set_1/docs/Transformer-XL Attentive Language Models.pdf (chunk: N/A, method: Initial Entity (Semantic), score: 0.000)\n    Entity: Sinusoidal Positional Encoding\n",
+    "retrieved_count": 15,
+    "llm_selected_count": 9,
+    "retrieval_methods_used": [
+      "initial_entity_bm25_search",
+      "semantic_chunk_search",
+      "initial_entity_semantic_search"
+    ],
+    "top_scores": [
+      1.5427769985974757,
+      1.5047879616963067,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "references": [
+      {
+        "index": 1,
+        "source_file": "/home/administrator/projects/NetMind-RS-KnowledgeRAG/paper_sets/paper_set_1/docs/Toolformer Language Models Can Teach Themselves to Use Tools.pdf",
+        "chunk_id": null,
+        "retrieval_method": "initial_entity_bm25_search",
+        "entity": "Toolformer",
+        "score": 1.5427769985974757
+      },
+      {
+        "index": 2,
+        "source_file": "/home/administrator/projects/NetMind-RS-KnowledgeRAG/paper_sets/paper_set_1/docs/Language Models are Few-Shot Learners.pdf",
+        "chunk_id": null,
+        "retrieval_method": "initial_entity_bm25_search",
+        "entity": "in-context learning",
+        "score": 1.5047879616963067
+      },
+      {
+        "index": 3,
+        "source_file": "/home/administrator/projects/NetMind-RS-KnowledgeRAG/src/tests/Attention Is All You Need.llm_extraction.json",
+        "chunk_id": "chunk_0",
+        "retrieval_method": "semantic_chunk_search",
+        "entity": null,
+        "score": 0.0
+      },
+      {
+        "index": 4,
+        "source_file": "/home/administrator/projects/NetMind-RS-KnowledgeRAG/paper_sets/test_sets/docs/AutoPrompt Eliciting Knowledge from Language Models with Automatically Generated Prompts.llm_extraction.json",
+        "chunk_id": "chunk_5",
+        "retrieval_method": "semantic_chunk_search",
+        "entity": null,
+        "score": 0.0
+      },
+      {
+        "index": 5,
+        "source_file": "/home/administrator/projects/NetMind-RS-KnowledgeRAG/src/tests/Attention Is All You Need.llm_extraction.json",
+        "chunk_id": "chunk_1",
+        "retrieval_method": "semantic_chunk_search",
+        "entity": null,
+        "score": 0.0
+      },
+      {
+        "index": 8,
+        "source_file": "/home/administrator/projects/NetMind-RS-KnowledgeRAG/paper_sets/test_sets/docs/AutoPrompt Eliciting Knowledge from Language Models with Automatically Generated Prompts.llm_extraction.json",
+        "chunk_id": "chunk_0",
+        "retrieval_method": "semantic_chunk_search",
+        "entity": null,
+        "score": 0.0
+      },
+      {
+        "index": 13,
+        "source_file": "/home/administrator/projects/NetMind-RS-KnowledgeRAG/paper_sets/paper_set_1/docs/PaLM Scaling Language Modeling with Pathways.pdf",
+        "chunk_id": null,
+        "retrieval_method": "initial_entity_semantic_search",
+        "entity": "Adam Optimization",
+        "score": 0.0
+      },
+      {
+        "index": 14,
+        "source_file": "/home/administrator/projects/NetMind-RS-KnowledgeRAG/paper_sets/paper_set_1/docs/AutoPrompt Eliciting Knowledge from Language Models with Automatically Generated Prompts.pdf",
+        "chunk_id": null,
+        "retrieval_method": "initial_entity_semantic_search",
+        "entity": "T-REx triples",
+        "score": 0.0
+      },
+      {
+        "index": 15,
+        "source_file": "/home/administrator/projects/NetMind-RS-KnowledgeRAG/paper_sets/paper_set_1/docs/Transformer-XL Attentive Language Models.pdf",
+        "chunk_id": null,
+        "retrieval_method": "initial_entity_semantic_search",
+        "entity": "Sinusoidal Positional Encoding",
+        "score": 0.0
+      }
+    ],
+    "retrieved_context": [
+      {
+        "index": 1,
+        "entity_name": "Toolformer",
+        "entity_type": "MODEL",
+        "chunk_id": null,
+        "method": "initial_entity_bm25_search",
+        "score": 1.5427769985974757,
+        "content_preview": "a model trained to decide which APIs to call, when to call them, what arguments to pass, and how to best incorporate the results into future token prediction"
+      },
+      {
+        "index": 2,
+        "entity_name": "in-context learning",
+        "entity_type": "METHODOLOGY",
+        "chunk_id": null,
+        "method": "initial_entity_bm25_search",
+        "score": 1.5047879616963067,
+        "content_preview": "study of learning curves in-context"
+      },
+      {
+        "index": 3,
+        "entity_name": null,
+        "entity_type": null,
+        "chunk_id": "chunk_0",
+        "method": "semantic_chunk_search",
+        "score": 0.0,
+        "content_preview": "We propose a new simple network architecture, the Transformer, based solely on attention mechanisms, dispensing with recurrence and convolutions entirely. Experiments on two machine translation tasks ..."
+      },
+      {
+        "index": 4,
+        "entity_name": null,
+        "entity_type": null,
+        "chunk_id": "chunk_5",
+        "method": "semantic_chunk_search",
+        "score": 0.0,
+        "content_preview": "Our prompts for BERT outperform their LAMA and LPAQA counterparts, which provides further evidence that AUTOPROMPT produces better probes. We compare AUTOPROMPT to LAMA and LPAQA (their prompts are st..."
+      },
+      {
+        "index": 5,
+        "entity_name": null,
+        "entity_type": null,
+        "chunk_id": "chunk_1",
+        "method": "semantic_chunk_search",
+        "score": 0.0,
+        "content_preview": "Most competitive neural sequence transduction models have an encoder-decoder structure We employ a residual connection around each of the two sub-layers, followed by layer normalization The encoder is..."
+      },
+      {
+        "index": 6,
+        "entity_name": null,
+        "entity_type": null,
+        "chunk_id": "chunk_4",
+        "method": "semantic_chunk_search",
+        "score": 0.0,
+        "content_preview": "We further observe that, as expected, bigger models are better, and dropout is very helpful in avoiding over-fitting. To evaluate the importance of different components of the Transformer, we varied o..."
+      },
+      {
+        "index": 7,
+        "entity_name": null,
+        "entity_type": null,
+        "chunk_id": "chunk_4",
+        "method": "semantic_chunk_search",
+        "score": 0.0,
+        "content_preview": "and use standard ranking metrics: mean reciprocal rank (MRR), precision-at-1 (P@1), and precision-at-10 (P@10) we split the T-REx triples into a 60-20-20 train/dev/test split and evaluate on the test ..."
+      },
+      {
+        "index": 8,
+        "entity_name": null,
+        "entity_type": null,
+        "chunk_id": "chunk_0",
+        "method": "semantic_chunk_search",
+        "score": 0.0,
+        "content_preview": "Using AUTO-PROMPT, we show that masked language models (MLMs) have an inherent capability to perform sentiment analysis and natural language inference without additional parameters or finetuning. Thes..."
+      },
+      {
+        "index": 9,
+        "entity_name": null,
+        "entity_type": null,
+        "chunk_id": "chunk_2",
+        "method": "semantic_chunk_search",
+        "score": 0.0,
+        "content_preview": "In addition to attention sub-layers, each of the layers in our encoder and decoder contains a fully connected feed-forward network... The Transformer uses multi-head attention in three different ways...."
+      },
+      {
+        "index": 10,
+        "entity_name": null,
+        "entity_type": null,
+        "chunk_id": "chunk_3",
+        "method": "semantic_chunk_search",
+        "score": 0.0,
+        "content_preview": "For fair comparison between AU-TOPROMPT and finetuning, we use Mosbach et al.'s recommended parameters for finetuning on small datasets. We compare to the performance of BERT and RoBERTa finetuned on ..."
+      }
+    ]
+  },
+  {
+    "question_id": 9,
+    "doc_chunk_type": "single_doc_single_chunk",
+    "question_type": "Lookup / Factual",
+    "question": "Does the success of chain-of-thought prompting depend on a particular linguistic style?",
+    "expected_answer": "No, successful use of chain-of-thought does not depend on a particular linguistic style.",
+    "expected_chunks": [
+      {
+        "doc_id": "doc_Chain_of_Thought_Pro_a5fe4012_20250730_041312",
+        "chunk_id": "chunk_Chain_idx008_f25576"
+      }
+    ],
+    "generated_answer": "- The retrieved content does not directly address whether the success of chain-of-thought prompting depends on a particular linguistic style. \n- However, it does mention a method involving chain of thought prompting to elicit reasoning in large language models [4]. \n- Additionally, it discusses AUTO-PROMPT, an automated method to create prompts for a diverse set of tasks, based on a gradient-guided search [5]. This suggests that the success of prompting may depend on the quality and relevance of the prompts, rather than a specific linguistic style.\n- The content also indicates that prompts for BERT outperform their LAMA and LPAQA counterparts, which could imply that the effectiveness of prompts may vary with different models [6].\n- The content does not provide specific information on the role of linguistic style in the success of chain-of-thought prompting.\n\n**References:**\n[4] /home/administrator/projects/NetMind-RS-KnowledgeRAG/paper_sets/paper_set_1/docs/Let's Verify Step by Step.pdf (chunk: N/A, method: Initial Entity (Semantic), score: 0.047)\n    Entity: prompting language models\n[5] /home/administrator/projects/NetMind-RS-KnowledgeRAG/paper_sets/test_sets/docs/AutoPrompt Eliciting Knowledge from Language Models with Automatically Generated Prompts.llm_extraction.json (chunk: chunk_0, method: Semantic Chunk Search, score: 0.000)\n[6] /home/administrator/projects/NetMind-RS-KnowledgeRAG/paper_sets/test_sets/docs/AutoPrompt Eliciting Knowledge from Language Models with Automatically Generated Prompts.llm_extraction.json (chunk: chunk_5, method: Semantic Chunk Search, score: 0.000)\n",
+    "retrieved_count": 15,
+    "llm_selected_count": 3,
+    "retrieval_methods_used": [
+      "initial_entity_bm25_search",
+      "semantic_chunk_search",
+      "initial_entity_semantic_search"
+    ],
+    "top_scores": [
+      3.1965128950236106,
+      1.6356877323420076,
+      1.6034985422740526,
+      0.04668736457824707,
+      0.0
+    ],
+    "references": [
+      {
+        "index": 4,
+        "source_file": "/home/administrator/projects/NetMind-RS-KnowledgeRAG/paper_sets/paper_set_1/docs/Let's Verify Step by Step.pdf",
+        "chunk_id": null,
+        "retrieval_method": "initial_entity_semantic_search",
+        "entity": "prompting language models",
+        "score": 0.04668736457824707
+      },
+      {
+        "index": 5,
+        "source_file": "/home/administrator/projects/NetMind-RS-KnowledgeRAG/paper_sets/test_sets/docs/AutoPrompt Eliciting Knowledge from Language Models with Automatically Generated Prompts.llm_extraction.json",
+        "chunk_id": "chunk_0",
+        "retrieval_method": "semantic_chunk_search",
+        "entity": null,
+        "score": 0.0
+      },
+      {
+        "index": 6,
+        "source_file": "/home/administrator/projects/NetMind-RS-KnowledgeRAG/paper_sets/test_sets/docs/AutoPrompt Eliciting Knowledge from Language Models with Automatically Generated Prompts.llm_extraction.json",
+        "chunk_id": "chunk_5",
+        "retrieval_method": "semantic_chunk_search",
+        "entity": null,
+        "score": 0.0
+      }
+    ],
+    "retrieved_context": [
+      {
+        "index": 1,
+        "entity_name": "Computational cost consideration",
+        "entity_type": "LIMITATION",
+        "chunk_id": null,
+        "method": "initial_entity_bm25_search",
+        "score": 3.1965128950236106,
+        "content_preview": "Toolformer currently does not take into account the tool-dependent computational cost incurred from making an API call."
+      },
+      {
+        "index": 2,
+        "entity_name": "Truthful AI",
+        "entity_type": "MODEL",
+        "chunk_id": null,
+        "method": "initial_entity_bm25_search",
+        "score": 1.6356877323420076,
+        "content_preview": "Model for developing and governing AI that does not lie"
+      },
+      {
+        "index": 3,
+        "entity_name": "Equation only",
+        "entity_type": "MODEL",
+        "chunk_id": null,
+        "method": "initial_entity_bm25_search",
+        "score": 1.6034985422740526,
+        "content_preview": "Model variant that allows for intermediate reasoning steps via equations but does not leverage natural language"
+      },
+      {
+        "index": 4,
+        "entity_name": "prompting language models",
+        "entity_type": "METHODOLOGY",
+        "chunk_id": null,
+        "method": "initial_entity_semantic_search",
+        "score": 0.04668736457824707,
+        "content_preview": "Method involving chain of thought prompting to elicit reasoning in large language models"
+      },
+      {
+        "index": 5,
+        "entity_name": null,
+        "entity_type": null,
+        "chunk_id": "chunk_0",
+        "method": "semantic_chunk_search",
+        "score": 0.0,
+        "content_preview": "Using AUTO-PROMPT, we show that masked language models (MLMs) have an inherent capability to perform sentiment analysis and natural language inference without additional parameters or finetuning. Thes..."
+      },
+      {
+        "index": 6,
+        "entity_name": null,
+        "entity_type": null,
+        "chunk_id": "chunk_5",
+        "method": "semantic_chunk_search",
+        "score": 0.0,
+        "content_preview": "Our prompts for BERT outperform their LAMA and LPAQA counterparts, which provides further evidence that AUTOPROMPT produces better probes. We compare AUTOPROMPT to LAMA and LPAQA (their prompts are st..."
+      },
+      {
+        "index": 7,
+        "entity_name": null,
+        "entity_type": null,
+        "chunk_id": "chunk_6",
+        "method": "semantic_chunk_search",
+        "score": 0.0,
+        "content_preview": "In some data-scarce settings, it may be more effective to prompt language models than to finetune them for the task. our method can be trivially extended to standard language models, and thus maybe us..."
+      },
+      {
+        "index": 8,
+        "entity_name": null,
+        "entity_type": null,
+        "chunk_id": "chunk_1",
+        "method": "semantic_chunk_search",
+        "score": 0.0,
+        "content_preview": "AUTOPROMPT achieves higher average- and worst-case accuracy than finetuning in low-data regimes Next, we apply AUTOPROMPT to the fact retrieval tasks of LAMA we achieve 43.3% precision-at-1 we are abl..."
+      },
+      {
+        "index": 9,
+        "entity_name": null,
+        "entity_type": null,
+        "chunk_id": "chunk_6",
+        "method": "semantic_chunk_search",
+        "score": 0.0,
+        "content_preview": "Many of the attention heads attend to a distant dependency of the verb 'making', completing the phrase 'making...more difficult'. Attentions here shown only for the word 'making'. Different colors rep..."
+      },
+      {
+        "index": 10,
+        "entity_name": null,
+        "entity_type": null,
+        "chunk_id": "chunk_2",
+        "method": "semantic_chunk_search",
+        "score": 0.0,
+        "content_preview": "In this section, we develop a general two-step approach to automate the selection of the sets of label tokens $V_y$. In the second step, we substitute h (i) with the MLM's output word embeddings wout ..."
+      }
+    ]
+  },
+  {
+    "question_id": 10,
+    "doc_chunk_type": "single_doc_single_chunk",
+    "question_type": "Lookup / Factual",
+    "question": "What is the reduction in GPU memory requirements when fine-tuning a 65B parameter model using QLORA compared to regular 16-bit fine-tuning?",
+    "expected_answer": "QLORA reduces the average memory requirements of fine-tuning a 65B parameter model from more than 780 GB of GPU memory to less than 48 GB without degrading performance.",
+    "expected_chunks": [
+      {
+        "doc_id": "doc_QLoRA_Efficient_Fine_6e74f985_20250730_032114",
+        "chunk_id": "chunk_QLoRA_idx003_b7b09f"
+      }
+    ],
+    "generated_answer": "- The retrieved content does not provide specific information on the reduction in GPU memory requirements when fine-tuning a 65B parameter model using QLORA compared to regular 16-bit fine-tuning.\n- The content mentions the use of GPU model parallelism in language model training [1], and the availability of memory on a GPU for caching previous segments and reusing them as extra context [2, 5], but does not provide specific details on memory requirements for QLORA or 16-bit fine-tuning.\n- The content also discusses the methodology used for finetuning QLORA [3], and a comparison between QLORA and standard finetuning [4], but does not provide specific data on GPU memory requirements.\n- The content is missing specific data or comparisons on GPU memory requirements for QLORA and 16-bit fine-tuning.\n\n**References:**\n[1] /home/administrator/projects/NetMind-RS-KnowledgeRAG/paper_sets/paper_set_1/docs/RealFormer Transformer Likes Residual Attention.pdf (chunk: N/A, method: Initial Entity (BM25), score: 5.192)\n    Entity: Megatron-LM\n[3] /home/administrator/projects/NetMind-RS-KnowledgeRAG/paper_sets/paper_set_1/docs/QLoRA Efficient Finetuning of Quantized LLMs.pdf (chunk: N/A, method: Initial Entity (BM25), score: 1.664)\n    Entity: QLORA finetuning experiments\n[4] /home/administrator/projects/NetMind-RS-KnowledgeRAG/paper_sets/paper_set_1/docs/QLoRA Efficient Finetuning of Quantized LLMs.pdf (chunk: N/A, method: Initial Entity (BM25), score: 1.658)\n    Entity: QLoRA vs. Standard Finetuning\n",
+    "retrieved_count": 15,
+    "llm_selected_count": 3,
+    "retrieval_methods_used": [
+      "initial_entity_bm25_search",
+      "semantic_chunk_search"
+    ],
+    "top_scores": [
+      5.1917408310757125,
+      4.826325411334553,
+      1.6635160680529302,
+      1.6578749058025624,
+      1.6411786646773594
+    ],
+    "references": [
+      {
+        "index": 1,
+        "source_file": "/home/administrator/projects/NetMind-RS-KnowledgeRAG/paper_sets/paper_set_1/docs/RealFormer Transformer Likes Residual Attention.pdf",
+        "chunk_id": null,
+        "retrieval_method": "initial_entity_bm25_search",
+        "entity": "Megatron-LM",
+        "score": 5.1917408310757125
+      },
+      {
+        "index": 3,
+        "source_file": "/home/administrator/projects/NetMind-RS-KnowledgeRAG/paper_sets/paper_set_1/docs/QLoRA Efficient Finetuning of Quantized LLMs.pdf",
+        "chunk_id": null,
+        "retrieval_method": "initial_entity_bm25_search",
+        "entity": "QLORA finetuning experiments",
+        "score": 1.6635160680529302
+      },
+      {
+        "index": 4,
+        "source_file": "/home/administrator/projects/NetMind-RS-KnowledgeRAG/paper_sets/paper_set_1/docs/QLoRA Efficient Finetuning of Quantized LLMs.pdf",
+        "chunk_id": null,
+        "retrieval_method": "initial_entity_bm25_search",
+        "entity": "QLoRA vs. Standard Finetuning",
+        "score": 1.6578749058025624
+      }
+    ],
+    "retrieved_context": [
+      {
+        "index": 1,
+        "entity_name": "Megatron-LM",
+        "entity_type": "MODEL",
+        "chunk_id": null,
+        "method": "initial_entity_bm25_search",
+        "score": 5.1917408310757125,
+        "content_preview": "Language model training using GPU model parallelism"
+      },
+      {
+        "index": 2,
+        "entity_name": "GPU memory",
+        "entity_type": "TECHNOLOGY",
+        "chunk_id": null,
+        "method": "initial_entity_bm25_search",
+        "score": 4.826325411334553,
+        "content_preview": "Memory available on a GPU for caching previous segments and reusing them as extra context"
+      },
+      {
+        "index": 3,
+        "entity_name": "QLORA finetuning experiments",
+        "entity_type": "METHODOLOGY",
+        "chunk_id": null,
+        "method": "initial_entity_bm25_search",
+        "score": 1.6635160680529302,
+        "content_preview": "Methodology used for finetuning QLORA"
+      },
+      {
+        "index": 4,
+        "entity_name": "QLoRA vs. Standard Finetuning",
+        "entity_type": "CONTRIBUTION",
+        "chunk_id": null,
+        "method": "initial_entity_bm25_search",
+        "score": 1.6578749058025624,
+        "content_preview": "Comparison between QLoRA and standard finetuning"
+      },
+      {
+        "index": 5,
+        "entity_name": "Neural GPU",
+        "entity_type": "MODEL",
+        "chunk_id": null,
+        "method": "initial_entity_bm25_search",
+        "score": 1.6411786646773594,
+        "content_preview": "Memory available on a GPU for caching previous segments and reusing them as extra context"
+      },
+      {
+        "index": 6,
+        "entity_name": null,
+        "entity_type": null,
+        "chunk_id": "chunk_3",
+        "method": "semantic_chunk_search",
+        "score": 0.0,
+        "content_preview": "For fair comparison between AU-TOPROMPT and finetuning, we use Mosbach et al.'s recommended parameters for finetuning on small datasets. We compare to the performance of BERT and RoBERTa finetuned on ..."
+      },
+      {
+        "index": 7,
+        "entity_name": null,
+        "entity_type": null,
+        "chunk_id": "chunk_4",
+        "method": "semantic_chunk_search",
+        "score": 0.0,
+        "content_preview": "We further observe that, as expected, bigger models are better, and dropout is very helpful in avoiding over-fitting. To evaluate the importance of different components of the Transformer, we varied o..."
+      },
+      {
+        "index": 8,
+        "entity_name": null,
+        "entity_type": null,
+        "chunk_id": "chunk_6",
+        "method": "semantic_chunk_search",
+        "score": 0.0,
+        "content_preview": "In some data-scarce settings, it may be more effective to prompt language models than to finetune them for the task. our method can be trivially extended to standard language models, and thus maybe us..."
+      },
+      {
+        "index": 9,
+        "entity_name": null,
+        "entity_type": null,
+        "chunk_id": "chunk_1",
+        "method": "semantic_chunk_search",
+        "score": 0.0,
+        "content_preview": "AUTOPROMPT achieves higher average- and worst-case accuracy than finetuning in low-data regimes Next, we apply AUTOPROMPT to the fact retrieval tasks of LAMA we achieve 43.3% precision-at-1 we are abl..."
+      },
+      {
+        "index": 10,
+        "entity_name": null,
+        "entity_type": null,
+        "chunk_id": "chunk_7",
+        "method": "semantic_chunk_search",
+        "score": 0.0,
+        "content_preview": "To measure the effects of the AUTOPROMPT search hyperparameters, we plot the validation accuracy as a function of label set size |Vy| and the number of trigger tokens |xtrig|. Following [Petroni et al..."
+      }
+    ]
+  }
+]
