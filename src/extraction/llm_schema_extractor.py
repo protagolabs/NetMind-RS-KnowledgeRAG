@@ -107,7 +107,7 @@ EXTRACTION HINTS:
 {json.dumps(entity_schema.extraction_hints, indent=2)}
 
 TEXT TO ANALYZE:
-{content[:3000]}  # Limit to 3000 chars for API
+{content} 
 
 INSTRUCTIONS:
 1. Extract ALL relevant entities matching the specified types

@@ -52,37 +52,40 @@ async def store_extraction_properly(extraction_json_path: str, storage_manager: 
         }
     )
     
-    # Process chunks - create chunk list with proper format
-    chunk_ids = set()
-    for entity_data in data.get('entities', []):
-        chunk_id = entity_data.get('chunk_id', 'unknown')
-        chunk_ids.add(chunk_id)
+    # Load real chunks from enhanced.json if available
+    enhanced_json_path = extraction_json_path.replace('.llm_extraction.json', '.enhanced.json')
+    if Path(enhanced_json_path).exists():
+        try:
+            with open(enhanced_json_path, 'r', encoding='utf-8') as f:
+                enhanced_data = json.load(f)
+            
+            # Use the actual text chunks from the enhanced parsing
+            for i, chunk in enumerate(enhanced_data.get('text_chunks', [])):
+                paper.chunks.append({
+                    "chunk_id": chunk.get('id', f'text_{i:03d}'),  # Keep original IDs like text_000
+                    "content": chunk.get('content', ''),
+                    "chunk_type": chunk.get('chunk_type', 'text'),
+                    "word_count": chunk.get('word_count', len(chunk.get('content', '').split())),
+                    "sequence": i,
+                    "metadata": chunk.get('metadata', {})
+                })
+            print(f"  Loaded {len(paper.chunks)} real chunks from enhanced.json")
+        except Exception as e:
+            print(f"  Warning: Could not load chunks from enhanced.json: {e}")
+    else:
+        print(f"  Warning: No enhanced.json found for {paper_title}")
     
-    # Create chunks with proper content
-    for chunk_id in sorted(chunk_ids):
-        # Get all entities in this chunk to build context
-        chunk_entities = [e for e in data.get('entities', []) 
-                         if e.get('chunk_id') == chunk_id]
-        
-        # Aggregate unique contexts from entities in this chunk
-        contexts = set(e.get('context', '') for e in chunk_entities if e.get('context'))
-        chunk_content = " ".join(contexts) if contexts else f"Content for {chunk_id}"
-        
-        chunk_index = int(chunk_id.split('_')[-1]) if '_' in chunk_id else 0
-        
-        paper.chunks.append({
-            "chunk_id": chunk_id,
-            "content": chunk_content,
-            "chunk_type": "text",
-            "word_count": len(chunk_content.split()),
-            "sequence": chunk_index,
-            "metadata": {
-                "entity_count": len(chunk_entities)
-            }
-        })
-    
-    # Process entities with correct field names
+    # Process entities with correct field names and fix chunk_id mapping
     for entity_data in data.get('entities', []):
+        # Map chunk_X to text_XXX format to match actual chunk IDs
+        original_chunk_id = entity_data.get('chunk_id', 'unknown')
+        if original_chunk_id.startswith('chunk_'):
+            # Extract the number and reformat to text_XXX
+            chunk_num = original_chunk_id.split('_')[-1]
+            mapped_chunk_id = f'text_{int(chunk_num):03d}'
+        else:
+            mapped_chunk_id = original_chunk_id
+        
         entity = ExtractedEntity(
             name=entity_data.get('name', ''),
             type=entity_data.get('type', 'UNKNOWN'),
@@ -90,13 +93,22 @@ async def store_extraction_properly(extraction_json_path: str, storage_manager: 
             confidence=entity_data.get('confidence', 0.5),
             attributes=entity_data.get('attributes', {}),
             context=entity_data.get('context', ''),
-            chunk_id=entity_data.get('chunk_id', 'unknown'),
+            chunk_id=mapped_chunk_id,  # Use mapped ID
             source_file=extraction_json_path
         )
         paper.entities.append(entity)
     
-    # Process relationships with correct field names
+    # Process relationships with correct field names and fix chunk_id mapping
     for rel_data in data.get('relationships', []):
+        # Map chunk_X to text_XXX format to match actual chunk IDs
+        original_chunk_id = rel_data.get('chunk_id', 'unknown')
+        if original_chunk_id.startswith('chunk_'):
+            # Extract the number and reformat to text_XXX
+            chunk_num = original_chunk_id.split('_')[-1]
+            mapped_chunk_id = f'text_{int(chunk_num):03d}'
+        else:
+            mapped_chunk_id = original_chunk_id
+        
         relationship = ExtractedRelationship(
             source_entity=rel_data.get('source', ''),
             target_entity=rel_data.get('target', ''),
@@ -107,7 +119,7 @@ async def store_extraction_properly(extraction_json_path: str, storage_manager: 
                 'evidence': rel_data.get('evidence', '')
             },
             context=rel_data.get('evidence', ''),
-            chunk_id=rel_data.get('chunk_id', 'unknown'),
+            chunk_id=mapped_chunk_id,  # Use mapped ID
             source_file=extraction_json_path
         )
         paper.relationships.append(relationship)
