@@ -1,0 +1,1 @@
+{"detail":"File size exceeds 10 MB limit"}
