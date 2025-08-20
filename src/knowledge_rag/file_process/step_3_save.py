@@ -422,7 +422,11 @@ async def process_folder(
     }
 
     # 定义输出路径
-    output_path = Path(folder_path).parent / "experiments_docs_processed" / "paper_set_1" / output_file
+    output_path = Path(folder_path).parent.parent / "experiments_docs_processed" /  output_file
+    print(f"Output path: {output_path}")
+    # check if the output path exists
+    if not os.path.exists(Path(folder_path).parent.parent / "experiments_docs_processed" ):
+        raise FileNotFoundError(f"Output path {output_path} does not exist")
 
     # 使用 tqdm 进度条
     progress_bar = tqdm(markdown_files, desc="Processing documents")
@@ -453,7 +457,9 @@ async def process_folder(
             })
 
         except Exception as e:
-            print(f"❌ Error processing {file_name}: {str(e)}")
+            import traceback
+            error_message = traceback.format_exc()
+            print(f"❌ Error processing {file_name}: {error_message}")
             continue
 
     print("\n🎉 Processing completed!")
@@ -478,4 +484,13 @@ def generate_uuid() -> str:
     return IDGenerator.generate_simple_uuid()
 
 
-
+if __name__ == "__main__":
+    
+    import asyncio
+    
+    asyncio.run(
+        process_folder(
+        folder_path="./experiments_docs/baoxian",
+        output_file="baoxian.json"
+        )   
+    )

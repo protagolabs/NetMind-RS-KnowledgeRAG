@@ -30,23 +30,30 @@ from knowledge_rag.agentic_generation.rag_agent import RAGAgent
 async def main():
     """主函数，使用异步上下文管理器确保资源正确释放"""
     
-    with open("data/questions.json", "r") as f:
-        questions = json.load(f)
-    
-    all_results = []
+    # with open("data/questions.json", "r") as f:
+    #     questions = json.load(f)
+    query = "For the Patriot Exchange policy's Accidental Death & Dismemberment benefit, what is the maximum principal sum payable, and name two specific types of activities or conditions explicitly listed as exclusions for accidental death or dismemberment coverage? "
+    print(query)
     async with RAGAgent() as rag_agent:
-        for question in tqdm(questions):
-            query = question['question']
-            result = await rag_agent.rag_agent(query) 
-            question['xyz_answer'] = result['answer']
-            question['chunks'] = result['chunk_ids']
-            question['cost_breakdown'] = result['cost_breakdown']
-            question['performance_metrics'] = result['performance_metrics']
-            question['metadata'] = result['metadata']
-            all_results.append(question)
+        result = await rag_agent.rag_agent(query, dataset_type="baoxian") 
+    print(f"Chunk ids: {result['chunk_ids']}")
+    print(f"Cost breakdown: {result['cost_breakdown']}")
+    print(f"Performance metrics: {result['performance_metrics']}")
+    print(f"Metadata: {result['metadata']}")
+    # all_results = []
+    # async with RAGAgent() as rag_agent:
+    #     for question in tqdm(questions):
+    #         query = question['question']
+    #         result = await rag_agent.rag_agent(query) 
+    #         question['xyz_answer'] = result['answer']
+    #         question['chunks'] = result['chunk_ids']
+    #         question['cost_breakdown'] = result['cost_breakdown']
+    #         question['performance_metrics'] = result['performance_metrics']
+    #         question['metadata'] = result['metadata']
+    #         all_results.append(question)
             
-            with open("data/results_20250815.json", "w") as f:
-                json.dump(all_results, f, indent=4)
+    #         with open("data/results_20250815.json", "w") as f:
+    #             json.dump(all_results, f, indent=4)
 
 if __name__ == "__main__":
     import asyncio

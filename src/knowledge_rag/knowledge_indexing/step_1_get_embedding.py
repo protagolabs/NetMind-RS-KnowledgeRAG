@@ -341,8 +341,18 @@ async def embedding_chunk(dataset: list) -> list:
             
         return results
     
-            
-
+if __name__ == "__main__":
+    import asyncio
+    with open("experiments_docs_processed/baoxian_docs.json", "r") as f:
+        docs = json.load(f)
+    with open("experiments_docs_processed/baoxian_chunks.json", "r") as f:
+        chunks = json.load(f)
+    results = asyncio.run(embedding_doc(docs))
+    with open("experiments_docs_processed/baoxian_docs_embedding.json", "w") as f:
+        json.dump(results, f, ensure_ascii=False, indent=4)
+    results = asyncio.run(embedding_chunk(chunks))
+    with open("experiments_docs_processed/baoxian_chunks_embedding.json", "w") as f:
+        json.dump(results, f, ensure_ascii=False, indent=4)
         
         
         

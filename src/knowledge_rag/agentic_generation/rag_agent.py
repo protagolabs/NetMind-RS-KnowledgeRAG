@@ -36,8 +36,8 @@ from traceloop.sdk.decorators import workflow
 
 Traceloop.init(
     app_name="knowledge_rag",
-    # api_key="tl_1e636be3e4dd41c2b4d3e9dad4b6ae6f"
-    api_key="tl_46cc5aaa8f5649d89e530bcc6e2ac37b"
+    api_key="tl_1e636be3e4dd41c2b4d3e9dad4b6ae6f"
+    # api_key="tl_46cc5aaa8f5649d89e530bcc6e2ac37b"
 )
 
 class RAGAgent:

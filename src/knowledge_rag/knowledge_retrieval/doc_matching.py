@@ -83,8 +83,8 @@ class DocMatchingResultWithIsRelated(DocMatchingResult):
         score: 相关性评分
     
     决策逻辑：
-        - 通常score >= 31时，is_related = True
-        - score < 31时，is_related = False
+        - 通常score >= 21时，is_related = True
+        - score < 21时，is_related = False
         - 具体阈值可根据应用场景调整
     
     用途：
@@ -132,13 +132,21 @@ Judge a document **related** if it **mentions, overlaps with, or is clearly rele
 
 > Write `analysis_detail` in the **same language as the user question**.
 
-## Scoring Rubric (0–100, integers only, More Lenient)
-- **0–10**: No overlap at all.
-- **20–35**: Weak overlap — only 1 shared entity/term, but still somewhat relevant.
-- **40–55**: Moderate overlap — some matching terms, could help partially answer.
-- **60–75**: Good overlap — multiple matches or same subtopic/task.
-- **80–90**: Strong overlap — most key elements matched, clear same context/task.
-- **95–100**: Exact or near-exact match — doc is clearly about the question’s main topic.
+## Scoring Rubric (choose a band, then pick a score inside it)
+- **0–20 — No Overlap**  
+  No matching entities/terms/constraints with the question; fragment is unrelated.
+- **20–40 — Weak Overlap**  
+  One minor match **or** only generic same-domain similarity without concrete specifics.  
+  (Pick closer to 20 when purely generic; closer to 40 when one clear specific is present.)
+- **40–60 — Moderate Overlap**  
+  Multiple specific matches **or** one specific element with clear detail (e.g., version/metric/parameter).  
+  (Closer to 60 when ≥2 solid matches or precise definitions/configs appear.)
+- **60–80 — Strong Overlap**  
+  Most key elements align, or the fragment clearly addresses the **same task/dataset/API** context with specifics.  
+  (Use upper 70s when coverage is broad and precise with minor mismatches.)
+- **80–100 — Near-Exact / Primary Topic Match**  
+  The fragment is **primarily about** the same specific item/task; rich, precise coverage, minimal mismatches.  
+  (Choose 90–100 when it is essentially a direct topic match.)
 
 ## Output Format
 - DocMatchingResult

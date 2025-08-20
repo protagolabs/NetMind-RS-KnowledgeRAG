@@ -758,7 +758,7 @@ class DataToDBSaver:
             logger.error(f"关闭数据库连接失败: {e}")
 
 
-def main():
+def main(docs_file: str, chunks_file: str):
     """
     主函数 - 执行完整的数据库存储流程
     ================================
@@ -812,8 +812,8 @@ def main():
         
         # 第四步：定义数据文件路径
         # 指向step_1处理结果的JSON文件
-        docs_file = project_root / "experiments_docs_processed" / "paper_set_1_docs.json"
-        chunks_file = project_root / "experiments_docs_processed" / "paper_set_1_chunks.json"
+        docs_file = Path(docs_file)
+        chunks_file = Path(chunks_file)
         
         # 第五步：检查输入文件是否存在
         # 确保数据源文件存在，避免后续处理失败
@@ -871,4 +871,6 @@ def main():
             saver.close_connections()
 
 
-
+if __name__ == "__main__":
+    print("Starting to save data to database...")
+    main(docs_file="experiments_docs_processed/baoxian_docs_embedding.json", chunks_file="experiments_docs_processed/baoxian_chunks_embedding.json")
