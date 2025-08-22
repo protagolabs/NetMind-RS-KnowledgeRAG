@@ -14,6 +14,7 @@ from pathlib import Path
 
 from .graph_store import PaperGraphStore
 from .vector_store import PaperVectorStore
+from .entity_consolidator import EntityConsolidator
 from .models import (
     ExtractedEntity, ExtractedRelationship, ExtractedPaper,
     SearchResult, StorageStats
@@ -65,6 +66,10 @@ class PaperStorageManager:
             openai_api_key=openai_api_key,
             embedding_model=embedding_model
         )
+        
+        # Store OpenAI API key for entity consolidator
+        self.openai_api_key = openai_api_key
+        self.entity_consolidator = None  # Will be initialized when needed
         
         self.logger.info("PaperStorageManager initialized")
     
@@ -427,3 +432,193 @@ class PaperStorageManager:
         except Exception as e:
             self.logger.error(f"Failed to clear all data: {e}")
             return False
+    
+    async def consolidate_entities_globally(
+        self,
+        dry_run: bool = False,
+        entity_types: Optional[List[str]] = None,
+        semantic_threshold: float = 0.85,
+        levenshtein_threshold: float = 0.8
+    ) -> Dict[str, Any]:
+        """
+        Consolidate entity variants across all documents using semantic similarity.
+        
+        This method identifies and merges duplicate entities that appear across
+        different documents while preserving full context and occurrence information.
+        
+        Args:
+            dry_run: If True, only identify duplicates without modifying data
+            entity_types: Specific entity types to consolidate (None for all)
+            semantic_threshold: Minimum cosine similarity for semantic matching (0-1)
+            levenshtein_threshold: Minimum string similarity for name matching (0-1)
+            
+        Returns:
+            Dictionary with consolidation results:
+            - mode: 'dry_run' or 'executed'
+            - entities_consolidated: Number of entity groups consolidated
+            - consolidation_details: Details of consolidated entities
+            - timestamp: When consolidation was performed
+            
+        Example:
+            # Dry run to see what would be consolidated
+            results = await storage.consolidate_entities_globally(dry_run=True)
+            print(f"Would consolidate {results['entities_to_consolidate']} entities")
+            
+            # Actual consolidation
+            results = await storage.consolidate_entities_globally()
+            print(f"Consolidated {results['entities_consolidated']} entity groups")
+        """
+        try:
+            # Initialize entity consolidator if not already done
+            if self.entity_consolidator is None:
+                # Import OpenAI client if available
+                llm_client = None
+                if self.openai_api_key:
+                    try:
+                        from openai import OpenAI
+                        llm_client = OpenAI(api_key=self.openai_api_key)
+                    except ImportError:
+                        self.logger.warning("OpenAI not available, will use basic description merging")
+                
+                self.entity_consolidator = EntityConsolidator(
+                    graph_store=self.graph_store,
+                    vector_store=self.vector_store,
+                    llm_client=llm_client,
+                    semantic_threshold=semantic_threshold,
+                    levenshtein_threshold=levenshtein_threshold
+                )
+            
+            # Run consolidation
+            self.logger.info(f"Starting entity consolidation (dry_run={dry_run})")
+            results = await self.entity_consolidator.consolidate_entities_globally(
+                dry_run=dry_run,
+                entity_types=entity_types,
+                exclude_consolidated=True
+            )
+            
+            if dry_run:
+                self.logger.info(
+                    f"Dry run complete: Found {results['potential_groups']} groups "
+                    f"with {results['entities_to_consolidate']} entities to consolidate"
+                )
+            else:
+                self.logger.info(
+                    f"Consolidation complete: Processed {results['entities_consolidated']} groups"
+                )
+            
+            return results
+            
+        except Exception as e:
+            self.logger.error(f"Failed to consolidate entities: {e}")
+            raise
+    
+    async def get_entity_occurrences(self, entity_name: str) -> List[Dict[str, Any]]:
+        """
+        Get all occurrences of an entity across documents.
+        
+        For consolidated entities, this returns all contexts where the entity
+        (or its aliases) appeared across different documents.
+        
+        Args:
+            entity_name: Name of the entity
+            
+        Returns:
+            List of occurrence dictionaries containing:
+            - context: The specific context where entity appeared
+            - chunk_id: ID of the chunk containing the context
+            - paper_path: Path to the source document
+            - paper_title: Title of the source document
+            - confidence: Extraction confidence score
+            - original_name: How the entity was originally named in that document
+            - extraction_date: When it was extracted
+            
+        Example:
+            occurrences = await storage.get_entity_occurrences("New York City")
+            for occ in occurrences:
+                print(f"{occ['paper_title']}: {occ['context']}")
+        """
+        try:
+            if self.entity_consolidator is None:
+                # Initialize consolidator for querying
+                self.entity_consolidator = EntityConsolidator(
+                    graph_store=self.graph_store,
+                    vector_store=self.vector_store,
+                    llm_client=None
+                )
+            
+            return await self.entity_consolidator.get_entity_occurrences(entity_name)
+            
+        except Exception as e:
+            self.logger.error(f"Failed to get entity occurrences: {e}")
+            return []
+    
+    async def get_consolidation_statistics(self) -> Dict[str, Any]:
+        """
+        Get statistics about consolidated entities.
+        
+        Returns:
+            Dictionary with consolidation statistics:
+            - total_entities: Total number of entities
+            - consolidated_entities: Number of consolidated entities
+            - total_occurrences: Total occurrence nodes
+            - avg_occurrences_per_entity: Average occurrences
+            - entities_by_document_count: Distribution by document count
+        """
+        try:
+            query = """
+            MATCH (e:Entity)
+            WITH count(e) as total_entities,
+                 sum(CASE WHEN e.is_consolidated = true THEN 1 ELSE 0 END) as consolidated_entities
+            
+            OPTIONAL MATCH (e2:Entity {is_consolidated: true})-[:HAS_OCCURRENCE]->(o:Occurrence)
+            WITH total_entities, consolidated_entities, count(o) as total_occurrences
+            
+            OPTIONAL MATCH (e3:Entity {is_consolidated: true})
+            WITH total_entities, consolidated_entities, total_occurrences,
+                 collect({name: e3.name, doc_count: e3.document_count}) as entity_docs
+            
+            RETURN total_entities, consolidated_entities, total_occurrences,
+                   CASE WHEN consolidated_entities > 0 
+                        THEN total_occurrences * 1.0 / consolidated_entities 
+                        ELSE 0 END as avg_occurrences_per_entity,
+                   entity_docs
+            """
+            
+            async with self.graph_store.driver.session() as session:
+                result = await session.run(query)
+                record = await result.single()
+                
+                if record:
+                    # Calculate distribution by document count
+                    doc_count_dist = {}
+                    for entity in record['entity_docs']:
+                        if entity['doc_count']:
+                            count = entity['doc_count']
+                            doc_count_dist[count] = doc_count_dist.get(count, 0) + 1
+                    
+                    return {
+                        'total_entities': record['total_entities'],
+                        'consolidated_entities': record['consolidated_entities'],
+                        'unconsolidated_entities': record['total_entities'] - record['consolidated_entities'],
+                        'total_occurrences': record['total_occurrences'],
+                        'avg_occurrences_per_entity': round(record['avg_occurrences_per_entity'], 2),
+                        'entities_by_document_count': doc_count_dist,
+                        'consolidation_percentage': round(
+                            record['consolidated_entities'] * 100.0 / record['total_entities']
+                            if record['total_entities'] > 0 else 0, 2
+                        )
+                    }
+                
+                return {
+                    'total_entities': 0,
+                    'consolidated_entities': 0,
+                    'unconsolidated_entities': 0,
+                    'total_occurrences': 0,
+                    'avg_occurrences_per_entity': 0,
+                    'entities_by_document_count': {},
+                    'consolidation_percentage': 0
+                }
+                
+        except Exception as e:
+            self.logger.error(f"Failed to get consolidation statistics: {e}")
+            return {}

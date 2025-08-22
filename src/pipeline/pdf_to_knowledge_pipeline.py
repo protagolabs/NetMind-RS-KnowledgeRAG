@@ -50,6 +50,9 @@ class PipelineConfig(BaseModel):
     chunk_size: int = Field(default=500, description="Target chunk size in words")
     chunk_overlap: int = Field(default=50, description="Chunk overlap in words")
     parse_output_dir: str = Field(default="./parsed_docs", description="Output directory for parsed documents")
+    use_section_chunking: bool = Field(default=False, description="Use section-based chunking")
+    section_chunk_size: int = Field(default=2000, description="Words per chunk within sections")
+    section_chunk_overlap: int = Field(default=200, description="Word overlap within sections")
     
     # Extraction config
     llm_model: str = Field(default="gpt-3.5-turbo", description="LLM model to use")
@@ -133,7 +136,13 @@ class PDFToKnowledgePipeline:
         self.cost_tracker: Optional[CostTracker] = None
         
         # Initialize components
-        self.parser = EnhancedDocumentParser()
+        self.parser = EnhancedDocumentParser(
+            chunk_size=config.chunk_size,
+            chunk_overlap=config.chunk_overlap,
+            use_section_chunking=config.use_section_chunking,
+            section_chunk_size=config.section_chunk_size,
+            section_chunk_overlap=config.section_chunk_overlap
+        )
         self.extractor = None  # Will be initialized when needed
         self.storage_manager = None  # Will be initialized when needed
         
@@ -316,7 +325,6 @@ class PDFToKnowledgePipeline:
             extraction_result = self.extractor.extract_from_document(
                 parsed_doc,
                 override_type=DocumentType.ACADEMIC_PAPER,
-                max_chunks=1000,
             )
             
             logger.info(f"llm extractor done")

@@ -179,7 +179,11 @@ class PaperGraphStore:
                     SET c.content = chunk.content,
                         c.chunk_type = chunk.chunk_type,
                         c.word_count = chunk.word_count,
-                        c.sequence = chunk.sequence
+                        c.sequence = chunk.sequence,
+                        c.summary = chunk.summary,
+                        c.references = chunk.references,
+                        c.section_title = chunk.section_title,
+                        c.section_level = chunk.section_level
                     WITH c
                     MATCH (p:Paper {file_path: $paper_path})
                     MERGE (p)-[:HAS_CHUNK]->(c)
@@ -191,7 +195,11 @@ class PaperGraphStore:
                             'content': chunk.get('content', ''),
                             'chunk_type': chunk.get('chunk_type', 'text'),
                             'word_count': chunk.get('word_count', 0),
-                            'sequence': i
+                            'sequence': i,
+                            'summary': chunk.get('summary', ''),
+                            'references': json.dumps(chunk.get('references', [])) if chunk.get('references') else '[]',
+                            'section_title': chunk.get('section_title', ''),
+                            'section_level': chunk.get('section_level', 0)
                         }
                         for i, chunk in enumerate(paper.chunks)
                     ]

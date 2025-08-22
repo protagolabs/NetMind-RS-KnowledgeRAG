@@ -73,6 +73,67 @@ class LLMSchemaExtractor:
         self.max_tokens = max_tokens
         self.classifier = DocumentClassifier()
     
+    def summarize_chunk_with_llm(
+        self,
+        content: str,
+        chunk_id: Optional[str] = None,
+        section_title: Optional[str] = None
+    ) -> Tuple[str, Dict[str, Any]]:
+        """
+        Create a concise summary of a chunk's content.
+        
+        Args:
+            content: Text content to summarize
+            chunk_id: Optional chunk identifier
+            section_title: Optional section title for context
+            
+        Returns:
+            Tuple of (summary string, usage dict)
+        """
+        # Build context-aware prompt
+        context = f"This chunk is from section: '{section_title}'\n\n" if section_title else ""
+        
+        prompt = f"""You are an expert at summarizing academic and technical content.
+
+{context}TEXT TO SUMMARIZE:
+{content[:4000]}
+
+INSTRUCTIONS:
+Create a concise, informative summary (2-3 sentences) that captures:
+1. The main topic or concept being discussed
+2. Key points, methods, or findings mentioned
+3. Any important relationships or comparisons made
+
+The summary should be self-contained and help someone quickly understand what this chunk discusses without reading the full text.
+
+Focus on technical content and avoid generic descriptions."""
+
+        try:
+            response = self.client.chat.completions.create(
+                model=self.model,
+                messages=[
+                    {"role": "system", "content": "You are a precise technical content summarizer."},
+                    {"role": "user", "content": prompt}
+                ],
+                temperature=self.temperature,
+                max_tokens=150  # Keep summaries concise
+            )
+            
+            # Track usage for cost calculation
+            usage = {
+                "prompt_tokens": response.usage.prompt_tokens,
+                "completion_tokens": response.usage.completion_tokens,
+                "total_tokens": response.usage.total_tokens
+            }
+            
+            summary = response.choices[0].message.content.strip()
+            
+            return summary, usage
+            
+        except Exception as e:
+            logger.error(f"Chunk summarization failed: {e}")
+            return "Summary generation failed", {}
+    
     def extract_entities_with_llm(
         self,
         content: str,
@@ -111,23 +172,39 @@ TEXT TO ANALYZE:
 
 INSTRUCTIONS:
 1. Extract ALL relevant entities matching the specified types
-2. For academic papers, focus on methodologies, algorithms, models, and contributions
-3. Include confidence scores (0-1) for each entity
-4. Extract key attributes when available
+2. Include confidence scores (0-1) for each entity
+3. Extract key attributes when available
+4. For the context field, provide analytical insights about the entity's role in this chunk
 
 Return a JSON array of entities with this structure:
 [
   {{
     "name": "entity name",
     "type": "ENTITY_TYPE",
-    "description": "brief description",
+    "description": "brief description of what the entity is",
     "confidence": 0.9,
     "attributes": {{"key": "value"}},
-    "context": "relevant quote from text"
+    "context": "analytical insight about this entity in the chunk"
   }}
 ]
 
-Focus on technical contributions, not generic concepts. Be comprehensive."""
+IMPORTANT for the "context" field:
+- DO NOT just quote text. Instead, explain the entity's role, purpose, or significance in this chunk
+- Examples of good context across different domains:
+  * TECHNOLOGY/TOOL: "Introduced as the primary framework for building the system, chosen for its scalability and 50% faster processing speed"
+  * PERSON/ORGANIZATION: "Mentioned as the lead developer who contributed the core algorithm, affiliated with MIT"
+  * PROCESS/METHOD: "Described as a three-stage pipeline that reduces processing time from hours to minutes"
+  * PRODUCT/SERVICE: "Launched in Q2 2023 as a cloud-based solution targeting enterprise customers"
+  * CONCEPT/THEORY: "Explained as the foundational principle underlying the new approach, contrasting with traditional methods"
+  * LOCATION/FACILITY: "Identified as the manufacturing site where production increased by 30% after automation"
+  * EVENT/MILESTONE: "Marked as the turning point when the company pivoted to AI-focused strategy"
+  * STANDARD/REGULATION: "Referenced as the compliance requirement driving the system redesign"
+- Include quantitative details if mentioned (percentages, metrics, dates, amounts)
+- Mention relationships to other entities when relevant
+- Explain what the chunk reveals about this entity (findings, comparisons, applications, impacts)
+- Keep it concise but informative (1-2 sentences)
+
+Focus on specific, technical, and factual information. Be comprehensive."""
 
         try:
             response = self.client.chat.completions.create(
@@ -271,7 +348,6 @@ Be comprehensive and precise."""
         self,
         document_path,
         override_type: Optional[DocumentType] = None,
-        max_chunks: int = 10
     ) -> Dict[str, Any]:
         """
         Extract knowledge from document using LLM and schema.
@@ -322,24 +398,46 @@ Be comprehensive and precise."""
         
         all_entities = []
         all_relationships = []
+        chunk_summaries = []  # Store summaries for each chunk
         self.last_usage = []  # Track API usage for cost tracking
         
         # Process chunks or full content
         if chunks:
             # Process each chunk
-            for i, chunk in enumerate(chunks[:max_chunks]):
+            for i, chunk in enumerate(chunks):
                 # Handle ContentChunk objects from EnhancedParsedDocument
                 if hasattr(chunk, 'content'):
                     chunk_content = chunk.content
-                    chunk_id = chunk.chunk_id if hasattr(chunk, 'chunk_id') else f"chunk_{i}"
+                    chunk_id = chunk.id if hasattr(chunk, 'id') else f"chunk_{i}"
+                    section_title = chunk.section_title if hasattr(chunk, 'section_title') else None
+                    chunk_references = chunk.references if hasattr(chunk, 'references') else []
                 elif isinstance(chunk, dict):
                     chunk_content = chunk.get("content", "")
                     chunk_id = chunk.get("id", f"chunk_{i}")
+                    section_title = chunk.get("section_title", None)
+                    chunk_references = chunk.get("references", [])
                 else:
                     chunk_content = str(chunk)
                     chunk_id = f"chunk_{i}"
+                    section_title = None
+                    chunk_references = []
                 
-                logger.info(f"Processing chunk {i+1}/{min(len(chunks), max_chunks)}")
+                logger.info(f"Processing chunk {i+1}/{len(chunks)}")
+                
+                # Summarize chunk first
+                summary, summary_usage = self.summarize_chunk_with_llm(
+                    chunk_content,
+                    chunk_id,
+                    section_title
+                )
+                chunk_summaries.append({
+                    "chunk_id": chunk_id,
+                    "section_title": section_title,
+                    "summary": summary,
+                    "references": chunk_references  # Include references from parsing
+                })
+                if summary_usage:
+                    self.last_usage.append(summary_usage)
                 
                 # Extract entities from chunk
                 entities, entity_usage = self.extract_entities_with_llm(
@@ -364,7 +462,7 @@ Be comprehensive and precise."""
         else:
             # Process full content in sections
             sections = content.split('\n\n')
-            for i, section in enumerate(sections[:max_chunks]):
+            for i, section in enumerate(sections):
                 if len(section) > 100:  # Skip very short sections
                     entities, entity_usage = self.extract_entities_with_llm(
                         section,
@@ -395,16 +493,18 @@ Be comprehensive and precise."""
             "schema_used": schema.document_type,
             "entities": all_entities,
             "relationships": all_relationships,
+            "chunk_summaries": chunk_summaries,  # Add summaries to results
             "statistics": {
                 "total_entities": len(all_entities),
                 "total_relationships": len(all_relationships),
                 "entity_types": self._count_types(all_entities),
-                "relationship_types": self._count_types(all_relationships)
+                "relationship_types": self._count_types(all_relationships),
+                "chunks_summarized": len(chunk_summaries)
             },
             "extraction_metadata": {
                 "timestamp": datetime.now().isoformat(),
                 "model": self.model,
-                "chunks_processed": min(len(chunks) if chunks else len(content.split('\n\n')), max_chunks)
+                "chunks_processed": min(len(chunks) if chunks else len(content.split('\n\n')))
             }
         }
         
@@ -488,141 +588,3 @@ Be comprehensive and precise."""
         return counts
 
 
-def test_llm_extraction(model: str = "gpt-3.5-turbo", max_chunks: int = 5):
-    """
-    Test LLM-based extraction on Attention paper.
-    
-    Args:
-        model: OpenAI model to use (default: gpt-3.5-turbo)
-                Options: gpt-3.5-turbo, gpt-4, gpt-4-turbo-preview
-        max_chunks: Maximum number of chunks to process (default: 5)
-    """
-    
-    print("\n" + "=" * 80)
-    print("LLM-BASED SCHEMA EXTRACTION TEST")
-    print("=" * 80)
-    
-    # Check for API key (will be loaded from .env by load_dotenv)
-    api_key = os.getenv("OPENAI_API_KEY")
-    if not api_key:
-        print("\nError: OPENAI_API_KEY not found")
-        print("Please set your OpenAI API key in one of these ways:")
-        print("1. Create a .env file with: OPENAI_API_KEY=your-key-here")
-        print("2. Set environment variable: export OPENAI_API_KEY='your-key-here'")
-        return
-    
-    print(f"\nUsing model: {model}")
-    print(f"Processing {max_chunks} chunks")
-    
-    # Initialize extractor with specified model
-    extractor = LLMSchemaExtractor(
-        api_key=api_key,
-        model=model,
-        temperature=0.1
-    )
-    
-    # Path to document
-    doc_path = Path("/home/administrator/projects/NetMind-RS-KnowledgeRAG/paper_sets/paper_set_1/docs/Attention Is All You Need.enhanced.json")
-    
-    if not doc_path.exists():
-        print(f"Error: {doc_path} not found")
-        return
-    
-    print(f"\nExtracting from: {doc_path.name}")
-    print(f"Using {model} for comprehensive extraction...")
-    print(f"Processing first {max_chunks} chunks for demonstration...")
-    
-    # Extract with LLM
-    results = extractor.extract_from_document(
-        doc_path,
-        override_type=DocumentType.ACADEMIC_PAPER,
-        max_chunks=max_chunks  # Use configurable limit
-    )
-    
-    # Display results
-    print(f"\n{'='*40}")
-    print("EXTRACTION RESULTS")
-    print(f"{'='*40}")
-    
-    print(f"\nDocument Type: {results['document_type']}")
-    print(f"Output File: {results['output_file']}")
-    print(f"Entity Count: {results['entity_count']}")
-    print(f"Relationship Count: {results['relationship_count']}")
-    
-    # Access the detailed extraction results
-    extraction_data = results.get('extraction_results', {})
-    
-    if extraction_data:
-        print(f"\nSchema Used: {extraction_data.get('schema_used', 'N/A')}")
-        
-        stats = extraction_data.get('statistics', {})
-        if stats.get('entity_types'):
-            print("\nEntity Types:")
-            for entity_type, count in stats['entity_types'].items():
-                print(f"  • {entity_type}: {count}")
-        
-        if stats.get('relationship_types'):
-            print("\nRelationship Types:")
-            for rel_type, count in stats['relationship_types'].items():
-                print(f"  • {rel_type}: {count}")
-        
-        # Show sample entities
-        entities = extraction_data.get('entities', [])
-        if entities:
-            print(f"\n{'='*40}")
-            print("SAMPLE ENTITIES")
-            print(f"{'='*40}")
-            
-            for entity in entities[:10]:
-                print(f"\n[{entity['type']}] {entity['name']}")
-                if entity.get('description'):
-                    print(f"  Description: {entity['description']}")
-                if entity.get('confidence'):
-                    print(f"  Confidence: {entity['confidence']:.2f}")
-                if entity.get('attributes'):
-                    print(f"  Attributes: {entity['attributes']}")
-        
-        # Show sample relationships
-        relationships = extraction_data.get('relationships', [])
-        if relationships:
-            print(f"\n{'='*40}")
-            print("SAMPLE RELATIONSHIPS")
-            print(f"{'='*40}")
-            
-            for rel in relationships[:10]:
-                print(f"\n{rel['source']} --[{rel['type']}]--> {rel['target']}")
-                if rel.get('description'):
-                    print(f"  {rel['description']}")
-                if rel.get('evidence'):
-                    print(f"  Evidence: {rel['evidence'][:100]}...")
-    
-    print(f"\n{'='*40}")
-    print(f"Results saved to: {results['output_file']}")
-    print(f"{'='*40}")
-
-
-if __name__ == "__main__":
-    import sys
-    
-    # Parse command line arguments
-    model = "gpt-3.5-turbo"  # Default model
-    max_chunks = 100  # Default chunks
-    
-    if len(sys.argv) > 1:
-        model = sys.argv[1]
-    if len(sys.argv) > 2:
-        max_chunks = int(sys.argv[2])
-    
-    # Show usage if help requested
-    if "--help" in sys.argv or "-h" in sys.argv:
-        print("Usage: python llm_schema_extractor.py [model] [max_chunks]")
-        print("  model: OpenAI model name (default: gpt-3.5-turbo)")
-        print("         Options: gpt-3.5-turbo, gpt-4, gpt-4-turbo-preview")
-        print("  max_chunks: Number of chunks to process (default: 5)")
-        print("\nExamples:")
-        print("  python llm_schema_extractor.py")
-        print("  python llm_schema_extractor.py gpt-4")
-        print("  python llm_schema_extractor.py gpt-3.5-turbo 10")
-        sys.exit(0)
-    
-    test_llm_extraction(model=model, max_chunks=max_chunks)

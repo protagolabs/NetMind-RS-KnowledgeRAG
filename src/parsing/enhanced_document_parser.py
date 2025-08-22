@@ -56,6 +56,9 @@ class ContentChunk(BaseModel):
     page_end: Optional[int] = Field(default=None, description="Ending page")
     references: List[str] = Field(default_factory=list, description="Referenced table/image IDs")
     metadata: Dict[str, Any] = Field(default_factory=dict, description="Additional metadata")
+    section_title: Optional[str] = Field(default=None, description="Title of the section this chunk belongs to")
+    section_level: Optional[int] = Field(default=None, description="Hierarchical level of the section (1-6)")
+    chunk_number_in_section: Optional[int] = Field(default=None, description="Chunk number within the section")
 
 
 class TableChunk(ContentChunk):
@@ -105,21 +108,30 @@ class EnhancedDocumentParser:
         chunk_size: int = 1000,
         chunk_overlap: int = 100,
         extract_images: bool = True,
-        extract_tables: bool = True
+        extract_tables: bool = True,
+        use_section_chunking: bool = False,
+        section_chunk_size: int = 2000,
+        section_chunk_overlap: int = 200
     ):
         """
         Initialize the enhanced parser.
         
         Args:
-            chunk_size: Maximum words per text chunk
-            chunk_overlap: Word overlap between text chunks
+            chunk_size: Maximum words per text chunk (used when use_section_chunking=False)
+            chunk_overlap: Word overlap between text chunks (used when use_section_chunking=False)
             extract_images: Whether to extract images separately
             extract_tables: Whether to extract tables separately
+            use_section_chunking: Whether to use section-based chunking
+            section_chunk_size: Maximum words per chunk within a section (used when use_section_chunking=True)
+            section_chunk_overlap: Word overlap between chunks within a section (used when use_section_chunking=True)
         """
         self.chunk_size = chunk_size
         self.chunk_overlap = chunk_overlap
         self.extract_images = extract_images
         self.extract_tables = extract_tables
+        self.use_section_chunking = use_section_chunking
+        self.section_chunk_size = section_chunk_size
+        self.section_chunk_overlap = section_chunk_overlap
         
         if not MARKER_AVAILABLE:
             raise RuntimeError("Marker not installed. Run: pip install marker-pdf")
@@ -179,11 +191,17 @@ class EnhancedDocumentParser:
             if hasattr(rendered, 'metadata') and rendered.metadata:
                 metadata.page_count = rendered.metadata.get('page_count', 0)
             
-            # Create text chunks with references
-            text_chunks = self._create_text_chunks(modified_text, table_chunks, image_chunks)
-            
             # Extract sections
             sections = self._extract_sections(modified_text)
+            
+            # Create text chunks with references
+            if self.use_section_chunking:
+                text_chunks = self._create_section_based_chunks(
+                    modified_text, sections, table_chunks, image_chunks,
+                    self.section_chunk_size, self.section_chunk_overlap
+                )
+            else:
+                text_chunks = self._create_text_chunks(modified_text, table_chunks, image_chunks)
             
             # Create chunk index
             chunk_index = {}
@@ -362,6 +380,115 @@ class EnhancedDocumentParser:
         logger.info(f"Extracted {len(image_chunks)} images")
         return image_chunks
     
+    def _create_section_based_chunks(
+        self,
+        text: str,
+        sections: List[Dict[str, Any]],
+        table_chunks: List[TableChunk],
+        image_chunks: List[ImageChunk],
+        section_chunk_size: int = 2000,
+        section_chunk_overlap: int = 200
+    ) -> List[ContentChunk]:
+        """
+        Create text chunks based on document sections.
+        
+        Each section is split into chunks of section_chunk_size words.
+        Maintains section boundaries and metadata.
+        
+        Args:
+            text: Modified text with placeholders
+            sections: List of section dictionaries with position, title, level
+            table_chunks: List of table chunks
+            image_chunks: List of image chunks
+            section_chunk_size: Maximum words per chunk within a section
+            section_chunk_overlap: Word overlap between chunks within a section
+            
+        Returns:
+            List of text ContentChunk objects with section metadata
+        """
+        chunks = []
+        table_refs = {t.id for t in table_chunks}
+        image_refs = {i.id for i in image_chunks}
+        
+        # Sort sections by position
+        sorted_sections = sorted(sections, key=lambda x: x['position'])
+        
+        # Add an ending position for the last section
+        for i in range(len(sorted_sections)):
+            if i < len(sorted_sections) - 1:
+                sorted_sections[i]['end_position'] = sorted_sections[i + 1]['position']
+            else:
+                sorted_sections[i]['end_position'] = len(text)
+        
+        # If no sections, treat entire document as one section
+        if not sorted_sections:
+            sorted_sections = [{
+                'title': 'Document',
+                'level': 1,
+                'position': 0,
+                'end_position': len(text)
+            }]
+        
+        global_chunk_idx = 0
+        
+        # Process each section
+        for section in sorted_sections:
+            section_text = text[section['position']:section['end_position']]
+            section_words = section_text.split()
+            
+            # Skip empty sections
+            if not section_words:
+                continue
+            
+            # Split section into chunks
+            section_chunk_num = 0
+            start = 0
+            
+            while start < len(section_words):
+                end = min(start + section_chunk_size, len(section_words))
+                chunk_words = section_words[start:end]
+                chunk_text = ' '.join(chunk_words)
+                
+                # Find references in this chunk
+                references = []
+                for table_id in table_refs:
+                    if f"TABLE_REF:{table_id}" in chunk_text:
+                        references.append(table_id)
+                for image_id in image_refs:
+                    if f"IMAGE_REF:{image_id}" in chunk_text:
+                        references.append(image_id)
+                
+                chunk = ContentChunk(
+                    id=f"text_{global_chunk_idx:03d}",
+                    chunk_type="text",
+                    content=chunk_text,
+                    word_count=len(chunk_words),
+                    char_count=len(chunk_text),
+                    references=references,
+                    section_title=section.get('title', 'Unknown'),
+                    section_level=section.get('level', 1),
+                    chunk_number_in_section=section_chunk_num,
+                    metadata={
+                        "start_word_in_section": start,
+                        "end_word_in_section": end,
+                        "section_position": section['position'],
+                        "is_last_chunk_in_section": end >= len(section_words)
+                    }
+                )
+                chunks.append(chunk)
+                
+                # Move forward with overlap
+                if end < len(section_words):
+                    start = end - section_chunk_overlap
+                else:
+                    start = end
+                    
+                section_chunk_num += 1
+                global_chunk_idx += 1
+        
+        logger.info(f"Created {len(chunks)} section-based text chunks from {len(sorted_sections)} sections")
+        return chunks
+    
     def _create_text_chunks(
         self,
         text: str,
@@ -482,17 +609,23 @@ def parse_pdf_enhanced(
     chunk_size: int = 1000,
     save_json: bool = True,
     extract_tables: bool = True,
-    extract_images: bool = True
+    extract_images: bool = True,
+    use_section_chunking: bool = False,
+    section_chunk_size: int = 2000,
+    section_chunk_overlap: int = 200
 ) -> EnhancedParsedDocument:
     """
     Parse a PDF with enhanced table/image extraction.
     
     Args:
         pdf_path: Path to PDF file
-        chunk_size: Maximum words per text chunk
+        chunk_size: Maximum words per text chunk (used when use_section_chunking=False)
         save_json: Whether to save output as JSON
         extract_tables: Whether to extract tables separately
         extract_images: Whether to extract images separately
+        use_section_chunking: Whether to use section-based chunking
+        section_chunk_size: Maximum words per chunk within a section (used when use_section_chunking=True)
+        section_chunk_overlap: Word overlap between chunks within a section (used when use_section_chunking=True)
         
     Returns:
         EnhancedParsedDocument object
@@ -500,7 +633,10 @@ def parse_pdf_enhanced(
     parser = EnhancedDocumentParser(
         chunk_size=chunk_size,
         extract_tables=extract_tables,
-        extract_images=extract_images
+        extract_images=extract_images,
+        use_section_chunking=use_section_chunking,
+        section_chunk_size=section_chunk_size,
+        section_chunk_overlap=section_chunk_overlap
     )
     parsed = parser.parse_pdf(pdf_path)
     
