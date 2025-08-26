@@ -170,7 +170,7 @@ async def doc_matching(user_question: str, doc_summary: str, doc_insights: str) 
                 model=MATCHING_MODEL,
                 openai_client=client,
             ),
-            model_settings=ModelSettings(temperature=0.0),
+            model_settings=ModelSettings(temperature=1),
             output_type=DocMatchingResult,
         )
 

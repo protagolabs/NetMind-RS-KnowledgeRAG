@@ -194,7 +194,7 @@ Rewriting rules:
             model=QUERY_REWRITE_MODEL_NAME,
             messages=messages,
             response_model=QueryRewriteResult,
-            temperature=0.2
+            temperature=1
         )
         
         print(result)

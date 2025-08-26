@@ -183,13 +183,12 @@ where `reference_order_number` corresponds to the order of the source in the Ref
         final_answer, cost_info = await self.openai_client.generate_text(
             model=GENERATION_MODEL_NAME,
             messages=messages,
-            temperature=0.1,
+            temperature=1,
         )
         
         if final_answer is None:
             raise ValueError("Generation result is None")
         
         return final_answer, cost_info
-        
         
         

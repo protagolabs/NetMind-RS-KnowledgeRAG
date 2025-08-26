@@ -122,7 +122,7 @@ Output format: 1 or 0
             model=INTENT_RECOGNITION_MODEL_NAME,
             messages=messages,
             response_model=IntentRecognitionResult,
-            temperature=0.1
+            temperature=1
         )
         
         if result is None:

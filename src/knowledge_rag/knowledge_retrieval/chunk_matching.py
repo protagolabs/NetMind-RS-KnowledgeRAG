@@ -199,7 +199,7 @@ async def chunk_matching(user_question: str, chunk_summary: str, chunk_insights:
                     model=MATCHING_MODEL,
                     openai_client=client,  # 继续复用同一个 client
                 ),
-                model_settings=ModelSettings(temperature=0.0),
+                model_settings=ModelSettings(temperature=1),
                 output_type=ChunkMatchingResult,
             )
 

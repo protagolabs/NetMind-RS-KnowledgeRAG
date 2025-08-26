@@ -36,6 +36,10 @@ class OpenAICostCalculator:
             "gpt-4o-mini": {      # $0.60 / 1M in, $2.40 / 1M out
                 "input_cost_per_token": 0.0000006,
                 "output_cost_per_token": 0.0000024
+            },
+            "gpt-5": {
+                "input_cost_per_token": 0.00000125,
+                "output_cost_per_token": 0.00001
             }
         }
         
@@ -138,7 +142,7 @@ class OpenAIClient:
         model: str,
         messages: List,
         response_model: BaseModel,
-        temperature: float = 0.1,
+        temperature: float = 1,
         **kwargs
     ) -> Optional[Tuple[BaseModel, Dict[str, float]]]:
         """异步解析结构化响应。
@@ -178,7 +182,7 @@ class OpenAIClient:
         self,
         model: str,
         messages: List,
-        temperature: float = 0.1,
+        temperature: float = 1,
         max_tokens: Optional[int] = None,
         **kwargs
     ) -> Optional[Tuple[str, Dict[str, float]]]:

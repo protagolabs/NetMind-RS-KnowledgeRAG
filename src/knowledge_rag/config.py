@@ -61,8 +61,8 @@ except ImportError:
 
 logger = logging.getLogger(__name__)
 
-MODEL_NAME = "gpt-5-2025-08-07"
-MODEL_NAME_CUR = "gpt-4.1-2025-04-14"
+MODEL_NAME_CUR  = "gpt-5-2025-08-07"
+MODEL_NAME= "gpt-4.1-2025-04-14"
 
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 MATCHING_MODEL = os.getenv("MATCHING_MODEL", MODEL_NAME_CUR)
