@@ -3,7 +3,7 @@ import requests
 import json
 import os
 
-MAX_SIZE = 20 * 1024 * 1024  # 20MB
+MAX_SIZE = 10 * 1024 * 1024  # 10MB
 
 
 url = "https://api.netmind.ai/inference-api/agent/v1/parse-pdf"
@@ -28,7 +28,9 @@ def split_pdf_recursive(input_file, base_name, counter=None):
 
     file_name = os.path.basename(input_file)
     if file_name[-5]==")":
-        file_name=file_name[:-7]+".pdf"
+        idx=file_name.rfind("(")
+        file_name=file_name[:idx]+".pdf"
+        
     name_without_ext = os.path.splitext(file_name)[0]
     print(f"📄 拆分: {file_name}")
 
@@ -71,7 +73,8 @@ def process_file_number(floder_name):
         if file[-5]!=")":
             continue
         else:
-            original_file_name=file[:-7]
+            idx=file.rfind("(")
+            original_file_name=file[:idx]
             if original_file_name not in file_number.keys():
                 file_number[original_file_name]=1
                 os.rename(os.path.join(floder_name,file),os.path.join(floder_name,original_file_name+"(1).pdf"))
@@ -104,6 +107,6 @@ if __name__ == "__main__":
     #     if not file.endswith(".pdf"):
     #         continue
     #     split_pdf_recursive(os.path.join("pdf_to_markdown/year_reports_of_NVDA",file), "pdf_to_markdown/year_reports_of_NVDA")
-    # process_file_number("pdf_to_markdown/year_reports_of_NVDA")
-    convert_pdf_to_markdown("pdf_to_markdown/year_reports_of_NVDA","pdf_to_markdown/year_reports_of_NVDA_markdown")
+    process_file_number("pdf_to_markdown/year_reports_of_NVDA")
+    # convert_pdf_to_markdown("pdf_to_markdown/year_reports_of_NVDA","pdf_to_markdown/year_reports_of_NVDA_markdown")
 
