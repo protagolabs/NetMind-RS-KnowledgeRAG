@@ -27,6 +27,7 @@
 
 
 from copy import deepcopy
+import json
 from pydantic import BaseModel, Field
 from typing import Dict, List, Tuple
 
@@ -203,6 +204,9 @@ Rewriting rules:
             return [], {}
         
         parsed_result, cost_info = result
+        with open("usage_query_rewrite.jsonl", "a") as f:
+            f.write(json.dumps(cost_info))
+            f.write("\n")
         
         rewritten_queries = []
         for query_item in parsed_result.queries:

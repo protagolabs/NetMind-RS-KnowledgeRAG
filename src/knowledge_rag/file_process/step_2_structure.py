@@ -30,9 +30,11 @@
 
 from copy import deepcopy
 from enum import Enum
+import json
 from openai import AsyncOpenAI
 from pydantic import BaseModel, Field
-from agents import Agent, Runner, OpenAIChatCompletionsModel
+from agents import Agent, Runner, OpenAIChatCompletionsModel, ModelSettings
+from openai.types.shared import Reasoning
 
 from knowledge_rag.config import OPENAI_API_KEY
 
@@ -118,7 +120,7 @@ OBJECTIVE
 
 
 
-async def analysis_doc(doc: str, model: str = "gpt-4.1") -> GenerateDocAnalysis:
+async def analysis_doc(doc: str, model: str = "gpt-5") -> GenerateDocAnalysis:
     """异步分析整个文档，生成结构化分析结果。
     
     使用大语言模型对输入的文档进行深度分析，提取关键信息并生成
@@ -167,6 +169,11 @@ async def analysis_doc(doc: str, model: str = "gpt-4.1") -> GenerateDocAnalysis:
             model=OpenAIChatCompletionsModel(
                 model=model,
                 openai_client=client,
+            ),
+            model_settings=ModelSettings(
+                reasoning=Reasoning(effort="low",),  # minimal/low/medium/high
+                verbosity="medium",
+                temperature=1,
             )
         )
         
@@ -174,6 +181,18 @@ async def analysis_doc(doc: str, model: str = "gpt-4.1") -> GenerateDocAnalysis:
             agent,
             input=f"Please help me to analyze the document {doc}",
         )
+        
+        usage = result.context_wrapper.usage
+        usage = {
+            "input_tokens": usage.input_tokens,
+            "output_tokens": usage.output_tokens,
+            "total_tokens": usage.total_tokens,
+            "reasoning_tokens": usage.output_tokens_details.reasoning_tokens,
+        }
+        with open("usage.jsonl", "a") as f:
+            f.write(json.dumps(usage))
+            f.write("\n")
+            
         
         return result.final_output
     
@@ -272,7 +291,7 @@ The insights are critical for knowledge retrieval via semantic similarity. Each 
 """
 
 
-async def analysis_chunk(chunk: str, doc: str, model: str = "gpt-4.1") -> GenerateChunkAnalysis:
+async def analysis_chunk(chunk: str, doc: str, model: str = "gpt-5") -> GenerateChunkAnalysis:
     """异步分析文档块，生成上下文感知的结构化分析结果。
     
     对单个文档块进行深度分析，同时考虑整个文档的上下文信息。
@@ -330,7 +349,12 @@ async def analysis_chunk(chunk: str, doc: str, model: str = "gpt-4.1") -> Genera
             model=OpenAIChatCompletionsModel(
                 model=model,
                 openai_client=client,
-            )
+            ),
+            model_settings=ModelSettings(
+                reasoning=Reasoning(effort="low",),  # minimal/low/medium/high
+                verbosity="medium",
+                temperature=1,
+            ),
         )
         
         result = await Runner.run(
@@ -345,6 +369,18 @@ The chunk is:
 Please help me to analyze the chunk.
 """,
         )
+        
+        usage = result.context_wrapper.usage
+        usage = {
+            "input_tokens": usage.input_tokens,
+            "output_tokens": usage.output_tokens,
+            "total_tokens": usage.total_tokens,
+            "reasoning_tokens": usage.output_tokens_details.reasoning_tokens,
+        }
+        with open("usage.jsonl", "a") as f:
+            f.write(json.dumps(usage))
+            f.write("\n")
+        
         return result.final_output
 
 

@@ -490,7 +490,7 @@ if __name__ == "__main__":
     
     asyncio.run(
         process_folder(
-        folder_path="./experiments_docs/baoxian",
-        output_file="baoxian.json"
+        folder_path="./experiments_docs/apple_split",
+        output_file="apple.json"
         )   
     )

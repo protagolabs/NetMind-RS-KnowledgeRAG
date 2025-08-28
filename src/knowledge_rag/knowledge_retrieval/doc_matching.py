@@ -32,6 +32,7 @@
 
 
 from copy import deepcopy
+import json
 from pydantic import BaseModel
 
 from openai import AsyncOpenAI
@@ -129,6 +130,11 @@ Judge a document **related** if it **mentions, overlaps with, or is clearly rele
    - Granularity (same task, dataset, API, or topic context).
 5. Write a concise **analysis_detail** citing 1–3 concrete cues (short quotes or faithful paraphrases) from the inputs.  
    Do **not** invent content.
+6. If the query have clearly year/date information, you should also consider the year/date information in the document. 
+    - If you can find the year/date information in the document, and they are not the same as the query, you should give a score of 0. You must be very sure that the year/date information in the document is different from the query.
+    - In other cases, if the document have same year/date information, you should give a high score.
+    - Pay attention on before two time points. Which means query said "from 2010 to 2024", if this document is 2020 you should give a high score. Same with after/before one time point.
+7. 有时候，问题中包含了一个时间。但是这时问题里可能有好几个问题。可能里面提到的其他的问题并不是问具体某一时间的问题。这时候你要仔细区分。
 
 > Write `analysis_detail` in the **same language as the user question**.
 
@@ -179,11 +185,24 @@ async def doc_matching(user_question: str, doc_summary: str, doc_insights: str) 
             input=f"Please help me to analyze the document.",
         )
         
+        usage = result.context_wrapper.usage
+        usage = {
+            "input_tokens": usage.input_tokens,
+            "output_tokens": usage.output_tokens,
+            "total_tokens": usage.total_tokens,
+            "reasoning_tokens": usage.output_tokens_details.reasoning_tokens,
+        }
+        with open("usage_doc_matching.jsonl", "a") as f:
+            f.write(json.dumps(usage))
+            f.write("\n")
+    
+        
         result = DocMatchingResultWithIsRelated(
             analysis_detail=result.final_output.analysis_detail,
             score=result.final_output.score,
             is_related=result.final_output.score >= 20,
         )
+        
     
     return result
 

@@ -872,5 +872,6 @@ def main(docs_file: str, chunks_file: str):
 
 
 if __name__ == "__main__":
+    project_name = "apple"
     print("Starting to save data to database...")
-    main(docs_file="experiments_docs_processed/baoxian_docs_embedding.json", chunks_file="experiments_docs_processed/baoxian_chunks_embedding.json")
+    main(docs_file=f"experiments_docs_processed/{project_name}_docs_embedding.json", chunks_file=f"experiments_docs_processed/{project_name}_chunks_embedding.json")

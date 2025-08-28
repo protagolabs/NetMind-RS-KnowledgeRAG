@@ -145,6 +145,12 @@ Judge the fragment **related** iff it mentions or covers any **specific elements
 3. Match for **overlap** (exact names, aliases, synonyms, versions, IDs, datasets, APIs, metrics, tasks).  
 4. Note **scope mismatches** (different task/dataset/modality/timeframe/audience/version). Mismatches lower the band/score but do not nullify relevance if at least one specific element matches.
 5. Write a concise **analysis_detail** in the **same language as the user question**, citing **1–3 concrete cues** (short quotes or faithful paraphrases) from this fragment only. **Do not invent** beyond the fragment.
+6. If the query have clearly year/date information, you should also consider the year/date information in the fragment. 
+    - If you can find the year/date information in the fragment, and they are not the same as the query, you should give a score of 0. You must be very sure that the year/date information in the fragment is different from the query.
+    - In other cases, if the fragment have same year/date information, you should give a high score.
+    - Pay attention on before two time points. Which means query said "from 2010 to 2024", if this fragment is 2020 you should give a high score. Same with after/before one time point.
+7. Sometimes a question includes a time reference, but it may actually bundle several sub-questions—some of which aren’t tied to that specific time. In such cases, you need to distinguish them carefully.
+
 
 ## Scoring Rubric (choose a band, then pick a score inside it)
 - **0–20 — No Overlap**  
@@ -207,6 +213,18 @@ async def chunk_matching(user_question: str, chunk_summary: str, chunk_insights:
                 agent,
                 input="Please help me to analyze the fragment.",
             )
+            
+            usage = result.context_wrapper.usage
+            usage = {
+                "input_tokens": usage.input_tokens,
+                "output_tokens": usage.output_tokens,
+                "total_tokens": usage.total_tokens,
+                "reasoning_tokens": usage.output_tokens_details.reasoning_tokens,
+            }
+            with open("usage_chunk_matching.jsonl", "a") as f:
+                f.write(json.dumps(usage))
+                f.write("\n")
+    
 
             return ChunkMatchingResultWithIsRelated(
                 analysis_detail=result.final_output.analysis_detail,
@@ -255,7 +273,7 @@ async def make_decision_of_chunk_matching(
     
     result = await chunk_matching(query_text, summary, insights)
     logger.info(f"Chunk匹配结果: 分数={result.score}, 是否相关={result.is_related}")
-    
+
     if result.is_related:
         return chunk
     else:

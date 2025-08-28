@@ -21,6 +21,7 @@
 
 
 from copy import deepcopy
+import json
 from typing import Dict, Tuple
 from pydantic import BaseModel, Field
 
@@ -133,6 +134,9 @@ Output format: 1 or 0
             ), {}
         
         parsed_result, cost_info = result
+        with open("usage_intent_recognition.jsonl", "a") as f:
+            f.write(json.dumps(cost_info))
+            f.write("\n")
         
         return QueryIntent(
             query=query,

@@ -12,6 +12,9 @@ sql/
 **/.env
 ./.env
 backup/
+**/usage_*.json
+CLAUDE.mkdocs
+test_api.py
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
@@ -221,3 +224,8 @@ marimo/_lsp/
 __marimo__/
 .env
 
+usage_chunk_matching.jsonl
+usage_doc_matching.jsonl
+usage_query_rewrite.jsonl
+usage.jsonl
+CLAUDE.md
