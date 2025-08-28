@@ -2,7 +2,8 @@ from PyPDF2 import PdfReader, PdfWriter
 import requests
 import json
 import os
-
+import re
+from concurrent.futures import ThreadPoolExecutor
 MAX_SIZE = 10 * 1024 * 1024  # 10MB
 
 
@@ -66,8 +67,17 @@ def split_pdf_recursive(input_file, base_name, counter=None):
     os.remove(input_file)
     print(f"🗑️ 已删除源文件: {input_file}")
 
+def natural_key(s):
+    # 拆分数字和非数字块
+    parts = re.split(r'(\d+)', s)
+    # 转数字，忽略空字符串
+    return [int(p) if p.isdigit() else p for p in parts if p != ""]
+
 def process_file_number(floder_name):
-    files=sorted(os.listdir(floder_name))
+    files=sorted(os.listdir(floder_name),key=natural_key)
+    # for file in files:
+    #     print(file)
+    # return
     file_number={}
     for file in files:
         if file[-5]!=")":
@@ -82,31 +92,55 @@ def process_file_number(floder_name):
                 file_number[original_file_name]+=1
                 os.rename(os.path.join(floder_name,file),os.path.join(floder_name,original_file_name+"("+str(file_number[original_file_name])+").pdf"))
 
-def convert_pdf_to_markdown(input_folder,output_folder):
-    for file in os.listdir(input_folder):
-        if not file.endswith(".pdf"):
-            continue
-        file=file.replace(" ","%20")
-        print(file)
-        new_url=url2+file
-    #  print(new_url)
-        payload = json.dumps({
-            "url":new_url,
-            "format": "markdown",
-            "vlm": True
-        })
-        file=file.replace("%20"," ")
-        file=file.replace(".pdf",".md")
-        response = requests.request("POST", url, headers=headers, data=payload)
+# def convert_pdf_to_markdown(input_folder,output_folder):
+#     for file in os.listdir(input_folder):
+#         if not file.endswith(".pdf"):
+#             continue
+#         file=file.replace(" ","%20")
+#         print(file)
+#         new_url=url2+file
+#     #  print(new_url)
+#         payload = json.dumps({
+#             "url":new_url,
+#             "format": "markdown",
+#             "vlm": True
+#         })
+#         file=file.replace("%20"," ")
+#         file=file.replace(".pdf",".md")
+#         response = requests.request("POST", url, headers=headers, data=payload)
 
-        with open(os.path.join(output_folder, file), "w", encoding="utf-8") as f:
-            f.write(response.text)
+#         with open(os.path.join(output_folder, file), "w", encoding="utf-8") as f:
+#             f.write(response.text)
+
+def process_file(file, output_folder):
+    if not file.endswith(".pdf"):
+        return
+    file_url = file.replace(" ", "%20")
+    new_url = url2 + file_url
+    payload = json.dumps({
+        "url": new_url,
+        "format": "markdown",
+        "vlm": True
+    })
+    response = requests.request("POST", url, headers=headers, data=payload)
+
+    output_file = file.replace(".pdf", ".md")
+    with open(os.path.join(output_folder, output_file), "w", encoding="utf-8") as f:
+        f.write(response.text)
+    print(f"{file} 完成")
+
+def convert_pdf_to_markdown(input_folder, output_folder, max_workers=5):
+    files = os.listdir(input_folder)
+    with ThreadPoolExecutor(max_workers=max_workers) as executor:
+        for file in files:
+            executor.submit(process_file, file, output_folder)
+
 
 if __name__ == "__main__":
     # for file in os.listdir("pdf_to_markdown/year_reports_of_NVDA"):
     #     if not file.endswith(".pdf"):
     #         continue
     #     split_pdf_recursive(os.path.join("pdf_to_markdown/year_reports_of_NVDA",file), "pdf_to_markdown/year_reports_of_NVDA")
-    process_file_number("pdf_to_markdown/year_reports_of_NVDA")
-    # convert_pdf_to_markdown("pdf_to_markdown/year_reports_of_NVDA","pdf_to_markdown/year_reports_of_NVDA_markdown")
+    # process_file_number("pdf_to_markdown/year_reports_of_NVDA")
+    convert_pdf_to_markdown("pdf_to_markdown/year_reports_of_NVDA","pdf_to_markdown/year_reports_of_NVDA_markdown",max_workers=32)
 
