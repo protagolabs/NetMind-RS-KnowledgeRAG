@@ -113,6 +113,116 @@ class ChunkMatchingResultWithIsRelated(ChunkMatchingResult):
     """
     is_related: bool
 
+standard_mark = """ 
+# Fragment–Question Relevance Scoring Rubric (Practical, Signal-Centric)
+
+> **Goal:** Score by **whether the fragment contains key information that directly answers the question**, not by length or the proportion of on-topic content. A **single decisive sentence** can merit a high score; long background with no decisive signal should score low.
+
+---
+
+## Bands (choose a band first, then pick a score within it)
+
+### **0–20 — No Overlap**
+- **No usable signal**: no matching entities/terms/constraints; off topic.
+- Use this band whenever you can’t find anything that advances the answer.
+
+### **20–40 — Weak Overlap**
+- **Slightly related**: one small match or same-domain talk but **not actionable**.
+- Toward **20**: purely generic domain similarity.
+- Toward **40**: exactly **one** concrete match (e.g., dataset/model name) but still not answer-enabling.
+
+### **40–60 — Moderate Overlap**
+- **Partially useful**: at least **one** piece of answer-advancing info, but **missing a key element** (e.g., lacks numbers/conditions/comparatives).
+- Toward **60**: ≥2 concrete matches, or one match **with clear specifics** (version/parameter/range).
+
+### **60–80 — Strong Overlap**
+- **Directly useful**: contains a **key fact/number/conclusion** that directly supports the answer (even if it’s just one sentence). Most core elements align.
+- **75–80** when coverage is broad **and** precise, with only minor gaps or small irrelevant parts.
+
+### **80–100 — Near-Exact / Primary Topic Match**
+- **Essentially the answer**: the fragment’s **main point** is the question’s core; info is **complete and precise** (numbers/comparisons/conditions/methods), minimal mismatch.
+- **90–100** when it’s structured, fine-grained, and virtually error-free—an “ideal citation.”
+
+---
+
+## In-Band Fine-Tuning (how to pick a specific score)
+
+Start from the band midpoint, then adjust **±3–10** using these “dials”:
+
+- **Directness**: Does it *state* the answer (conclusion/number/condition/steps/API field)? More direct → higher.
+- **Precision**: Concrete identifiers (version, parameters, time, metric, error bars, sample size). More precise → higher.
+- **Coverage**: How many of the question’s key elements (entities/task/dataset/API/constraints) are covered?
+- **Reliability**: Authoritativeness/verifiability, internal consistency, not obviously outdated unless flagged.
+
+**Quick rule-of-thumb adjustments**
+- **+5**: Provides **quantitative** or **reproducible** info (numbers, configs, code, API fields/parameters).
+- **+3**: Covers ≥2 key elements and forms a coherent mini-answer (e.g., *model + dataset + metric*).
+- **−5**: Pure background/generalities with little answer traction.
+- **−8**: Conflicts with stated constraints or is clearly outdated (without noting it).
+
+---
+
+## Decision Flow (short)
+
+1. **Extract the question’s key elements**: entities/task/dataset/metric/time/constraints.  
+2. **Scan for decisive evidence**: Can it directly answer?  
+   - **Yes** → **≥60**.  
+   - **No** → continue.  
+3. **If it only partially advances** → **40–60**, adjust by detail level.  
+4. **If only domain-adjacent/one weak match** → **20–40**.  
+5. **If the fragment’s main thrust is the answer and complete** → **80–100**.
+
+---
+
+## Quick Examples
+
+| Situation | Judgment | Suggested Score |
+|---|---|---|
+| Ask “ResNet-18 accuracy on CIFAR-10”; fragment states “ResNet-18 on CIFAR-10 = 94% (settings X)” | Direct hit + quantitative | **75–85** |
+| Same question; fragment says “ResNet is common on CIFAR-10” (no numbers) | Partial, not decisive | **35–45** |
+| Ask “Does ReAct improve WebNav vs baselines?”; fragment compares ReAct with metrics | Primary topic + numbers + comparison | **85–95** |
+| Ask for API fields; fragment gives only high-level overview | Background only | **20–35** |
+| Long fragment but exactly one sentence gives the key parameter = 0.1 and +3pp gain—matches the question | One-sentence **decisive** signal | **70–80** |
+
+---
+
+## Edges & Priorities (avoid common pitfalls)
+
+- **Length ≠ score**: Only the **presence of decisive info** matters.
+- **Single sentence can be high**: If it’s *the* key evidence, score in **60–80**.
+- **Conflict/obsolescence penalty**: Clear contradictions or unflagged staleness → downshift band.
+- **Noise tolerance**: Some irrelevant lines are fine; heavy noise that impedes extraction → small deduction.
+- **Second-hand claims**: Without sources, modest reliability deduction.
+- **Missing conditions**: If a conclusion lacks assumptions/settings/sample size, downgrade from Strong → Moderate.
+
+---
+
+## One-Line Principle
+
+> **Score by “Can it directly and precisely answer the question?” not by “How much of it is on-topic.”**  
+> **One decisive sentence > a page of generic background.**
+"""
+
+old_standard_mark = """ 
+## Scoring Rubric (choose a band, then pick a score inside it)
+- **0–20 — No Overlap**  
+  No matching entities/terms/constraints with the question; fragment is unrelated.
+- **20–40 — Weak Overlap**  
+  One minor match **or** only generic same-domain similarity without concrete specifics.  
+  (Pick closer to 20 when purely generic; closer to 40 when one clear specific is present.)
+- **40–60 — Moderate Overlap**  
+  Multiple specific matches **or** one specific element with clear detail (e.g., version/metric/parameter).  
+  (Closer to 60 when ≥2 solid matches or precise definitions/configs appear.)
+- **60–80 — Strong Overlap**  
+  Most key elements align, or the fragment clearly addresses the **same task/dataset/API** context with specifics.  
+  (Use upper 70s when coverage is broad and precise with minor mismatches.)
+- **80–100 — Near-Exact / Primary Topic Match**  
+  The fragment is **primarily about** the same specific item/task; rich, precise coverage, minimal mismatches.  
+  (Choose 90–100 when it is essentially a direct topic match.)
+
+> **Containment rule**: Any specific overlap ⇒ at least `20–40`.  
+> **Penalty rule**: Scope/timeframe/modality/version mismatches **lower** the band/score but don’t force it to `0–20` if specific overlap remains.
+"""
 
 chunk_matching_prompts = """ 
 ## Role
@@ -151,25 +261,87 @@ Judge the fragment **related** iff it mentions or covers any **specific elements
     - Pay attention on before two time points. Which means query said "from 2010 to 2024", if this fragment is 2020 you should give a high score. Same with after/before one time point.
 7. Sometimes a question includes a time reference, but it may actually bundle several sub-questions—some of which aren’t tied to that specific time. In such cases, you need to distinguish them carefully.
 
+## Scoring Rubric (choose a band first, then pick a score within it)
 
-## Scoring Rubric (choose a band, then pick a score inside it)
-- **0–20 — No Overlap**  
-  No matching entities/terms/constraints with the question; fragment is unrelated.
-- **20–40 — Weak Overlap**  
-  One minor match **or** only generic same-domain similarity without concrete specifics.  
-  (Pick closer to 20 when purely generic; closer to 40 when one clear specific is present.)
-- **40–60 — Moderate Overlap**  
-  Multiple specific matches **or** one specific element with clear detail (e.g., version/metric/parameter).  
-  (Closer to 60 when ≥2 solid matches or precise definitions/configs appear.)
-- **60–80 — Strong Overlap**  
-  Most key elements align, or the fragment clearly addresses the **same task/dataset/API** context with specifics.  
-  (Use upper 70s when coverage is broad and precise with minor mismatches.)
-- **80–100 — Near-Exact / Primary Topic Match**  
-  The fragment is **primarily about** the same specific item/task; rich, precise coverage, minimal mismatches.  
-  (Choose 90–100 when it is essentially a direct topic match.)
+### **0–20 — No Overlap**
+- **No usable signal**: no matching entities/terms/constraints; off topic.
+- Use this band whenever you can’t find anything that advances the answer.
 
-> **Containment rule**: Any specific overlap ⇒ at least `20–40`.  
-> **Penalty rule**: Scope/timeframe/modality/version mismatches **lower** the band/score but don’t force it to `0–20` if specific overlap remains.
+### **20–40 — Weak Overlap**
+- **Slightly related**: one small match or same-domain talk but **not actionable**.
+- Toward **20**: purely generic domain similarity.
+- Toward **40**: exactly **one** concrete match (e.g., dataset/model name) but still not answer-enabling.
+
+### **40–60 — Moderate Overlap**
+- **Partially useful**: at least **one** piece of answer-advancing info, but **missing a key element** (e.g., lacks numbers/conditions/comparatives).
+- Toward **60**: ≥2 concrete matches, or one match **with clear specifics** (version/parameter/range).
+
+### **60–80 — Strong Overlap**
+- **Directly useful**: contains a **key fact/number/conclusion** that directly supports the answer (even if it’s just one sentence). Most core elements align.
+- **75–80** when coverage is broad **and** precise, with only minor gaps or small irrelevant parts.
+
+### **80–100 — Near-Exact / Primary Topic Match**
+- **Essentially the answer**: the fragment’s **main point** is the question’s core; info is **complete and precise** (numbers/comparisons/conditions/methods), minimal mismatch.
+- **90–100** when it’s structured, fine-grained, and virtually error-free—an “ideal citation.”
+
+---
+
+### In-Band Fine-Tuning (how to pick a specific score)
+
+Start from the band midpoint, then adjust **±3–10** using these “dials”:
+
+- **Directness**: Does it *state* the answer (conclusion/number/condition/steps/API field)? More direct → higher.
+- **Precision**: Concrete identifiers (version, parameters, time, metric, error bars, sample size). More precise → higher.
+- **Coverage**: How many of the question’s key elements (entities/task/dataset/API/constraints) are covered?
+- **Reliability**: Authoritativeness/verifiability, internal consistency, not obviously outdated unless flagged.
+
+**Quick rule-of-thumb adjustments**
+- **+5**: Provides **quantitative** or **reproducible** info (numbers, configs, code, API fields/parameters).
+- **+3**: Covers ≥2 key elements and forms a coherent mini-answer (e.g., *model + dataset + metric*).
+- **−5**: Pure background/generalities with little answer traction.
+- **−8**: Conflicts with stated constraints or is clearly outdated (without noting it).
+
+---
+
+### Decision Flow (short)
+
+1. **Extract the question’s key elements**: entities/task/dataset/metric/time/constraints.  
+2. **Scan for decisive evidence**: Can it directly answer?  
+   - **Yes** → **≥60**.  
+   - **No** → continue.  
+3. **If it only partially advances** → **40–60**, adjust by detail level.  
+4. **If only domain-adjacent/one weak match** → **20–40**.  
+5. **If the fragment’s main thrust is the answer and complete** → **80–100**.
+
+---
+
+### Quick Examples
+
+| Situation | Judgment | Suggested Score |
+|---|---|---|
+| Ask “ResNet-18 accuracy on CIFAR-10”; fragment states “ResNet-18 on CIFAR-10 = 94% (settings X)” | Direct hit + quantitative | **75–85** |
+| Same question; fragment says “ResNet is common on CIFAR-10” (no numbers) | Partial, not decisive | **35–45** |
+| Ask “Does ReAct improve WebNav vs baselines?”; fragment compares ReAct with metrics | Primary topic + numbers + comparison | **85–95** |
+| Ask for API fields; fragment gives only high-level overview | Background only | **20–35** |
+| Long fragment but exactly one sentence gives the key parameter = 0.1 and +3pp gain—matches the question | One-sentence **decisive** signal | **70–80** |
+
+---
+
+### Edges & Priorities (avoid common pitfalls)
+
+- **Length not equal to score**: Only the **presence of decisive info** matters.
+- **Single sentence can be high**: If it’s *the* key evidence, score in **60–80**.
+- **Conflict/obsolescence penalty**: Clear contradictions or unflagged staleness → downshift band.
+- **Noise tolerance**: Some irrelevant lines are fine; heavy noise that impedes extraction → small deduction.
+- **Second-hand claims**: Without sources, modest reliability deduction.
+- **Missing conditions**: If a conclusion lacks assumptions/settings/sample size, downgrade from Strong → Moderate.
+
+---
+
+### One-Line Principle
+
+> **Score by “Can it directly and precisely answer the question?” not by “How much of it is on-topic.”**  
+> **One decisive sentence > a page of generic background.**
 
 ## Output Format (JSON-like)
 - **ChunkMatchingResult**
