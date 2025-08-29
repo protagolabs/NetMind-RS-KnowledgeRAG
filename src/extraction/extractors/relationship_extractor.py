@@ -125,7 +125,7 @@ EXTRACTION HINTS:
 {json.dumps(rel_schema.extraction_hints, indent=2)}
 
 TEXT TO ANALYZE:
-{content[:3000]}
+{content}
 
 INSTRUCTIONS:
 1. Extract ALL relationships between the identified entities
