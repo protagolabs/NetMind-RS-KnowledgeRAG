@@ -1198,34 +1198,40 @@ class DBRetriever:
                     if len(chunk_search_results) > 3:
                         chunk_insights_text_results = chunk_search_results[3] if not isinstance(chunk_search_results[3], Exception) else []
                 
-                # ============ chunk结果合并与去重 ============
-                # 同样使用字典去重，保留最高分的chunk版本
-                all_chunk_results = {}
-                for chunk in (chunk_vector_results + chunk_insights_vector_results + 
-                             chunk_text_results + chunk_insights_text_results):
-                    chunk_id = chunk['chunk_id']
-                    
-                    # 智能评分：优先考虑similarity_score，其次relevance_score
-                    existing_score = max(
-                        all_chunk_results.get(chunk_id, {}).get('similarity_score', 0),
-                        all_chunk_results.get(chunk_id, {}).get('relevance_score', 0)
-                    )
-                    current_score = max(
-                        chunk.get('similarity_score', 0),
-                        chunk.get('relevance_score', 0)
-                    )
-                    
-                    if chunk_id not in all_chunk_results or current_score > existing_score:
-                        all_chunk_results[chunk_id] = chunk
+                # ============ 使用RRF算法进行chunk结果融合 ============
+                # 构建策略结果字典，准备RRF融合
+                chunk_results = {
+                    'vector_search': chunk_vector_results,
+                    'insights_vector': chunk_insights_vector_results
+                }
                 
-                # 最终排序和截取
-                # 使用多维评分：优先similarity_score，其次relevance_score
-                final_chunks = list(all_chunk_results.values())
-                final_chunks.sort(key=lambda x: max(
-                    x.get('similarity_score', 0), 
-                    x.get('relevance_score', 0)
-                ), reverse=True)
+                # 如果有文本搜索结果，添加到策略字典
+                if query_text:
+                    chunk_results['text_search'] = chunk_text_results
+                    chunk_results['insights_text'] = chunk_insights_text_results
+                
+                # 使用RRF算法融合多策略结果
+                logger.info("开始RRF算法融合chunk搜索结果...")
+                final_chunks = self.weighted_rrf_fusion(
+                    chunk_results=chunk_results,
+                    weights=None,  # 使用默认权重
+                    k=60  # RRF平滑参数
+                )
+                
+                # 截取最终结果数量
                 result['relevant_chunks'] = final_chunks[:final_top_k]
+                
+                # 添加RRF统计信息到搜索摘要
+                if final_chunks:
+                    result['search_summary']['rrf_fusion'] = {
+                        'enabled': True,
+                        'strategies_used': list(chunk_results.keys()),
+                        'total_unique_chunks': len(final_chunks),
+                        'top_rrf_score': final_chunks[0]['rrf_score'],
+                        'average_strategy_consistency': sum(
+                            chunk['strategy_consistency'] for chunk in final_chunks[:10]
+                        ) / min(10, len(final_chunks))
+                    }
             
             # ============ 生成搜索报告 ============
             # 统计搜索结果和过程信息，便于调试和优化
@@ -1413,33 +1419,39 @@ class DBRetriever:
                         if len(chunk_search_results) > 3:
                             chunk_insights_text_results = chunk_search_results[3] if not isinstance(chunk_search_results[3], Exception) else []
                     
-                    # ============ chunk结果合并与去重 ============
-                    # 使用字典去重，保留最高分的chunk版本
-                    all_chunk_results = {}
-                    for chunk in (chunk_vector_results + chunk_insights_vector_results + 
-                                 chunk_text_results + chunk_insights_text_results):
-                        chunk_id = chunk['chunk_id']
-                        
-                        # 智能评分：优先考虑similarity_score，其次relevance_score
-                        existing_score = max(
-                            all_chunk_results.get(chunk_id, {}).get('similarity_score', 0),
-                            all_chunk_results.get(chunk_id, {}).get('relevance_score', 0)
-                        )
-                        current_score = max(
-                            chunk.get('similarity_score', 0),
-                            chunk.get('relevance_score', 0)
-                        )
-                        
-                        if chunk_id not in all_chunk_results or current_score > existing_score:
-                            all_chunk_results[chunk_id] = chunk
+                    # ============ 使用RRF算法进行chunk结果融合 ============
+                    # 构建策略结果字典，准备RRF融合
+                    chunk_results = {
+                        'vector_search': chunk_vector_results,
+                        'insights_vector': chunk_insights_vector_results
+                    }
                     
-                    # 最终排序和截取
-                    final_chunks = list(all_chunk_results.values())
-                    final_chunks.sort(key=lambda x: max(
-                        x.get('similarity_score', 0), 
-                        x.get('relevance_score', 0)
-                    ), reverse=True)
+                    # 如果有文本搜索结果，添加到策略字典
+                    if query_text:
+                        chunk_results['text_search'] = chunk_text_results
+                        chunk_results['insights_text'] = chunk_insights_text_results
+                    
+                    # 使用RRF算法融合多策略结果
+                    logger.info("开始RRF算法融合chunk搜索结果（无文档级搜索）...")
+                    final_chunks = self.weighted_rrf_fusion(
+                        chunk_results=chunk_results,
+                        weights=None,  # 使用默认权重
+                        k=60  # RRF平滑参数
+                    )
+                    
                     result['relevant_chunks'] = final_chunks
+                    
+                    # 添加RRF统计信息到搜索摘要
+                    if final_chunks:
+                        result['search_summary']['rrf_fusion'] = {
+                            'enabled': True,
+                            'strategies_used': list(chunk_results.keys()),
+                            'total_unique_chunks': len(final_chunks),
+                            'top_rrf_score': final_chunks[0]['rrf_score'],
+                            'average_strategy_consistency': sum(
+                                chunk['strategy_consistency'] for chunk in final_chunks[:10]
+                            ) / min(10, len(final_chunks))
+                        }
             
             # ============ 生成搜索报告 ============
             result['search_summary'] = {
@@ -1467,6 +1479,144 @@ class DBRetriever:
             # 即使出错也返回已有结果，提高系统容错性
             return result
     
+    def weighted_rrf_fusion(self, 
+                           chunk_results: Dict[str, List[dict]], 
+                           weights: Dict[str, float] = None,
+                           k: int = 60) -> List[dict]:
+        """
+        使用加权RRF算法融合多种检索策略结果
+        =========================================
+        
+        【RRF算法原理】
+        Reciprocal Rank Fusion通过倒数排名融合来组合多个排序列表：
+        RRF_score(d) = Σ(weight_i * 1 / (k + rank_i(d)))
+        
+        【算法优势】
+        1. 排序无关性：不依赖原始分数的绝对值和量纲
+        2. 自然降权：排名靠后的结果自动获得较低权重
+        3. 多策略平衡：通过权重调整不同策略的重要性
+        4. 鲁棒性强：对异常值和噪声不敏感
+        
+        Args:
+            chunk_results: 各种检索策略的结果字典
+                {
+                    'vector_search': [chunks...],      # 向量搜索结果
+                    'insights_vector': [chunks...],    # insights向量搜索结果  
+                    'text_search': [chunks...],        # 全文搜索结果
+                    'insights_text': [chunks...]       # insights文本搜索结果
+                }
+            weights: 各策略权重字典，默认为平衡权重
+                {
+                    'vector_search': 0.35,    # 向量搜索权重
+                    'insights_vector': 0.25,  # insights向量搜索权重
+                    'text_search': 0.25,      # 全文搜索权重  
+                    'insights_text': 0.15     # insights文本搜索权重
+                }
+            k: RRF平滑参数，通常为60
+                - 较小的k值：给排名靠前的结果更高权重
+                - 较大的k值：平滑不同排名间的分数差异
+                
+        Returns:
+            List[Dict]: 融合后按RRF分数排序的chunk列表
+            - 每个chunk新增'rrf_score'字段
+            - 保留原始的similarity_score和relevance_score
+            - 按rrf_score降序排列
+            
+        【权重策略说明】
+        - vector_search: 语义相似度，适合概念性查询
+        - insights_vector: 核心观点匹配，适合深度理解
+        - text_search: 关键词匹配，适合精确词汇查询
+        - insights_text: 观点文本匹配，适合特定论点查找
+        
+        【技术细节】
+        - 使用chunk_id进行去重，相同chunk只保留一个副本
+        - RRF分数累加所有策略中该chunk的贡献
+        - rank从1开始计算（第1名rank=1，第2名rank=2...）
+        - 最终分数=Σ(weight * 1/(k + rank))
+        """
+        # 设置默认权重：平衡各种检索策略
+        if weights is None:
+            weights = {
+                'vector_search': 0.35,      # 向量语义搜索
+                'insights_vector': 0.25,    # insights向量搜索
+                'text_search': 0.25,        # 关键词文本搜索
+                'insights_text': 0.15       # insights文本搜索
+            }
+        
+        # 初始化数据结构
+        all_chunks = {}          # chunk_id -> chunk数据
+        chunk_scores = {}        # chunk_id -> RRF累计分数
+        strategy_stats = {}      # 统计各策略贡献
+        
+        logger.info(f"开始RRF融合，策略数量: {len(chunk_results)}")
+        
+        # 遍历每种检索策略的结果
+        for strategy, chunk_list in chunk_results.items():
+            if not chunk_list:  # 跳过空结果
+                continue
+                
+            weight = weights.get(strategy, 0.1)  # 获取策略权重，默认0.1
+            strategy_stats[strategy] = {
+                'chunks_count': len(chunk_list),
+                'weight': weight
+            }
+            
+            logger.debug(f"处理策略 {strategy}: {len(chunk_list)}个chunks, 权重{weight}")
+            
+            # 遍历该策略的排序结果列表
+            for rank, chunk in enumerate(chunk_list, 1):  # rank从1开始
+                chunk_id = chunk.get('chunk_id')
+                if not chunk_id:  # 跳过无效chunk_id
+                    logger.warning(f"策略{strategy}中发现无效chunk_id: {chunk}")
+                    continue
+                
+                # 初始化新chunk
+                if chunk_id not in all_chunks:
+                    all_chunks[chunk_id] = chunk.copy()  # 保留原始数据
+                    chunk_scores[chunk_id] = 0
+                    # 初始化策略贡献记录
+                    all_chunks[chunk_id]['strategy_contributions'] = {}
+                
+                # 计算RRF分数：weight * (1 / (k + rank))
+                rrf_contribution = weight * (1.0 / (k + rank))
+                chunk_scores[chunk_id] += rrf_contribution
+                
+                # 记录策略贡献详情（用于调试和分析）
+                all_chunks[chunk_id]['strategy_contributions'][strategy] = {
+                    'rank': rank,
+                    'weight': weight,
+                    'rrf_contribution': rrf_contribution,
+                    'original_score': chunk.get('similarity_score', chunk.get('relevance_score', 0))
+                }
+                
+                logger.debug(f"Chunk {chunk_id} 在策略{strategy}中排名{rank}, 贡献分数{rrf_contribution:.6f}")
+        
+        # 为每个chunk设置最终RRF分数
+        for chunk in all_chunks.values():
+            chunk_id = chunk['chunk_id']
+            chunk['rrf_score'] = chunk_scores[chunk_id]
+            
+            # 统计该chunk在多少个策略中出现（一致性指标）
+            chunk['strategy_consistency'] = len(chunk['strategy_contributions'])
+        
+        # 按RRF分数降序排序
+        final_chunks = sorted(
+            all_chunks.values(), 
+            key=lambda x: x['rrf_score'], 
+            reverse=True
+        )
+        
+        # 记录融合统计信息
+        total_unique_chunks = len(final_chunks)
+        max_rrf_score = final_chunks[0]['rrf_score'] if final_chunks else 0
+        min_rrf_score = final_chunks[-1]['rrf_score'] if final_chunks else 0
+        
+        logger.info(f"RRF融合完成: {total_unique_chunks}个唯一chunks")
+        logger.info(f"RRF分数范围: {min_rrf_score:.6f} ~ {max_rrf_score:.6f}")
+        logger.debug(f"策略统计: {strategy_stats}")
+        
+        return final_chunks
+
     def close(self):
         """
         关闭数据库连接 - 资源清理
